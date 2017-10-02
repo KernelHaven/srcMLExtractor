@@ -1,7 +1,7 @@
 package net.ssehub.kernel_haven.srcml.xml;
 
 import java.io.IOException;
-import java.io.StringReader;
+import java.io.InputStream;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -33,13 +33,13 @@ public class XmlToAstConverter {
      *     (should not occur). 
      * @throws SAXException If a SAX error occurs (should not occur).
      */
-    public XmlToAstConverter(String xml, AbstractAstConverter converter) throws ParserConfigurationException,
+    public XmlToAstConverter(InputStream xml, AbstractAstConverter converter) throws ParserConfigurationException,
         SAXException {
         
         this.converter = converter;
         SAXParserFactory factory = SAXParserFactory.newInstance();
         this.saxParser = factory.newSAXParser();
-        this.in = new InputSource(new StringReader(xml));
+        this.in = new InputSource(xml);
     }
     
     /**

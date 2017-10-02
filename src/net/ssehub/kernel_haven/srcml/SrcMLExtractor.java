@@ -2,6 +2,9 @@ package net.ssehub.kernel_haven.srcml;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.UncheckedIOException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -13,11 +16,10 @@ import net.ssehub.kernel_haven.code_model.SourceFile;
 import net.ssehub.kernel_haven.config.CodeExtractorConfiguration;
 import net.ssehub.kernel_haven.srcml.xml.CXmlHandler;
 import net.ssehub.kernel_haven.srcml.xml.XmlToAstConverter;
-import net.ssehub.kernel_haven.util.CodeExtractorException;
-import net.ssehub.kernel_haven.util.CommandExecutor;
-import net.ssehub.kernel_haven.util.CommandExecutor.ExecutionResult;
 import net.ssehub.kernel_haven.util.ExtractorException;
 import net.ssehub.kernel_haven.util.FormatException;
+import net.ssehub.kernel_haven.util.Logger;
+import net.ssehub.kernel_haven.util.Util;
 
 /**
  * An extractor which uses <a href="http://www.srcml.org/">srcML</a> to create an AST, still containing variability
@@ -36,6 +38,9 @@ import net.ssehub.kernel_haven.util.FormatException;
  *
  */
 public class SrcMLExtractor extends AbstractCodeModelExtractor {
+    
+    private static final Logger LOGGER = Logger.get();
+    
     private File srcExec;
 
     @Override
@@ -46,53 +51,34 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
 
     @Override
     protected SourceFile runOnFile(File target) throws ExtractorException {
-        CommandExecutor cmdExec;
         try {
-            cmdExec = new CommandExecutor(srcExec.getParentFile().getAbsoluteFile(),
-                srcExec.getAbsolutePath(), target.getAbsolutePath());
-        } catch (IOException e) {
-            throw new CodeExtractorException(target, "srcML initialization not successful for file: "
-                + target.getAbsolutePath() + ", cause: " + e.getMessage());
+            PipedOutputStream out = new PipedOutputStream();
+            PipedInputStream stdout = new PipedInputStream(out);
+            
+            ProcessBuilder builder = new ProcessBuilder(srcExec.getAbsolutePath(), target.getAbsolutePath());
+//            builder.directory(srcExec.getParentFile());
+            
+            XmlToAstConverter converter = new XmlToAstConverter(stdout, new CXmlHandler(target));
+
+            new Thread(() -> {
+                boolean success;
+                try {
+                    success = Util.executeProcess(builder, "srcML", out, null, 0);
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+                if (!success) {
+                    LOGGER.logWarning("srcML exe did not execute succesfully.");
+                }
+            }, "SrcMLExtractor-Worker").start();;
+            
+            SourceFile resultFile = converter.parseToAst();
+            
+            return resultFile;
+            
+        } catch (IOException | UncheckedIOException | ParserConfigurationException | SAXException | FormatException e1) {
+            throw new ExtractorException(e1);
         }
-        
-        ExecutionResult result;
-        try {
-            result = cmdExec.execute();
-        } catch (InterruptedException e) {
-            throw new CodeExtractorException(target, "srcML execution interuppted on file: "
-                + target.getAbsolutePath() + ", cause: " + e.getMessage());
-        } catch (IOException e) {
-            throw new CodeExtractorException(target, "srcML execution not successful on file: "
-                + target.getAbsolutePath() + ", cause: " + e.getMessage());
-        }
-        
-        SourceFile resultFile = null;
-        
-        if (null != result.getError()) {
-            throw new CodeExtractorException(target, "srcML execution not successful on file: "
-                + target.getAbsolutePath() + ", cause: " + result.getError());
-        } else if (result.getCode() != 0) {
-            throw new CodeExtractorException(target, "srcML execution not successful on file: "
-                + target.getAbsolutePath());
-        } else {
-            String astAsXML = result.getOutput();
-//            System.out.println(astAsXML);
-            try {
-                XmlToAstConverter converter = new XmlToAstConverter(astAsXML, new CXmlHandler(target));
-                resultFile = converter.parseToAst();
-            } catch (ParserConfigurationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (SAXException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (FormatException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-        
-        return resultFile;
     }
 
     @Override

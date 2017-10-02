@@ -9,11 +9,9 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import net.ssehub.kernel_haven.PipelineConfigurator;
 import net.ssehub.kernel_haven.SetUpException;
 import net.ssehub.kernel_haven.TestConfiguration;
 import net.ssehub.kernel_haven.code_model.SourceFile;
-import net.ssehub.kernel_haven.todo.NonBooleanConditionConverter;
 import net.ssehub.kernel_haven.util.ExtractorException;
 import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.Util;
@@ -44,7 +42,8 @@ public class SrcMLExtractorTest {
     
     @Test
     public void test() {
-        SourceFile ast = loadFile("FunctionsAndCPP.c");
+//        SourceFile ast = loadFile("FunctionsAndCPP.c");
+        SourceFile ast = loadFile("test.c");
         System.out.println(ast.iterator().next());
     }
     
@@ -62,13 +61,9 @@ public class SrcMLExtractorTest {
             Properties props = new Properties();
             props.setProperty("resource_dir", RESOURCE_DIR.getAbsolutePath());
             props.setProperty("source_tree", "testdata/");
-            props.setProperty(NonBooleanConditionConverter.PROPERTY_VARIABLE_PATTERN, "\\p{Alpha}+(\\p{Alnum}|_)*");
             props.setProperty("code.extractor.files", file);
             
             TestConfiguration config = new TestConfiguration(props);
-            PipelineConfigurator.instance().init(config);
-            PipelineConfigurator.instance().instantiateExtractors();
-            PipelineConfigurator.instance().createProviders();
             
             SrcMLExtractor extractor = new SrcMLExtractor();
             extractor.init(config.getCodeConfiguration());
