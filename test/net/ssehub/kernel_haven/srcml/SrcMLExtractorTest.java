@@ -1,7 +1,5 @@
 package net.ssehub.kernel_haven.srcml;
 
-import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
@@ -47,7 +45,7 @@ public class SrcMLExtractorTest {
     @Test
     public void test() {
         SourceFile ast = loadFile("FunctionsAndCPP.c");
-        //fail("Not yet implemented");
+        System.out.println(ast.iterator().next());
     }
     
     /**

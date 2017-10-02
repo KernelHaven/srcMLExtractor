@@ -24,5 +24,9 @@ int main(int argc, char **argv) {
     calc(73, 37);
     #endif
     
+    if (a) {
+    	a = b;
+    }
+    
     return 0;
 }

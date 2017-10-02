@@ -48,7 +48,6 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
     protected SourceFile runOnFile(File target) throws ExtractorException {
         CommandExecutor cmdExec;
         try {
-            System.out.println(srcExec.getParentFile().getAbsoluteFile());
             cmdExec = new CommandExecutor(srcExec.getParentFile().getAbsoluteFile(),
                 srcExec.getAbsolutePath(), target.getAbsolutePath());
         } catch (IOException e) {
@@ -67,6 +66,8 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
                 + target.getAbsolutePath() + ", cause: " + e.getMessage());
         }
         
+        SourceFile resultFile = null;
+        
         if (null != result.getError()) {
             throw new CodeExtractorException(target, "srcML execution not successful on file: "
                 + target.getAbsolutePath() + ", cause: " + result.getError());
@@ -75,10 +76,10 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
                 + target.getAbsolutePath());
         } else {
             String astAsXML = result.getOutput();
-            System.out.println(astAsXML);
+//            System.out.println(astAsXML);
             try {
                 XmlToAstConverter converter = new XmlToAstConverter(astAsXML, new CXmlHandler(target));
-                converter.parseToAst();
+                resultFile = converter.parseToAst();
             } catch (ParserConfigurationException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -91,7 +92,7 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             }
         }
         
-        return null;
+        return resultFile;
     }
 
     @Override

@@ -53,7 +53,7 @@ public class XmlToAstConverter {
         } catch (SAXException | IOException e) {
             throw new FormatException("Invalid XML content passed as an AST, cause: " + e.getMessage());
         }
-        return converter.getAst();
+        return converter.getResult();
     }
 
 }

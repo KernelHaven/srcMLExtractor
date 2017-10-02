@@ -5,6 +5,7 @@ import java.io.File;
 import org.xml.sax.helpers.DefaultHandler;
 
 import net.ssehub.kernel_haven.code_model.SourceFile;
+import net.ssehub.kernel_haven.code_model.SyntaxElement;
 
 /**
  * Basis implementation of visitors/strategies for the SAXparser, which are responsible for the translation of the
@@ -37,10 +38,10 @@ public abstract class AbstractAstConverter extends DefaultHandler {
      * Returns the parsed AST.
      * @return The {@link SourceFile} representing the parsed file.
      */
-    public SourceFile getAst() {
-        parseAST();
+    public SourceFile getResult() {
+        file.addElement(getAst());
         return file;
     }
 
-    protected abstract void parseAST();
+    protected abstract SyntaxElement getAst();
 }
