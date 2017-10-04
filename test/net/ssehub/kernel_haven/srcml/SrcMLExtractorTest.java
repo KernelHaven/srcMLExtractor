@@ -53,8 +53,8 @@ public class SrcMLExtractorTest {
      */
     @Test
     public void test() {
-//        SourceFile ast = loadFile("FunctionsAndCPP.c");
-        SourceFile ast = loadFile("test.c");
+        SourceFile ast = loadFile("FunctionsAndCPP.c");
+//        SourceFile ast = loadFile("test.c");
         System.out.println(ast.iterator().next());
     }
     

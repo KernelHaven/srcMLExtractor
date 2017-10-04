@@ -2,7 +2,7 @@
 #include "logging.h"
 
 void calc(int operand1, int operand2) {
-    #if defined(CONFIG_ADDITION)
+    #if defined(CONFIG_ADDITION) && (!defined(CONFIG_A))
         int result = operand1 + operand2;
         char op = '+';
     #elif defined(CONFIG_SUBTRACTION)
