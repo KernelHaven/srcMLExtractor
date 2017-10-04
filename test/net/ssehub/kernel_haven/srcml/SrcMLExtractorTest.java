@@ -16,6 +16,11 @@ import net.ssehub.kernel_haven.util.ExtractorException;
 import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.Util;
 
+/**
+ * Tests the srcML extractor.
+ * 
+ * @author El-Sharkawy
+ */
 public class SrcMLExtractorTest {
     
     private static final File RESOURCE_DIR = AllTests.TESTDATA;
@@ -30,6 +35,9 @@ public class SrcMLExtractorTest {
         }
     }
     
+    /**
+     * Removes the temporary res folder.
+     */
     @AfterClass
     public static void afterClass() {
         File resFolder = new File(AllTests.TESTDATA, "net.ssehub.kernel_haven.srcml.SrcMLExtractor");
@@ -40,6 +48,9 @@ public class SrcMLExtractorTest {
         }
     }
     
+    /**
+     * Dummy "test" that simply logs the result to console.
+     */
     @Test
     public void test() {
 //        SourceFile ast = loadFile("FunctionsAndCPP.c");
@@ -51,8 +62,6 @@ public class SrcMLExtractorTest {
      * Helper method which uses the {@link EaseeExtractor} to load the build model from the
      * specified file.
      * @param file The model file to parse.
-     * @param variables Should be <tt>null</tt> or empty if the preparation should be tested without a variability
-     *     model or the complete list of relevant variables.
      * @return The parsed build model, ready for testing the result.
      */
     private SourceFile loadFile(String file) {

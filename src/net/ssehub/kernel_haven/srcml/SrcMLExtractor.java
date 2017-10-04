@@ -70,14 +70,14 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
                 if (!success) {
                     LOGGER.logWarning("srcML exe did not execute succesfully.");
                 }
-            }, "SrcMLExtractor-Worker").start();;
+            }, "SrcMLExtractor-Worker").start();
             
             SourceFile resultFile = converter.parseToAst();
             
             return resultFile;
             
-        } catch (IOException | UncheckedIOException | ParserConfigurationException | SAXException | FormatException e1) {
-            throw new ExtractorException(e1);
+        } catch (IOException | UncheckedIOException | ParserConfigurationException | SAXException | FormatException e) {
+            throw new ExtractorException(e);
         }
     }
 

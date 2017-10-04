@@ -44,6 +44,11 @@ public class CXmlHandler extends AbstractAstConverter {
     
     private String relation = "";
     
+    /**
+     * Creates an XML handler for the given source file.
+     * 
+     * @param path The path of the source file inside the source tree.
+     */
     public CXmlHandler(File path) {
         super(path);
         this.sourceFile = path;
@@ -53,10 +58,8 @@ public class CXmlHandler extends AbstractAstConverter {
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         if (null != qName) {
-            if (qName.startsWith("cpp:")) {
-                // TODO: handle preprocessor
-                
-            } else {
+            // TODO: handle preprocessor
+            if (!qName.startsWith("cpp:")) {
                 String relation = null;
                 ISyntaxElementType type = NAME_TYPE_MAPPING.get(qName);
                 if (type == null) {
@@ -91,25 +94,30 @@ public class CXmlHandler extends AbstractAstConverter {
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         if (null != qName) {
-            if (qName.startsWith("cpp:")) {
-                // TODO: handle preprocessor
-            } else {
+            // TODO: handle preprocessor
+            if (!qName.startsWith("cpp:")) {
                 wantCharacters = false;
                 if (NAME_RELATION_MAPPING.get(qName) == null) {
-                    // if we interpreted this tag as a relation, then don't pop the element (since we haven't created one) 
+                    // if we interpreted this tag as a relation, then don't pop the element
+                    //  (since we haven't created one) 
                     elements.pop();
                 }
             }
         }
     }
     
-    
+    /**
+     * Checks whether the given XML element expects a nested literal.
+     * 
+     * @param elementName The XML name of the element.
+     * @return <code>true</code> if the nested characters should be parsed into a literal value.
+     */
     private static boolean elementWantsCharacters(String elementName) {
         return elementName.equals("name") | elementName.equals("literal");
     }
     
     @Override
-    public void characters(char ch[], int start, int length) throws SAXException {
+    public void characters(char[] ch, int start, int length) throws SAXException {
         if (wantCharacters) {
             String str = new String(ch, start, length);
             

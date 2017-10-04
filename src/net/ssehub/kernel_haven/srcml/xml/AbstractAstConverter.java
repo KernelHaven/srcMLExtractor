@@ -43,5 +43,10 @@ public abstract class AbstractAstConverter extends DefaultHandler {
         return file;
     }
 
+    /**
+     * Returns the AST node representing the completed file.
+     * 
+     * @return The AST node that is the result of the coversion.
+     */
     protected abstract SyntaxElement getAst();
 }

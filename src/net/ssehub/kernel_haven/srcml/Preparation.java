@@ -10,12 +10,18 @@ import net.ssehub.kernel_haven.util.PreparationTool;
  * Prepares the srcML binary and checks if an update is required.
  * 
  * @author El-Sharkawy
- *
  */
 class Preparation extends PreparationTool {
 
     private File exec;
 
+    /**
+     * Creates a preparation wrapper for the srcML binary. 
+     * 
+     * @param config The extractor configuration.
+     * 
+     * @throws SetUpException If the current OS is not supported or the executable cannot be found.
+     */
     public Preparation(CodeExtractorConfiguration config) throws SetUpException {
         File resourceFolder = config.getExtractorResourceDir(SrcMLExtractor.class);
         resourceFolder = new File(resourceFolder, "srcML");
@@ -52,6 +58,13 @@ class Preparation extends PreparationTool {
         }
     }
 
+    /**
+     * Prepares and checks whether the srcML binary is up to date.
+     * 
+     * @return The prepared srcML binary.
+     * 
+     * @throws SetUpException If preparation fails.
+     */
     public File prepareExec() throws SetUpException {
         super.prepare();
         return exec;
