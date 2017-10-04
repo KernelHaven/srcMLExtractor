@@ -2,7 +2,9 @@ package net.ssehub.kernel_haven.srcml.xml;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 import org.xml.sax.Attributes;
@@ -23,15 +25,49 @@ import net.ssehub.kernel_haven.util.logic.True;
  */
 public class CXmlHandler extends AbstractAstConverter {
     
+    /**
+     * Global (i.e. "always fits") mapping of XML name -> SyntaxElemenType.
+     */
     private static final Map<String, ISyntaxElementType> NAME_TYPE_MAPPING = new HashMap<>();
     
-    private static final Map<String, String> NAME_RELATION_MAPPING = new HashMap<>();
+    /**
+     * Global (i.e. "always fits") set of XML names, that expect a literal value as a nested child.
+     */
+    private static final Set<String> ELEMENT_WANTS_CHARACTER_LITERAL = new HashSet<>();
     
     static {
-        NAME_TYPE_MAPPING.put("name", SyntaxElementTypes.ID);
         NAME_TYPE_MAPPING.put("unit", SyntaxElementTypes.TRANSLATION_UNIT);
+        NAME_TYPE_MAPPING.put("function", SyntaxElementTypes.FUNCTION_DEF);
         
-        NAME_RELATION_MAPPING.put("init", "Value");
+        // statements
+        NAME_TYPE_MAPPING.put("block", SyntaxElementTypes.COMPOUND_STATEMENT); // this only fits roughly...
+        NAME_TYPE_MAPPING.put("break", SyntaxElementTypes.BREAK_STATEMENT);
+        NAME_TYPE_MAPPING.put("case", SyntaxElementTypes.CASE_STATEMENT);
+        NAME_TYPE_MAPPING.put("continue", SyntaxElementTypes.CONTINUE_STATEMENT);
+        NAME_TYPE_MAPPING.put("decl_stmt", SyntaxElementTypes.DECLARATION_STATEMENT);
+        NAME_TYPE_MAPPING.put("default", SyntaxElementTypes.DEFAULT_STATEMENT);
+        NAME_TYPE_MAPPING.put("do", SyntaxElementTypes.DO_STATEMENT);
+        NAME_TYPE_MAPPING.put("elseif", SyntaxElementTypes.ELIF_STATEMENT);
+        NAME_TYPE_MAPPING.put("empty_stmt", SyntaxElementTypes.EMPTY_STATEMENT);
+        NAME_TYPE_MAPPING.put("expr_stmt", SyntaxElementTypes.EXPR_STATEMENT);
+        NAME_TYPE_MAPPING.put("for", SyntaxElementTypes.FOR_STATEMENT);
+        NAME_TYPE_MAPPING.put("goto", SyntaxElementTypes.GOTO_STATEMENT);
+        NAME_TYPE_MAPPING.put("if", SyntaxElementTypes.IF_STATEMENT);
+        NAME_TYPE_MAPPING.put("label", SyntaxElementTypes.LABEL_STATEMENT);
+        NAME_TYPE_MAPPING.put("return", SyntaxElementTypes.RETURN_STATEMENT);
+        NAME_TYPE_MAPPING.put("switch", SyntaxElementTypes.SWITCH_STATEMENT);
+        NAME_TYPE_MAPPING.put("while", SyntaxElementTypes.WHILE_STATEMENT);
+        
+        // expressions
+        NAME_TYPE_MAPPING.put("name", SyntaxElementTypes.ID);
+        NAME_TYPE_MAPPING.put("call", SyntaxElementTypes.FUNCTION_CALL);
+        NAME_TYPE_MAPPING.put("decl", SyntaxElementTypes.DECLARATION);
+        NAME_TYPE_MAPPING.put("init", SyntaxElementTypes.INITIALIZER);
+        
+        ELEMENT_WANTS_CHARACTER_LITERAL.add("name");
+        ELEMENT_WANTS_CHARACTER_LITERAL.add("literal");
+        ELEMENT_WANTS_CHARACTER_LITERAL.add("operator");
+        ELEMENT_WANTS_CHARACTER_LITERAL.add("specifier");
     }
     
     private File sourceFile;
@@ -41,8 +77,6 @@ public class CXmlHandler extends AbstractAstConverter {
     private Stack<SyntaxElement> elements;
     
     private boolean wantCharacters;
-    
-    private String relation = "";
     
     /**
      * Creates an XML handler for the given source file.
@@ -60,33 +94,24 @@ public class CXmlHandler extends AbstractAstConverter {
         if (null != qName) {
             // TODO: handle preprocessor
             if (!qName.startsWith("cpp:")) {
-                String relation = null;
                 ISyntaxElementType type = NAME_TYPE_MAPPING.get(qName);
                 if (type == null) {
-                    relation = NAME_RELATION_MAPPING.get(qName);
-                    if (relation == null) {
-//                        System.out.println("Unknown xml name: " + qName);
-                        type = new ErrorSyntaxElement(qName);
-                    }
+//                    System.out.println("Unknown xml name: " + qName);
+                    type = new ErrorSyntaxElement(qName);
                 }
                 
-                if (type != null) {
-                    SyntaxElement element = new SyntaxElement(type,
-                            True.INSTANCE, True.INSTANCE);
-                    element.setSourceFile(sourceFile);
-                    
-                    if (elements.empty()) {
-                        topElement = element;
-                    } else {
-                        elements.peek().addNestedElement(element, this.relation);
-                    }
-                    this.relation = "";
-                    elements.push(element);
-                    
-                    wantCharacters = elementWantsCharacters(qName);
+                SyntaxElement element = new SyntaxElement(type,
+                        True.INSTANCE, True.INSTANCE);
+                element.setSourceFile(sourceFile);
+                
+                if (elements.empty()) {
+                    topElement = element;
                 } else {
-                    this.relation = relation;
+                    elements.peek().addNestedElement(element);
                 }
+                elements.push(element);
+                
+                wantCharacters = ELEMENT_WANTS_CHARACTER_LITERAL.contains(qName);
             }
         }
     }
@@ -97,23 +122,9 @@ public class CXmlHandler extends AbstractAstConverter {
             // TODO: handle preprocessor
             if (!qName.startsWith("cpp:")) {
                 wantCharacters = false;
-                if (NAME_RELATION_MAPPING.get(qName) == null) {
-                    // if we interpreted this tag as a relation, then don't pop the element
-                    //  (since we haven't created one) 
-                    elements.pop();
-                }
+                elements.pop();
             }
         }
-    }
-    
-    /**
-     * Checks whether the given XML element expects a nested literal.
-     * 
-     * @param elementName The XML name of the element.
-     * @return <code>true</code> if the nested characters should be parsed into a literal value.
-     */
-    private static boolean elementWantsCharacters(String elementName) {
-        return elementName.equals("name") | elementName.equals("literal");
     }
     
     @Override
