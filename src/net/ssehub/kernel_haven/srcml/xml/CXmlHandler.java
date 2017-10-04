@@ -62,7 +62,7 @@ public class CXmlHandler extends AbstractAstConverter {
                 if (type == null) {
                     relation = NAME_RELATION_MAPPING.get(qName);
                     if (relation == null) {
-//                        System.out.println("Unkown xml name: " + qName);
+//                        System.out.println("Unknown xml name: " + qName);
                         type = new ErrorSyntaxElement(qName);
                     }
                 }
