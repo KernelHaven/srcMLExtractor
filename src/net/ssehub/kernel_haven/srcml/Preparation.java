@@ -35,17 +35,9 @@ class Preparation extends PreparationTool {
                 execPath = "win64/bin/srcml.exe";
                 break;
             case LINUX32:
-                // falls through
-                break;
             case LINUX64:
-                // falls through
-                break;
             case MACOS64:
-                // falls through
-                break;
             case WIN32:
-                // falls through
-                break;
             default:
                 throw new SetUpException("Operating system not supported by srcML extractor: " + os.name());
             }
