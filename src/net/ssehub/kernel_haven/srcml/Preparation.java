@@ -34,8 +34,10 @@ class Preparation extends PreparationTool {
             case WIN64:
                 execPath = "win64/bin/srcml.exe";
                 break;
-            case LINUX32:
             case LINUX64:
+                execPath = "linux64/bin/srcml";
+                break;
+            case LINUX32:
             case MACOS64:
             case WIN32:
             default:

@@ -57,13 +57,17 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             
             ProcessBuilder builder = new ProcessBuilder(srcExec.getAbsolutePath(), target.getAbsolutePath());
 //            builder.directory(srcExec.getParentFile());
+            // set LD_LIBRARY_PATH to ../lib
+            // only needed for linux, but does no harm on windows.
+            builder.environment().put("LD_LIBRARY_PATH",
+                    new File(srcExec.getParentFile().getParentFile(), "lib").getAbsolutePath());
             
             XmlToAstConverter converter = new XmlToAstConverter(stdout, new CXmlHandler(target));
 
             new Thread(() -> {
                 boolean success;
                 try {
-                    success = Util.executeProcess(builder, "srcML", out, null, 0);
+                    success = Util.executeProcess(builder, "srcML", out, System.err, 0);
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
                 }
