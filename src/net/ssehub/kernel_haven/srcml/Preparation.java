@@ -3,8 +3,9 @@ package net.ssehub.kernel_haven.srcml;
 import java.io.File;
 
 import net.ssehub.kernel_haven.SetUpException;
-import net.ssehub.kernel_haven.config.CodeExtractorConfiguration;
+import net.ssehub.kernel_haven.config.Configuration;
 import net.ssehub.kernel_haven.util.PreparationTool;
+import net.ssehub.kernel_haven.util.Util;
 
 /**
  * Prepares the srcML binary and checks if an update is required.
@@ -22,8 +23,8 @@ class Preparation extends PreparationTool {
      * 
      * @throws SetUpException If the current OS is not supported or the executable cannot be found.
      */
-    public Preparation(CodeExtractorConfiguration config) throws SetUpException {
-        File resourceFolder = config.getExtractorResourceDir(SrcMLExtractor.class);
+    public Preparation(Configuration config) throws SetUpException {
+        File resourceFolder = Util.getExtractorResourceDir(config, SrcMLExtractor.class);
         resourceFolder = new File(resourceFolder, "srcML");
 
         OSType os = super.determineOS();

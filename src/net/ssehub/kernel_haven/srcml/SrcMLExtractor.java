@@ -13,7 +13,7 @@ import org.xml.sax.SAXException;
 import net.ssehub.kernel_haven.SetUpException;
 import net.ssehub.kernel_haven.code_model.AbstractCodeModelExtractor;
 import net.ssehub.kernel_haven.code_model.SourceFile;
-import net.ssehub.kernel_haven.config.CodeExtractorConfiguration;
+import net.ssehub.kernel_haven.config.Configuration;
 import net.ssehub.kernel_haven.srcml.xml.CXmlHandler;
 import net.ssehub.kernel_haven.srcml.xml.XmlToAstConverter;
 import net.ssehub.kernel_haven.util.ExtractorException;
@@ -44,7 +44,7 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
     private File srcExec;
 
     @Override
-    protected void init(CodeExtractorConfiguration config) throws SetUpException {
+    protected void init(Configuration config) throws SetUpException {
         Preparation preparator = new Preparation(config);
         srcExec = preparator.prepareExec();
     }
