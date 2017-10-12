@@ -64,20 +64,27 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             
             XmlToAstConverter converter = new XmlToAstConverter(stdout, new CXmlHandler(target));
 
+            // CHECKSTYLE:OFF
             new Thread(() -> {
                 boolean success;
                 try {
                     success = Util.executeProcess(builder, "srcML", out, System.err, 0);
                 } catch (IOException e) {
+                    try {
+                        out.close();
+                    } catch (Exception e1) {
+                        Logger.get().logWarning("srcML exited unnomrally and stream could not be closed: "
+                            + e1.getMessage());
+                    }
                     throw new UncheckedIOException(e);
                 }
                 if (!success) {
                     LOGGER.logWarning("srcML exe did not execute succesfully.");
                 }
             }, "SrcMLExtractor-Worker").start();
+            // CHECKSTYLE:ON
             
             SourceFile resultFile = converter.parseToAst();
-            
             return resultFile;
             
         } catch (IOException | UncheckedIOException | ParserConfigurationException | SAXException | FormatException e) {

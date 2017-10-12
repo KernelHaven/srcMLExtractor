@@ -18,7 +18,7 @@ import net.ssehub.kernel_haven.code_model.SyntaxElementTypes;
 public class CPPTest extends AbstractSrcMLExtractorTest {
     
     /**
-     * Test that a simple <tt>ifdef</tt> statement with a single empty statement can be parsed.
+     * Test that a simple <tt>&#35ifdef</tt> statement with a single empty statement can be parsed.
      */
     @Ignore("Translation of ifdef not implemented yet")
     @Test
@@ -31,9 +31,8 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
     }
 
     /**
-     * Test that a simple <tt>if defined()</tt> statement with a single empty statement can be parsed.
+     * Test that a simple <tt>&#35if defined()</tt> statement with a single empty statement can be parsed.
      */
-    @Ignore("Statement is not translated correctly")
     @Test
     public void testSimpleIf() {
         SourceFile ast = loadFile("SimpleIf.c");
@@ -41,6 +40,52 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
         
         Assert.assertEquals(1, elements.size());
         assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(0));
+    }
+    
+    /**
+     * Test that a simple <tt>&#35if defined()</tt> with an <tt>&#35else</tt> statement can be parsed.
+     */
+    @Test
+    public void testSimpleIfElse() {
+        SourceFile ast = loadFile("SimpleIfElse.c");
+        List<SyntaxElement> elements = super.getElements(ast);
+        
+        Assert.assertEquals(2, elements.size());
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(0));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!A", elements.get(1));
+    }
+    
+    /**
+     * Test that a simple <tt>&#35if defined()</tt> with an <tt>&#35elif</tt> statement can be parsed.
+     */
+    @Test
+    public void testSimpleIfElif() {
+        SourceFile ast = loadFile("SimpleIfElif.c");
+        List<SyntaxElement> elements = super.getElements(ast);
+        
+        Assert.assertEquals(2, elements.size());
+        // if defined(A)
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(0));
+        // elif defined(B)
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!A && B", elements.get(1));
+    }
+    
+    /**
+     * Test that a simple <tt>&#35if defined()</tt> with an <tt>&#35elif</tt> and <tt>&#35else</tt> statements
+     * can be parsed.
+     */
+    @Test
+    public void testSimpleIfElifElse() {
+        SourceFile ast = loadFile("SimpleIfElifElse.c");
+        List<SyntaxElement> elements = super.getElements(ast);
+        
+        Assert.assertEquals(3, elements.size());
+        // if defined(A)
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(0));
+        // elif defined(B)
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!A && B", elements.get(1));
+        // else
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!(!A && B)", elements.get(2));
     }
     
     @Override

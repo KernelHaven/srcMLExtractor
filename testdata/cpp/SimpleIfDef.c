@@ -1,3 +1,3 @@
-#if defined(A)
+#ifdef A
     ;
 #endif
