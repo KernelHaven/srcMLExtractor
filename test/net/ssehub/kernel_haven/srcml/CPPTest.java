@@ -88,6 +88,24 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
         assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!(!A && B)", elements.get(2));
     }
     
+    /**
+     * Test translation of nested <tt>&#35if defined()</tt> statements.
+     */
+    @Ignore("Presence conditions do not work")
+    @Test
+    public void testNestedIf() {
+        SourceFile ast = loadFile("NestedIf.c");
+        List<SyntaxElement> elements = super.getElements(ast);
+        
+        Assert.assertEquals(3, elements.size());
+        // if defined(A)
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(0));
+        // nested if defined(B)
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "B", "A && B", elements.get(1));
+        // if defined(A)
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(2));
+    }
+    
     @Override
     protected SourceFile loadFile(String file) {
         return super.loadFile("cpp/" + file);

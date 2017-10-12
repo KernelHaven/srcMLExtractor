@@ -86,11 +86,34 @@ public class AbstractSrcMLExtractorTest {
      * @param element The element to test.
      */
     protected void assertStatement(ISyntaxElementType type, String condition, SyntaxElement element) {
+        assertStatement(type, condition, null, element);
+    }
+    
+    /**
+     * Tests the statement.
+     * @param type The expected syntax type
+     * @param condition The expected condition in c-style.
+     * @param presenceCondition The expected presence/compound in c-style. This contains also all surrounding
+     *     conditions.
+     * @param element The element to test.
+     */
+    protected void assertStatement(ISyntaxElementType type, String condition, String presenceCondition,
+        SyntaxElement element) {
+        
+        // Syntax check
         Assert.assertSame("Wrong syntax element", type, element.getType());
+        
+        // Check of current condition
         if (null != condition) {
             Assert.assertEquals("Wrong condition", condition, element.getCondition().toString());
         } else {
             Assert.assertNull("Element has a condition, but wasn't expected.", element.getCondition());
+        }
+        
+        // Check of presence condition
+        if (null != presenceCondition) {
+            Assert.assertEquals("Wrong presence/compound condition", presenceCondition,
+                element.getPresenceCondition().toString());
         }
     }
     
