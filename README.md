@@ -2,7 +2,8 @@
 A code-model extractor for KernelHaven. This extractor uses [srcML](http://srcml.org/) to analyze C source code.
 
 ## Supported Platforms
-* Windows (7, 8, 8.1, 10) 64 Bit
+* Windows (Vista, 7, 8, 10) 64 Bit
+* Linux x86 64 Bit, requires the following libraries: libxml2, libxslt1.1, libarchive13, libssl1.0.0, libcurl3
 
 ## License
 This extractor is licensed under GPLv3. Another license would be possible with following restrictions:
