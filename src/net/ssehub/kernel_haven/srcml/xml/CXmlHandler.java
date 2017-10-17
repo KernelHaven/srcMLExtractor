@@ -99,9 +99,9 @@ public class CXmlHandler extends AbstractAstConverter {
     private boolean wantCharacters;
     
     /**
-     * The stack of conditions. This should have the same depth as elements + 1. A new element has the immediate
-     * condition of peek(). A new element (that is not a CPP directive) push()es true. A closing element pop()s.
-     * A CPP directive replaces peek() with the new condition.
+     * The stack of conditions. A new element has the immediate condition of peek(). A new element
+     * (that is not a CPP directive) push()es true. A closing element pop()s.
+     * A CPP directive push()es its condition, an endif pops()s the pushed if condition.
      * This starts with a single True push()ed.
      */
     private Stack<Formula> conditions;
@@ -174,7 +174,7 @@ public class CXmlHandler extends AbstractAstConverter {
                 }
                 
                 SyntaxElement element = new SyntaxElement(type,
-                        conditions.peek(), True.INSTANCE);
+                        conditions.peek(), getPc());
                 element.setSourceFile(sourceFile);
                 
                 if (elements.empty()) {
@@ -200,34 +200,29 @@ public class CXmlHandler extends AbstractAstConverter {
                     inCpp = null;
                     
                     // we reached the end of the CPP directive. modify the current condition accordingly
-                    Formula oldFormula = conditions.pop();
-                    Formula newFormula;
                     switch (qName) {
                     case "cpp:if":
                         // a normal if just replaces the current condition
-                        newFormula = cppExpr;
+                        conditions.push(cppExpr);
                         break;
                     case "cpp:else":
                         // an else negates the previous condition
-                        newFormula = new Negation(oldFormula);
+                        conditions.push(new Negation(conditions.peek()));
                         break;
                     case "cpp:elif":
                         // an elif negates the previous and appends the parsed condition
-                        newFormula = new Conjunction(new Negation(oldFormula), cppExpr);
+                        conditions.push(new Conjunction(new Negation(conditions.peek()), cppExpr));
                         break;
                     case "cpp:endif":
                         // an endif clears the condition
-                        newFormula = True.INSTANCE;
+                        conditions.pop();
                         break;
                     // TODO: ifdef, ifndef
                         
                     default:
                         Logger.get().logError("Unknown CPP directive: " + qName);
-                        newFormula = oldFormula;
                         break;
                     }
-                    
-                    conditions.push(newFormula);
                     
                 }
             } else if (inCpp != null) {
@@ -321,6 +316,27 @@ public class CXmlHandler extends AbstractAstConverter {
         if (qName.equals("call")) {
             inCppExprString.append(")");
         }
+    }
+    
+    /**
+     * Calculates the presence condition from {@link #conditions}.
+     * 
+     * @return The presence condition;
+     */
+    private Formula getPc() {
+        Formula pc = True.INSTANCE;
+        
+        for (Formula f : conditions) {
+            if (!(f instanceof True)) {
+                if (pc instanceof True) {
+                    pc = f;
+                } else {
+                    pc = new Conjunction(pc, f);
+                }
+            }
+        }
+        
+        return pc;
     }
 
     @Override

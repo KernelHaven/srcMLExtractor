@@ -91,7 +91,6 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
     /**
      * Test translation of nested <tt>&#35if defined()</tt> statements.
      */
-    @Ignore("Presence conditions do not work")
     @Test
     public void testNestedIf() {
         SourceFile ast = loadFile("NestedIf.c");
