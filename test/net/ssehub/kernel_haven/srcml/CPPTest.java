@@ -154,6 +154,21 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
         // second endif
     }
     
+    /**
+     * Tests an if with a complicated structure of !, || and && operators and brackets.
+     */
+    @Test
+    public void testComplicatedIf() {
+        SourceFile ast = loadFile("ComplicatedIf.c");
+        List<SyntaxElement> elements = super.getElements(ast);
+        
+        Assert.assertEquals(1, elements.size());
+        
+        System.out.println(elements.get(0).getCondition());
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!((A || !!B) && C) && !D",
+                "!((A || !!B) && C) && !D", elements.get(0));
+    }
+    
     @Override
     protected SourceFile loadFile(String file) {
         return super.loadFile("cpp/" + file);

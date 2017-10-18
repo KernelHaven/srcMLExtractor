@@ -198,6 +198,7 @@ public class CppHandler {
                     } else {
                         inCppExprString.append(str);
                     }
+                    
                 } else if (inCppExprNodes.peek().equals("operator")) {
                     if (LOG_IN_EXPR_STRUCUTRE) {
                         System.out.println("Op: " + inCppExprNodes + " -> " + str);
@@ -233,10 +234,10 @@ public class CppHandler {
      * @param qName The XML node.
      */
     private void inCppExprEnd(String qName) {
-        inCppExprNodes.pop();
         if (LOG_IN_EXPR_STRUCUTRE) {
             System.out.println("End: " + inCppExprNodes);
         }
+        inCppExprNodes.pop();
         
         if (qName.equals("call")) {
             inCppExprString.append(")");
