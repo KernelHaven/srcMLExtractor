@@ -105,6 +105,55 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
         assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(2));
     }
     
+    /**
+     * Test that a <tt>&#35if defined()</tt> statement with a compound expression can be parsed.
+     */
+    @Test
+    public void testCompoundIf() {
+        SourceFile ast = loadFile("CompoundIf.c");
+        List<SyntaxElement> elements = super.getElements(ast);
+        
+        Assert.assertEquals(1, elements.size());
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A && B", elements.get(0));
+    }
+    
+    /**
+     * Test that <tt>&#35if defined()</tt> statement with compound expression, <tt>elif</tt> and <tt>else</tt>
+     * can be parsed.
+     */
+    @Test
+    public void testCompoundIfElifElse() {
+        SourceFile ast = loadFile("CompoundIfElifElse.c");
+        List<SyntaxElement> elements = super.getElements(ast);
+        
+        Assert.assertEquals(3, elements.size());
+        // if defined(A) && defined(B)
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A && B", elements.get(0));
+        // elif !defined(C)
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!(A && B) && !C", elements.get(1));
+        // else
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!(!(A && B) && !C)", "!(!(A && B) && !C)",
+            elements.get(2));
+    }
+    
+    /**
+     * Test that nested <tt>&#35if defined()</tt> statements with compound expressions can be parsed.
+     */
+    @Test
+    public void testNestedCompoundIf() {
+        SourceFile ast = loadFile("NestedCompoundIf.c");
+        List<SyntaxElement> elements = super.getElements(ast);
+        
+        Assert.assertEquals(3, elements.size());
+        // if defined(A) && defined(B)
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A && B", "A && B", elements.get(0));
+        // nested if defined(C) && !defined(D)
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "C && !D", "A && B && C && !D" , elements.get(1));
+        // first endif
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A && B", "A && B", elements.get(2));
+        // second endif
+    }
+    
     @Override
     protected SourceFile loadFile(String file) {
         return super.loadFile("cpp/" + file);
