@@ -15,14 +15,7 @@ import net.ssehub.kernel_haven.code_model.ISyntaxElementType;
 import net.ssehub.kernel_haven.code_model.LiteralSyntaxElement;
 import net.ssehub.kernel_haven.code_model.SyntaxElement;
 import net.ssehub.kernel_haven.code_model.SyntaxElementTypes;
-import net.ssehub.kernel_haven.util.Logger;
-import net.ssehub.kernel_haven.util.logic.Conjunction;
-import net.ssehub.kernel_haven.util.logic.Formula;
-import net.ssehub.kernel_haven.util.logic.Negation;
 import net.ssehub.kernel_haven.util.logic.True;
-import net.ssehub.kernel_haven.util.logic.parser.ExpressionFormatException;
-import net.ssehub.kernel_haven.util.logic.parser.Parser;
-import net.ssehub.kernel_haven.util.logic.parser.VariableCache;
 
 /**
  * A converter for translating C-files including their preprocessor statements.
@@ -98,42 +91,7 @@ public class CXmlHandler extends AbstractAstConverter {
      */
     private boolean wantCharacters;
     
-    /**
-     * The stack of conditions. A new element has the immediate condition of peek(). A new element
-     * (that is not a CPP directive) push()es true. A closing element pop()s.
-     * A CPP directive push()es its condition, an endif pops()s the pushed if condition.
-     * This starts with a single True push()ed.
-     */
-    private Stack<Formula> conditions;
-    
-    /**
-     * Not <code>null</code> if we are currently in a CPP directive. In this case, this equals the qname.
-     */
-    private String inCpp;
-    
-    /**
-     * The expression that was created from a &lt;expr&gt; inside a CPP directive.
-     */
-    private Formula cppExpr;
-    
-    /**
-     * Whether we are currently inside an &lt;expr&gt; inside a CPP directive.
-     */
-    private boolean inCppExpr;
-    
-    /**
-     * A stack with the qNames of the current hierarchy when walking through an &lt;expr&gt; inside a CPP directive.
-     * inCppExpr may only turn back to false, if this is empty.
-     */
-    private Stack<String> inCppExprNodes;
-    
-    /**
-     * The expression string that we build while we are in an &lt;expr&gt; inside a CPP directive. This will be parsed
-     * at the end into a Formula.
-     */
-    private StringBuilder inCppExprString;
-    
-    private boolean inCppExprCall;
+    private CppHandler cppHandler;
     
     /**
      * Creates an XML handler for the given source file.
@@ -144,27 +102,14 @@ public class CXmlHandler extends AbstractAstConverter {
         super(path);
         this.sourceFile = path;
         elements = new Stack<>();
-        conditions = new Stack<>();
-        conditions.push(True.INSTANCE);
-        inCppExprNodes = new Stack<>();
+        cppHandler = new CppHandler();
     }
 
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         if (null != qName) {
-            if (inCppExpr) {
-                inCppExprStart(qName, attributes);
-                
-            } else if (qName.startsWith("cpp:")) {
-                if (inCpp == null) {
-                    inCpp = qName;
-                }
-            } else if (inCpp != null) {
-                if (qName.equals("expr")) {
-                    // start parsing the expression of the cpp directive
-                    inCppExprString = new StringBuilder();
-                    inCppExpr = true;
-                }
+            if (qName.startsWith("cpp:") || cppHandler.inCpp()) {
+                cppHandler.startElement(qName, attributes);
                 
             } else { // we are not in a CPP directive
                 ISyntaxElementType type = NAME_TYPE_MAPPING.get(qName);
@@ -174,7 +119,7 @@ public class CXmlHandler extends AbstractAstConverter {
                 }
                 
                 SyntaxElement element = new SyntaxElement(type,
-                        conditions.peek(), getPc());
+                        cppHandler.getCondition(), cppHandler.getPc());
                 element.setSourceFile(sourceFile);
                 
                 if (elements.empty()) {
@@ -187,7 +132,7 @@ public class CXmlHandler extends AbstractAstConverter {
                 wantCharacters = ELEMENT_WANTS_CHARACTER_LITERAL.contains(qName);
                 
                 // condition for nested elements is true
-                conditions.push(True.INSTANCE);
+                cppHandler.onNormalElementAdded();
             }
         }
     }
@@ -195,62 +140,13 @@ public class CXmlHandler extends AbstractAstConverter {
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         if (null != qName) {
-            if (qName.startsWith("cpp:")) {
-                if (qName.equals(inCpp)) {
-                    inCpp = null;
-                    
-                    // we reached the end of the CPP directive. modify the current condition accordingly
-                    switch (qName) {
-                    case "cpp:if":
-                        // a normal if just replaces the current condition
-                        conditions.push(cppExpr);
-                        break;
-                    case "cpp:else":
-                        // an else negates the previous condition
-                        conditions.push(new Negation(conditions.pop()));
-                        break;
-                    case "cpp:elif":
-                        // an elif negates the previous and appends the parsed condition
-                        conditions.push(new Conjunction(new Negation(conditions.pop()), cppExpr));
-                        break;
-                    case "cpp:endif":
-                        // an endif clears the condition
-                        conditions.pop();
-                        break;
-                    // TODO: ifdef, ifndef
-                        
-                    default:
-                        Logger.get().logError("Unknown CPP directive: " + qName);
-                        break;
-                    }
-                    
-                }
-            } else if (inCpp != null) {
-                if (inCppExpr && inCppExprNodes.isEmpty() && qName.equals("expr")) { 
-                    // we reached the end of the CPP expression (</expr>);
-                    // we should have a formula now
-                    inCppExpr = false;
-                    
-                    // TODO: temporary debug try
-                    System.out.println("-------------");
-                    System.out.println(inCppExprString);
-                    VariableCache cache = new VariableCache();
-                    Parser<Formula> parser = new Parser<>(new SrcMlConditionGrammar(cache));
-                    
-                    try {
-                        cppExpr = parser.parse(inCppExprString.toString());
-                    } catch (ExpressionFormatException e) {
-                        Logger.get().logException("Unable to parser condition; using True instead", e);
-                        cppExpr = True.INSTANCE;
-                    }
-                } else if (inCppExpr) {
-                    inCppExprEnd(qName);
-                }
+            if (qName.startsWith("cpp:") || cppHandler.inCpp()) {
+                cppHandler.endElement(qName);
                 
             } else { // we are not in a CPP directive
                 wantCharacters = false;
                 elements.pop();
-                conditions.pop();
+                cppHandler.onNormalElementRemoved();
             }
         }
     }
@@ -259,24 +155,8 @@ public class CXmlHandler extends AbstractAstConverter {
     public void characters(char[] ch, int start, int length) throws SAXException {
         String str = new String(ch, start, length);
         
-        if (inCppExpr) {
-            if (!inCppExprNodes.empty()) {
-                
-                if (inCppExprNodes.peek().equals("name")) {
-                    System.out.println("Name: " + inCppExprNodes + " -> " + str);
-                    
-                    if (inCppExprCall) {
-                        inCppExprCall = false;
-                        inCppExprString.append(str + "(");
-                    } else {
-                        inCppExprString.append(str);
-                    }
-                } else if (inCppExprNodes.peek().equals("operator")) {
-                    System.out.println("Op: " + inCppExprNodes + " -> " + str);
-                    
-                    inCppExprString.append(str);
-                }
-            }
+        if (cppHandler.inCpp()) {
+            cppHandler.characters(str);
             
         } else if (wantCharacters) {
             
@@ -288,57 +168,6 @@ public class CXmlHandler extends AbstractAstConverter {
         }
     }
     
-    /**
-     * Handles an opening XML node found inside an &lt;expr&gt; inside a CPP directive.
-     * 
-     * @param qName The XML node.
-     * @param attributes The attributes of the XML node.
-     */
-    private void inCppExprStart(String qName, Attributes attributes) {
-        inCppExprNodes.push(qName);
-        
-        if (qName.equals("call")) {
-            inCppExprCall = true;
-        }
-        
-        System.out.println("Start: " + inCppExprNodes);
-    }
-    
-    /**
-     * Handles a closing XML node found inside an &lt;expr&gt; inside a CPP directive.
-     * 
-     * @param qName The XML node.
-     */
-    private void inCppExprEnd(String qName) {
-        inCppExprNodes.pop();
-        System.out.println("End: " + inCppExprNodes);
-        
-        if (qName.equals("call")) {
-            inCppExprString.append(")");
-        }
-    }
-    
-    /**
-     * Calculates the presence condition from {@link #conditions}.
-     * 
-     * @return The presence condition;
-     */
-    private Formula getPc() {
-        Formula pc = True.INSTANCE;
-        
-        for (Formula f : conditions) {
-            if (!(f instanceof True)) {
-                if (pc instanceof True) {
-                    pc = f;
-                } else {
-                    pc = new Conjunction(pc, f);
-                }
-            }
-        }
-        
-        return pc;
-    }
-
     @Override
     public SyntaxElement getAst() {
         return topElement;
