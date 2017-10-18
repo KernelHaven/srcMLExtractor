@@ -207,11 +207,11 @@ public class CXmlHandler extends AbstractAstConverter {
                         break;
                     case "cpp:else":
                         // an else negates the previous condition
-                        conditions.push(new Negation(conditions.peek()));
+                        conditions.push(new Negation(conditions.pop()));
                         break;
                     case "cpp:elif":
                         // an elif negates the previous and appends the parsed condition
-                        conditions.push(new Conjunction(new Negation(conditions.peek()), cppExpr));
+                        conditions.push(new Conjunction(new Negation(conditions.pop()), cppExpr));
                         break;
                     case "cpp:endif":
                         // an endif clears the condition
