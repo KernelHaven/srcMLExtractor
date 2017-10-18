@@ -165,8 +165,7 @@ public class CppHandler {
                 try {
                     cppExpr = parser.parse(inCppExprString.toString());
                 } catch (ExpressionFormatException e) {
-                    LOGGER.logException("Unable to parser condition; using True instead", e);
-                    cppExpr = True.INSTANCE;
+                    throw new RuntimeException(e);
                 }
                 
             } else if (inCppExpr) {
@@ -194,9 +193,19 @@ public class CppHandler {
                     
                     if (inCppExprCall) {
                         inCppExprCall = false;
-                        inCppExprString.append(str + "(");
+                        inCppExprString.append(str).append("(");
+                        
                     } else {
-                        inCppExprString.append(str);
+                        if (inCppExprNodes.size() < 5
+                                || !inCppExprNodes.get(inCppExprNodes.size() - 5).equals("call")) {
+                            // if a variable name is used outside of a call
+                            LOGGER.logWarning("Variable \"" + str + "\" used in preprocessor condition outside of a "
+                                    + "function call; assuming false");
+                            inCppExprString.append("0");
+                            
+                        } else {
+                            inCppExprString.append(str);
+                        }
                     }
                     
                 } else if (inCppExprNodes.peek().equals("operator")) {
@@ -224,7 +233,16 @@ public class CppHandler {
         }
         
         if (LOG_IN_EXPR_STRUCUTRE) {
-            System.out.println("Start: " + inCppExprNodes);
+            System.out.print("Start: " + inCppExprNodes);
+            if (attributes.getLength() > 0) {
+                for (int i = 0; i < attributes.getLength(); i++) {
+                    if (i != 0) {
+                        System.out.println(", ");
+                    }
+                    System.out.print(attributes.getQName(i) + "=" + attributes.getValue(i));
+                }
+            }
+            System.out.println();
         }
     }
 

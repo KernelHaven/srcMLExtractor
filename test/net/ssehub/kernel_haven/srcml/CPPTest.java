@@ -168,6 +168,19 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
                 "!((A || !!B) && C) && !D", elements.get(0));
     }
     
+    /**
+     * Tests an whether an if with a variable outside of a defined() call is handled correctly.
+     */
+    @Test
+    public void testMissingDefined() {
+        SourceFile ast = loadFile("MissingDefined.c");
+        List<SyntaxElement> elements = super.getElements(ast);
+        
+        Assert.assertEquals(1, elements.size());
+        
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "0", "0", elements.get(0));
+    }
+    
     @Override
     protected SourceFile loadFile(String file) {
         return super.loadFile("cpp/" + file);
