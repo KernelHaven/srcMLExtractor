@@ -164,7 +164,6 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
         
         Assert.assertEquals(1, elements.size());
         
-        System.out.println(elements.get(0).getCondition());
         assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!((A || !!B) && C) && !D",
                 "!((A || !!B) && C) && !D", elements.get(0));
     }
