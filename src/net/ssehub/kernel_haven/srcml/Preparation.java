@@ -6,6 +6,7 @@ import net.ssehub.kernel_haven.SetUpException;
 import net.ssehub.kernel_haven.config.Configuration;
 import net.ssehub.kernel_haven.util.PreparationTool;
 import net.ssehub.kernel_haven.util.Util;
+import net.ssehub.kernel_haven.util.Util.OSType;
 
 /**
  * Prepares the srcML binary and checks if an update is required.
@@ -27,7 +28,7 @@ class Preparation extends PreparationTool {
         File resourceFolder = Util.getExtractorResourceDir(config, SrcMLExtractor.class);
         resourceFolder = new File(resourceFolder, "srcML");
 
-        OSType os = super.determineOS();
+        OSType os = Util.determineOS();
         String execPath = null;
         if (null != os) {
             switch (os) {
