@@ -3,7 +3,6 @@ package net.ssehub.kernel_haven.srcml;
 import java.util.List;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import net.ssehub.kernel_haven.code_model.SourceFile;
@@ -20,7 +19,6 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
     /**
      * Test that a simple <tt>&#35ifdef</tt> statement with a single empty statement can be parsed.
      */
-    @Ignore("Translation of ifdef not implemented yet")
     @Test
     public void testSimpleIfDef() {
         SourceFile ast = loadFile("SimpleIfDef.c");

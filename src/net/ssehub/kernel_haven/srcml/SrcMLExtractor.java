@@ -61,7 +61,6 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             // only needed for linux, but does no harm on windows.
             builder.environment().put("LD_LIBRARY_PATH",
                     new File(srcExec.getParentFile().getParentFile(), "lib").getAbsolutePath());
-            
             XmlToAstConverter converter = new XmlToAstConverter(stdout, new CXmlHandler(target));
 
             // CHECKSTYLE:OFF

@@ -20,11 +20,33 @@ import net.ssehub.kernel_haven.util.logic.parser.VariableCache;
  */
 public class CppHandler {
     
+    /**
+     * Stores the current C preprocessor state.
+     * @author El-Sharkawy
+     *
+     */
+    private static enum State {
+        /**
+         * Inside an if or elif expression.
+         */
+        IN_CPP_EXPR,
+        
+        /**
+         * Inside an ifdef state.
+         */
+        IN_IFDEF,
+        
+        /**
+         * No CPP expression relevant state.
+         */
+        NO_EXPR; 
+    }
+    
     private static final Logger LOGGER = Logger.get();
     
     private static final boolean LOG_IN_EXPR_STRUCUTRE = false;
     
-    private static final boolean LOG_EXPR_STRING = false;
+    private static final boolean LOG_EXPR_STRING = true;
     
     /**
      * The stack of conditions. A new element has the immediate condition of peek(). A new element
@@ -47,7 +69,7 @@ public class CppHandler {
     /**
      * Whether we are currently inside an &lt;expr&gt; inside a CPP directive.
      */
-    private boolean inCppExpr;
+    private State cppState = State.NO_EXPR;
     
     /**
      * A stack with the qNames of the current hierarchy when walking through an &lt;expr&gt; inside a CPP directive.
@@ -91,21 +113,23 @@ public class CppHandler {
     public void startElement(String qName, Attributes attributes) {
         if (inCpp != null) {
 
-            if (inCppExpr) {
+            if (cppState == State.IN_CPP_EXPR) {
                 inCppExprStart(qName, attributes);
                 
             } else if (qName.equals("expr")) {
                 // start parsing the expression of the cpp directive
                 inCppExprString = new StringBuilder();
-                inCppExpr = true;
+                cppState = State.IN_CPP_EXPR;
                 
 //            } else {
 //                LOGGER.logWarning("Don't know what to do with opening " + qName + " inside " + inCpp);
+            } else if (inCpp.equals("cpp:ifdef") && qName.equals("name")) {
+                inCppExprString = new StringBuilder();
+                cppState = State.IN_IFDEF;                
             }
             
         } else if (qName.startsWith("cpp:")) {
             inCpp = qName;
-            
         } else {
             throw new IllegalStateException("Got a starting element, but we are not inside a <cpp:> element");
         }
@@ -131,6 +155,10 @@ public class CppHandler {
                     // a normal if just replaces the current condition
                     conditions.push(cppExpr);
                     break;
+                case "cpp:ifdef":
+                    // a normal ifdef just replaces the current condition
+                    conditions.push(cppExpr);
+                    break;
                 case "cpp:else":
                     // an else negates the previous condition
                     conditions.push(new Negation(conditions.pop()));
@@ -151,10 +179,13 @@ public class CppHandler {
             }
             
         } else {
-            if (inCppExpr && inCppExprNodes.isEmpty() && qName.equals("expr")) { 
+            boolean cppExprFinished = cppState == State.IN_CPP_EXPR && inCppExprNodes.isEmpty() && qName.equals("expr");
+            boolean ifdefExprFinished = cppState == State.IN_IFDEF & inCppExprNodes.isEmpty() && qName.equals("name");
+            if (cppExprFinished || ifdefExprFinished) { 
+                
                 // we reached the end of the CPP expression (</expr>);
                 // we should have a formula now
-                inCppExpr = false;
+                cppState = State.NO_EXPR;
                 
                 if (LOG_EXPR_STRING) {
                     System.out.println("\nExprString: " + inCppExprString + "\n");
@@ -168,7 +199,7 @@ public class CppHandler {
                     throw new RuntimeException(e);
                 }
                 
-            } else if (inCppExpr) {
+            } else if (cppState == State.IN_CPP_EXPR) {
                 inCppExprEnd(qName);
                 
 //            } else {
@@ -183,7 +214,8 @@ public class CppHandler {
      * @param str The nested characters.
      */
     public void characters(String str) {
-        if (inCppExpr) {
+        switch (cppState) {
+        case IN_CPP_EXPR:
             if (!inCppExprNodes.empty()) {
                 
                 if (inCppExprNodes.peek().equals("name")) {
@@ -216,8 +248,53 @@ public class CppHandler {
                     inCppExprString.append(str);
                 }
             }
+            break;
+        case IN_IFDEF:
+            // composite expressions should not be possible for idfef expressions
+            inCppExprString.append("defined(");
+            inCppExprString.append(str);
+            inCppExprString.append(")");
+            break;
+        case NO_EXPR:
+            // falls through
+        default:
+            // No operation needed.
         }
     }
+//        if (cppState == State.IN_CPP_EXPR) {
+//            if (!inCppExprNodes.empty()) {
+//                
+//                if (inCppExprNodes.peek().equals("name")) {
+//                    if (LOG_IN_EXPR_STRUCUTRE) {
+//                        System.out.println("Name: " + inCppExprNodes + " -> " + str);
+//                    }
+//                    
+//                    if (inCppExprCall) {
+//                        inCppExprCall = false;
+//                        inCppExprString.append(str).append("(");
+//                        
+//                    } else {
+//                        if (inCppExprNodes.size() < 5
+//                                || !inCppExprNodes.get(inCppExprNodes.size() - 5).equals("call")) {
+//                            // if a variable name is used outside of a call
+//                            LOGGER.logWarning("Variable \"" + str + "\" used in preprocessor condition outside of a "
+//                                    + "function call; assuming false");
+//                            inCppExprString.append("0");
+//                            
+//                        } else {
+//                            inCppExprString.append(str);
+//                        }
+//                    }
+//                    
+//                } else if (inCppExprNodes.peek().equals("operator")) {
+//                    if (LOG_IN_EXPR_STRUCUTRE) {
+//                        System.out.println("Op: " + inCppExprNodes + " -> " + str);
+//                    }
+//                    
+//                    inCppExprString.append(str);
+//                }
+//            }
+//        }
     
     /**
      * Handles an opening XML node found inside an &lt;expr&gt; inside a CPP directive.
