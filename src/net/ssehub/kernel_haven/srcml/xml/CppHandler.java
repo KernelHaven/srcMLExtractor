@@ -37,6 +37,11 @@ public class CppHandler {
         IN_IFDEF,
         
         /**
+         * Inside an ifndef state.
+         */
+        IN_IFNDEF,
+        
+        /**
          * No CPP expression relevant state.
          */
         NO_EXPR; 
@@ -46,7 +51,7 @@ public class CppHandler {
     
     private static final boolean LOG_IN_EXPR_STRUCUTRE = false;
     
-    private static final boolean LOG_EXPR_STRING = true;
+    private static final boolean LOG_EXPR_STRING = false;
     
     /**
      * The stack of conditions. A new element has the immediate condition of peek(). A new element
@@ -126,6 +131,9 @@ public class CppHandler {
             } else if (inCpp.equals("cpp:ifdef") && qName.equals("name")) {
                 inCppExprString = new StringBuilder();
                 cppState = State.IN_IFDEF;                
+            } else if (inCpp.equals("cpp:ifndef") && qName.equals("name")) {
+                inCppExprString = new StringBuilder();
+                cppState = State.IN_IFNDEF;                
             }
             
         } else if (qName.startsWith("cpp:")) {
@@ -156,7 +164,8 @@ public class CppHandler {
                     conditions.push(cppExpr);
                     break;
                 case "cpp:ifdef":
-                    // a normal ifdef just replaces the current condition
+                    // falls through
+                case "cpp:ifndef":
                     conditions.push(cppExpr);
                     break;
                 case "cpp:else":
@@ -180,7 +189,8 @@ public class CppHandler {
             
         } else {
             boolean cppExprFinished = cppState == State.IN_CPP_EXPR && inCppExprNodes.isEmpty() && qName.equals("expr");
-            boolean ifdefExprFinished = cppState == State.IN_IFDEF & inCppExprNodes.isEmpty() && qName.equals("name");
+            boolean ifdefExprFinished = (cppState == State.IN_IFDEF || cppState == State.IN_IFNDEF)
+                && inCppExprNodes.isEmpty() && qName.equals("name");
             if (cppExprFinished || ifdefExprFinished) { 
                 
                 // we reached the end of the CPP expression (</expr>);
@@ -252,6 +262,12 @@ public class CppHandler {
         case IN_IFDEF:
             // composite expressions should not be possible for idfef expressions
             inCppExprString.append("defined(");
+            inCppExprString.append(str);
+            inCppExprString.append(")");
+            break;
+        case IN_IFNDEF:
+            // composite expressions should not be possible for idfef expressions
+            inCppExprString.append("!defined(");
             inCppExprString.append(str);
             inCppExprString.append(")");
             break;

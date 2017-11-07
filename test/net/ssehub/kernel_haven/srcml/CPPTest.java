@@ -27,6 +27,18 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
         Assert.assertEquals(1, elements.size());
         assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(0));
     }
+    
+    /**
+     * Test that a simple <tt>&#35ifndef</tt> statement with a single empty statement can be parsed.
+     */
+    @Test
+    public void testSimpleIfNDef() {
+        SourceFile ast = loadFile("SimpleIfNDef.c");
+        List<SyntaxElement> elements = super.getElements(ast);
+        
+        Assert.assertEquals(1, elements.size());
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!A", elements.get(0));
+    }
 
     /**
      * Test that a simple <tt>&#35if defined()</tt> statement with a single empty statement can be parsed.

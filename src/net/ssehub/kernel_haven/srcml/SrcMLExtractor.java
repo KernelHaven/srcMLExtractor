@@ -22,7 +22,7 @@ import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.Util;
 
 /**
- * An extractor which uses <a href="http://www.srcml.org/">srcML</a> to create an AST, still containing variability
+ * An extractor which uses <a href="">srcML</a> to create an AST, still containing variability
  * information. <br/>
  * The AST has the following properties:
  * <ul>
