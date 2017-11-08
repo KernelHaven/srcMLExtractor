@@ -29,6 +29,23 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
     }
     
     /**
+     * Test translation of nested <tt>&#35ifdef</tt> statements.
+     */
+    @Test
+    public void testNestedIfDef() {
+        SourceFile ast = loadFile("NestedIfDef.c");
+        List<SyntaxElement> elements = super.getElements(ast);
+        
+        Assert.assertEquals(3, elements.size());
+        // ifdef A
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(0));
+        // nested ifdef B
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "B", "A && B", elements.get(1));
+        // ifdef A
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(2));
+    }
+    
+    /**
      * Test that a simple <tt>&#35ifndef</tt> statement with a single empty statement can be parsed.
      */
     @Test
@@ -38,6 +55,23 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
         
         Assert.assertEquals(1, elements.size());
         assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!A", elements.get(0));
+    }
+    
+    /**
+     * Test translation of nested <tt>&#35ifdef</tt> statements.
+     */
+    @Test
+    public void testNestedIfNDef() {
+        SourceFile ast = loadFile("NestedIfNDef.c");
+        List<SyntaxElement> elements = super.getElements(ast);
+        
+        Assert.assertEquals(3, elements.size());
+        // ifdef A
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(0));
+        // nested ifndef B
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!B", "A && !B", elements.get(1));
+        // ifdef A
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(2));
     }
 
     /**
