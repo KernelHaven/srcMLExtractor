@@ -1,0 +1,5 @@
+#ifndef A
+    ;
+#else
+	;
+#endif

@@ -46,6 +46,21 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
     }
     
     /**
+     * Tests whether an #else block for an #ifdef is translated correcltly. 
+     */
+    @Test
+    public void testElseForIfDef() {
+        SourceFile ast = loadFile("ElseForIfdef.c");
+        List<SyntaxElement> elements = super.getElements(ast);
+        
+        Assert.assertEquals(2, elements.size());
+        // ifdef A
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(0));
+        // else
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!A", elements.get(1));
+    }
+    
+    /**
      * Test that a simple <tt>&#35ifndef</tt> statement with a single empty statement can be parsed.
      */
     @Test
@@ -72,6 +87,21 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
         assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!B", "A && !B", elements.get(1));
         // ifdef A
         assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(2));
+    }
+    
+    /**
+     * Tests whether an #else block for an #ifndef is translated correcltly. 
+     */
+    @Test
+    public void testElseForIfNdef() {
+        SourceFile ast = loadFile("ElseForIfNdef.c");
+        List<SyntaxElement> elements = super.getElements(ast);
+        
+        Assert.assertEquals(2, elements.size());
+        // ifdef A
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!A", elements.get(0));
+        // else
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!!A", elements.get(1));
     }
 
     /**
