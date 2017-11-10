@@ -180,7 +180,6 @@ public class CppHandler {
                     // an endif clears the condition
                     conditions.pop();
                     break;
-                // TODO: ifdef, ifndef
                     
                 default:
                     throw new IllegalArgumentException("Unknown CPP directive: " + qName);
