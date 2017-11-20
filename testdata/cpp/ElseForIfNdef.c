@@ -1,5 +1,7 @@
+;
 #ifndef A
     ;
 #else
 	;
 #endif
+;

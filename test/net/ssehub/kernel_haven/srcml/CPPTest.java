@@ -36,13 +36,15 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
         SourceFile ast = loadFile("NestedIfDef.c");
         List<SyntaxElement> elements = super.getElements(ast);
         
-        Assert.assertEquals(3, elements.size());
+        Assert.assertEquals(5, elements.size());
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "1", "1", elements.get(0));
         // ifdef A
-        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(0));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(1));
         // nested ifdef B
-        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "B", "A && B", elements.get(1));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "B", "A && B", elements.get(2));
         // ifdef A
-        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(2));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(3));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "1", "1", elements.get(4));
     }
     
     /**
@@ -53,11 +55,13 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
         SourceFile ast = loadFile("ElseForIfdef.c");
         List<SyntaxElement> elements = super.getElements(ast);
         
-        Assert.assertEquals(2, elements.size());
+        Assert.assertEquals(4, elements.size());
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "1", "1", elements.get(0));
         // ifdef A
-        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(0));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(1));
         // else
-        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!A", elements.get(1));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!A", elements.get(2));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "1", "1", elements.get(3));
     }
     
     /**
@@ -68,8 +72,10 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
         SourceFile ast = loadFile("SimpleIfNDef.c");
         List<SyntaxElement> elements = super.getElements(ast);
         
-        Assert.assertEquals(1, elements.size());
-        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!A", elements.get(0));
+        Assert.assertEquals(3, elements.size());
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "1", "1", elements.get(0));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!A", elements.get(1));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "1", "1", elements.get(2));
     }
     
     /**
@@ -97,11 +103,13 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
         SourceFile ast = loadFile("ElseForIfNdef.c");
         List<SyntaxElement> elements = super.getElements(ast);
         
-        Assert.assertEquals(2, elements.size());
+        Assert.assertEquals(4, elements.size());
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "1", "1", elements.get(0));
         // ifdef A
-        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!A", elements.get(0));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!A", elements.get(1));
         // else
-        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!!A", elements.get(1));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!!A", elements.get(2));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "1", "1", elements.get(3));
     }
 
     /**
@@ -170,13 +178,15 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
         SourceFile ast = loadFile("NestedIf.c");
         List<SyntaxElement> elements = super.getElements(ast);
         
-        Assert.assertEquals(3, elements.size());
+        Assert.assertEquals(5, elements.size());
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "1", "1", elements.get(0));
         // if defined(A)
-        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(0));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(1));
         // nested if defined(B)
-        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "B", "A && B", elements.get(1));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "B", "A && B", elements.get(2));
         // if defined(A)
-        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(2));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A", elements.get(3));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "1", "1", elements.get(4));
     }
     
     /**
@@ -187,8 +197,10 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
         SourceFile ast = loadFile("CompoundIf.c");
         List<SyntaxElement> elements = super.getElements(ast);
         
-        Assert.assertEquals(1, elements.size());
-        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A && B", elements.get(0));
+        Assert.assertEquals(3, elements.size());
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "1", "1", elements.get(0));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A && B", elements.get(1));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "1", "1", elements.get(2));
     }
     
     /**
@@ -200,14 +212,16 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
         SourceFile ast = loadFile("CompoundIfElifElse.c");
         List<SyntaxElement> elements = super.getElements(ast);
         
-        Assert.assertEquals(3, elements.size());
+        Assert.assertEquals(5, elements.size());
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "1", "1", elements.get(0));
         // if defined(A) && defined(B)
-        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A && B", elements.get(0));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A && B", elements.get(1));
         // elif !defined(C)
-        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!(A && B) && !C", elements.get(1));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!(A && B) && !C", elements.get(2));
         // else
         assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!(!(A && B) && !C)", "!(!(A && B) && !C)",
-            elements.get(2));
+            elements.get(3));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "1", "1", elements.get(4));
     }
     
     /**
@@ -218,14 +232,16 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
         SourceFile ast = loadFile("NestedCompoundIf.c");
         List<SyntaxElement> elements = super.getElements(ast);
         
-        Assert.assertEquals(3, elements.size());
+        Assert.assertEquals(5, elements.size());
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "1", "1", elements.get(0));
         // if defined(A) && defined(B)
-        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A && B", "A && B", elements.get(0));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A && B", "A && B", elements.get(1));
         // nested if defined(C) && !defined(D)
-        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "C && !D", "A && B && C && !D" , elements.get(1));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "C && !D", "A && B && C && !D" , elements.get(2));
         // first endif
-        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A && B", "A && B", elements.get(2));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "A && B", "A && B", elements.get(3));
         // second endif
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "1", "1", elements.get(4));
     }
     
     /**
@@ -236,10 +252,12 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
         SourceFile ast = loadFile("ComplicatedIf.c");
         List<SyntaxElement> elements = super.getElements(ast);
         
-        Assert.assertEquals(1, elements.size());
+        Assert.assertEquals(3, elements.size());
         
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "1", "1", elements.get(0));
         assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!((A || !!B) && C) && !D",
-                "!((A || !!B) && C) && !D", elements.get(0));
+                "!((A || !!B) && C) && !D", elements.get(1));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "1", "1", elements.get(2));
     }
     
     /**
@@ -250,9 +268,11 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
         SourceFile ast = loadFile("MissingDefined.c");
         List<SyntaxElement> elements = super.getElements(ast);
         
-        Assert.assertEquals(1, elements.size());
+        Assert.assertEquals(3, elements.size());
         
-        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "0", "0", elements.get(0));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "1", "1", elements.get(0));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "0", "0", elements.get(1));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "1", "1", elements.get(2));
     }
     
     @Override
