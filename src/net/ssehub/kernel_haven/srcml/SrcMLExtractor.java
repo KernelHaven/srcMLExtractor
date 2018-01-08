@@ -15,6 +15,7 @@ import net.ssehub.kernel_haven.SetUpException;
 import net.ssehub.kernel_haven.code_model.AbstractCodeModelExtractor;
 import net.ssehub.kernel_haven.code_model.SourceFile;
 import net.ssehub.kernel_haven.config.Configuration;
+import net.ssehub.kernel_haven.srcml.xml.AbstractAstConverter;
 import net.ssehub.kernel_haven.srcml.xml.CXmlHandler;
 import net.ssehub.kernel_haven.srcml.xml.XmlToAstConverter;
 import net.ssehub.kernel_haven.util.ExtractorException;
@@ -63,7 +64,11 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             // only needed for linux, but does no harm on windows.
             builder.environment().put("LD_LIBRARY_PATH",
                     new File(srcExec.getParentFile().getParentFile(), "lib").getAbsolutePath());
-            XmlToAstConverter converter = new XmlToAstConverter(stdout, new CXmlHandler(target));
+            
+            AbstractAstConverter xmlConverter = new CXmlHandler(target);
+//            AbstractAstConverter xmlConverter = new XmlToSyntaxElementConverter(target);
+            
+            XmlToAstConverter converter = new XmlToAstConverter(stdout, xmlConverter);
 
             // CHECKSTYLE:OFF
             new Thread(() -> {

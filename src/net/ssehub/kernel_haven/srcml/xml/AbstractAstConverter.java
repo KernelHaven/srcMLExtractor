@@ -4,8 +4,8 @@ import java.io.File;
 
 import org.xml.sax.helpers.DefaultHandler;
 
+import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.code_model.SourceFile;
-import net.ssehub.kernel_haven.code_model.SyntaxElement;
 
 /**
  * Basis implementation of visitors/strategies for the SAXparser, which are responsible for the translation of the
@@ -46,7 +46,7 @@ public abstract class AbstractAstConverter extends DefaultHandler {
     /**
      * Returns the AST node representing the completed file.
      * 
-     * @return The AST node that is the result of the coversion.
+     * @return The AST node that is the result of the conversion.
      */
-    protected abstract SyntaxElement getAst();
+    protected abstract CodeElement getAst();
 }

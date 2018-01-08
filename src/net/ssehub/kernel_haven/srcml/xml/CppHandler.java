@@ -182,7 +182,8 @@ public class CppHandler {
                     break;
                     
                 default:
-                    throw new IllegalArgumentException("Unknown CPP directive: " + qName);
+                    LOGGER.logWarning("Unknown CPP directive: " + qName);
+//                    throw new IllegalArgumentException("Unknown CPP directive: " + qName);
                 }
             }
             
