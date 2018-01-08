@@ -2,11 +2,11 @@ package net.ssehub.kernel_haven.srcml.model;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.util.logic.Formula;
 
 /**
@@ -19,7 +19,7 @@ public class OtherSyntaxElement extends SrcMlSyntaxElement {
 
     private String name;
     
-    private List<OtherSyntaxElement> nested;
+    private List<SrcMlSyntaxElement> nested;
     
     private Map<String, String> attributes; // TODO is this needed?
     
@@ -47,17 +47,18 @@ public class OtherSyntaxElement extends SrcMlSyntaxElement {
     }
 
     @Override
-    public CodeElement getNestedElement(int index) throws IndexOutOfBoundsException {
+    public SrcMlSyntaxElement getNestedElement(int index) throws IndexOutOfBoundsException {
         return nested.get(index);
     }
 
     @Override
-    public void addNestedElement(CodeElement element) {
-        if (!(element instanceof SrcMlSyntaxElement)) {
-            throw new IllegalArgumentException("Can only add SrcMlSyntaxElement as child of SrcMlSyntaxElement");
-        }
-        
-        nested.add((OtherSyntaxElement) element);
+    protected void addNestedElement(SrcMlSyntaxElement element) {
+        nested.add(element);
+    }
+    
+    @Override
+    public void setNestedElement(int index, SrcMlSyntaxElement element) {
+        nested.set(index, element);
     }
 
     /**
@@ -89,41 +90,37 @@ public class OtherSyntaxElement extends SrcMlSyntaxElement {
         return name;
     }
     
-    @Override
-    public String toString() {
-        return toString("");
-    }
-    
     /**
-     * Turns this node into a string with the given indentation. Recursively walks through its children with increased
-     * indentation.
+     * Iterates over the elements nested inside this element. Not recursively.
      * 
-     * @param indentation The indentation. Contains only tabs. Never null.
-     * 
-     * @return This element as a string. Never null.
+     * @return An iterable over the nested elements
      */
-    private String toString(String indentation) {
-        StringBuilder result = new StringBuilder(indentation);
-        
-        if (getCondition() != null) {
-            String conditionStr = getCondition().toString();
+    public Iterable<SrcMlSyntaxElement> iterateNestedOtherSyntaxElements() {
+        return new Iterable<SrcMlSyntaxElement>() {
             
-            if (conditionStr.length() > 64) {
-                conditionStr = "...";
+            @Override
+            public Iterator<SrcMlSyntaxElement> iterator() {
+                return new Iterator<SrcMlSyntaxElement>() {
+
+                    private int index = 0;
+                    
+                    @Override
+                    public boolean hasNext() {
+                        return index < getNestedElementCount();
+                    }
+
+                    @Override
+                    public SrcMlSyntaxElement next() {
+                        return getNestedElement(index++);
+                    }
+                };
             }
-            
-            result.append("[").append(conditionStr).append("] ");
-        }
-        
-        result.append(name).append('\n');
-        
-        indentation += '\t';
-        
-        for (int i = 0; i < nested.size(); i++) {
-            result.append(nested.get(i).toString(indentation));
-        }
-        
-        return result.toString();
+        };
+    }
+
+    @Override
+    protected String elementToString() {
+        return name;
     }
 
 }

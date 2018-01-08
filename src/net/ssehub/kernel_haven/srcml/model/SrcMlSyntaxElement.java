@@ -42,6 +42,24 @@ public abstract class SrcMlSyntaxElement implements CodeElement {
     }
 
     @Override
+    public void addNestedElement(CodeElement element) {
+        if (!(element instanceof SrcMlSyntaxElement)) {
+            throw new IllegalArgumentException("Can only add SrcMlSyntaxElement as child of SrcMlSyntaxElement");
+        }
+        
+        addNestedElement((SrcMlSyntaxElement) element);
+    }
+    
+    /**
+     * Adds a nested element to the end of the list.
+     * 
+     * @param element The element to add.
+     */
+    protected abstract void addNestedElement(SrcMlSyntaxElement element);
+    
+    public abstract void setNestedElement(int index, SrcMlSyntaxElement element);
+    
+    @Override
     public int getLineStart() {
         return lineStart;
     }
@@ -70,5 +88,50 @@ public abstract class SrcMlSyntaxElement implements CodeElement {
     public List<String> serializeCsv() {
         throw new UnsupportedOperationException("CSV serialization is not yet implemented.");
     }
+    
+    @Override
+    public String toString() {
+        return toString("");
+    }
+    
+    /**
+     * Turns this node into a string with the given indentation. Recursively walks through its children with increased
+     * indentation.
+     * 
+     * @param indentation The indentation. Contains only tabs. Never null.
+     * 
+     * @return This element as a string. Never null.
+     */
+    private String toString(String indentation) {
+        StringBuilder result = new StringBuilder(indentation);
+        
+        if (getCondition() != null) {
+            String conditionStr = getCondition().toString();
+            
+            if (conditionStr.length() > 64) {
+                conditionStr = "...";
+            }
+            
+            result.append("[").append(conditionStr).append("] ");
+        }
+        
+        result.append(elementToString()).append('\n');
+        
+        indentation += '\t';
+        
+        for (int i = 0; i < getNestedElementCount(); i++) {
+            result.append(((SrcMlSyntaxElement) getNestedElement(i)).toString(indentation));
+        }
+        
+        return result.toString();
+    }
+    
+    /**
+     * Creates a single line string that describes this element. This will be used in the hierarchy display of
+     * {@link #toString()}.
+     * 
+     * @return A string describing this element.
+     */
+    protected abstract String elementToString();
     
 }

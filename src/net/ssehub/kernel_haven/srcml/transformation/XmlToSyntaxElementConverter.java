@@ -1,4 +1,4 @@
-package net.ssehub.kernel_haven.srcml.model.transformation;
+package net.ssehub.kernel_haven.srcml.transformation;
 
 import java.io.File;
 import java.util.Stack;
@@ -7,6 +7,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 import net.ssehub.kernel_haven.srcml.model.OtherSyntaxElement;
+import net.ssehub.kernel_haven.srcml.model.SrcMlSyntaxElement;
 import net.ssehub.kernel_haven.srcml.xml.AbstractAstConverter;
 import net.ssehub.kernel_haven.srcml.xml.CppHandler;
 
@@ -70,8 +71,10 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
     }
     
     @Override
-    protected OtherSyntaxElement getAst() {
-        return topElement;
+    protected SrcMlSyntaxElement getAst() {
+        RuleTransformationEngine engine = new RuleTransformationEngine();
+        
+        return engine.transform(topElement);
     }
 
 }
