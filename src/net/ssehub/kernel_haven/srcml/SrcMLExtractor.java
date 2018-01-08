@@ -1,5 +1,6 @@
 package net.ssehub.kernel_haven.srcml;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PipedInputStream;
@@ -54,6 +55,7 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
         try {
             PipedOutputStream out = new PipedOutputStream();
             PipedInputStream stdout = new PipedInputStream(out);
+            ByteArrayOutputStream stderr = new ByteArrayOutputStream();
             
             ProcessBuilder builder = new ProcessBuilder(srcExec.getAbsolutePath(), target.getAbsolutePath());
 //            builder.directory(srcExec.getParentFile());
@@ -67,15 +69,20 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             new Thread(() -> {
                 boolean success;
                 try {
-                    success = Util.executeProcess(builder, "srcML", out, System.err, 0);
+                    success = Util.executeProcess(builder, "srcML", out, stderr, 0);
                 } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                } finally {
                     try {
                         out.close();
-                    } catch (Exception e1) {
-                        Logger.get().logWarning("srcML exited unnomrally and stream could not be closed: "
-                            + e1.getMessage());
+                    } catch (IOException e) {
+                        LOGGER.logException("Exception while closing piped stream for stdout", e);
                     }
-                    throw new UncheckedIOException(e);
+                    try {
+                        stderr.close();
+                    } catch (IOException e) {
+                        LOGGER.logException("Exception while closing piped stream for stderr", e);
+                    }
                 }
                 if (!success) {
                     LOGGER.logWarning("srcML exe did not execute succesfully.");
@@ -84,6 +91,9 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             // CHECKSTYLE:ON
             
             SourceFile resultFile = converter.parseToAst();
+            
+            LOGGER.logDebug(stderr.toString().split("\n"));
+            
             return resultFile;
             
         } catch (IOException | UncheckedIOException | ParserConfigurationException | SAXException | FormatException e) {
