@@ -1,41 +1,51 @@
 package net.ssehub.kernel_haven.srcml.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.util.logic.Formula;
 
-public class CppElse extends SrcMlSyntaxElement {
+public class CompoundStatement extends Statement {
     
-    public CppElse(Formula presenceCondition) {
+    private List<SrcMlSyntaxElement> elements;
+    
+    public CompoundStatement(Formula presenceCondition) {
         super(presenceCondition);
+        
+        elements = new ArrayList<>();
     }
     
-    public CppElse(int lineStart, int lineEnd, java.io.File sourceFile, Formula condition, Formula presenceCondition) {
+    public CompoundStatement(int lineStart, int lineEnd, java.io.File sourceFile, Formula condition, Formula presenceCondition) {
         super(lineStart, lineEnd, sourceFile, condition, presenceCondition);
+        
+        elements = new ArrayList<>();
     }
-    
+
     @Override
     public int getNestedElementCount() {
-        return 0;
+        return elements.size();
     }
 
     @Override
     public CodeElement getNestedElement(int index) throws IndexOutOfBoundsException {
-        throw new IndexOutOfBoundsException();
+        return elements.get(index);
     }
 
     @Override
     protected void addNestedElement(SrcMlSyntaxElement element) {
-        throw new IndexOutOfBoundsException();
+        elements.add(element);
     }
     
     @Override
     public void setNestedElement(int index, SrcMlSyntaxElement element) {
-        throw new IndexOutOfBoundsException();
+        elements.set(index, element);
     }
 
     @Override
     protected String elementToString() {
-        return "#else";
+        return "Compound Statement";
     }
 
+    
 }

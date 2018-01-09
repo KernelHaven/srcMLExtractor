@@ -4,11 +4,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.ssehub.kernel_haven.code_model.CodeElement;
+import net.ssehub.kernel_haven.srcml.model.CompoundStatement;
 import net.ssehub.kernel_haven.srcml.model.Function;
 import net.ssehub.kernel_haven.srcml.model.OtherSyntaxElement;
 import net.ssehub.kernel_haven.srcml.model.SrcMlSyntaxElement;
 import net.ssehub.kernel_haven.srcml.transformation.OtherElementMatcher;
 import net.ssehub.kernel_haven.srcml.transformation.TransformationRule;
+import net.ssehub.kernel_haven.util.logic.True;
 
 public class FunctionRule implements TransformationRule {
 
@@ -79,9 +81,11 @@ public class FunctionRule implements TransformationRule {
                 }
             }
             
+            CompoundStatement bodyCompound = new CompoundStatement(True.INSTANCE);
             for (CodeElement bodyElement : body) {
-                function.addNestedElement(bodyElement);
+                bodyCompound.addNestedElement(bodyElement);
             }
+            function.setBody(bodyCompound);
             
             element = function;
         }

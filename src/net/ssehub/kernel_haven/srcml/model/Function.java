@@ -5,12 +5,13 @@ import java.util.List;
 
 import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.util.logic.Formula;
+import net.ssehub.kernel_haven.util.logic.True;
 
 public class Function extends SrcMlSyntaxElement {
     
     // TODO: return type, parameter types
     
-    private List<SrcMlSyntaxElement> body;
+    private Statement body;
     
     private List<String> parameters;
     
@@ -19,7 +20,7 @@ public class Function extends SrcMlSyntaxElement {
     public Function(String name, Formula presenceCondition) {
         super(presenceCondition);
         
-        body = new ArrayList<>();
+        body = new EmptyStatement(True.INSTANCE);
         parameters = new ArrayList<>();
         this.name = name;
     }
@@ -27,8 +28,8 @@ public class Function extends SrcMlSyntaxElement {
     public Function(String name, int lineStart, int lineEnd, java.io.File sourceFile, Formula condition,
             Formula presenceCondition) {
         super(lineStart, lineEnd, sourceFile, condition, presenceCondition);
-        
-        body = new ArrayList<>();
+
+        body = new EmptyStatement(True.INSTANCE);
         parameters = new ArrayList<>();
         this.name = name;
     }
@@ -51,22 +52,35 @@ public class Function extends SrcMlSyntaxElement {
     
     @Override
     public int getNestedElementCount() {
-        return body.size();
+        return 1;
     }
 
     @Override
     public CodeElement getNestedElement(int index) throws IndexOutOfBoundsException {
-        return body.get(index);
+        if (index != 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        return body;
     }
 
     @Override
     protected void addNestedElement(SrcMlSyntaxElement element) {
-        body.add(element);
+        throw new IndexOutOfBoundsException();
     }
     
     @Override
     public void setNestedElement(int index, SrcMlSyntaxElement element) {
-        body.set(index, element);
+        if (index != 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (!(element instanceof Statement)) {
+            throw new IllegalArgumentException();
+        }
+        body = (Statement) element;
+    }
+    
+    public void setBody(Statement body) {
+        this.body = body;
     }
 
     @Override

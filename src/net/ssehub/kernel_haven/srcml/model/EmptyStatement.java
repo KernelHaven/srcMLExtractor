@@ -3,16 +3,16 @@ package net.ssehub.kernel_haven.srcml.model;
 import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.util.logic.Formula;
 
-public class CppElse extends SrcMlSyntaxElement {
+public class EmptyStatement extends Statement {
     
-    public CppElse(Formula presenceCondition) {
+    public EmptyStatement(Formula presenceCondition) {
         super(presenceCondition);
     }
     
-    public CppElse(int lineStart, int lineEnd, java.io.File sourceFile, Formula condition, Formula presenceCondition) {
+    public EmptyStatement(int lineStart, int lineEnd, java.io.File sourceFile, Formula condition, Formula presenceCondition) {
         super(lineStart, lineEnd, sourceFile, condition, presenceCondition);
     }
-    
+
     @Override
     public int getNestedElementCount() {
         return 0;
@@ -35,7 +35,8 @@ public class CppElse extends SrcMlSyntaxElement {
 
     @Override
     protected String elementToString() {
-        return "#else";
+        return "Empty Statement";
     }
 
+    
 }

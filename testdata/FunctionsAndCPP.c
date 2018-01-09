@@ -30,3 +30,11 @@ int main(int argc, char **argv) {
     
     return 0;
 }
+
+int b(int a) {
+	#ifdef A
+		return -a;
+	#else
+		return 0;
+	#endif
+}
