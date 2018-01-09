@@ -18,5 +18,5 @@ public interface TransformationRule {
      * @return The result of the transformation. The unchanged input element if this rule does not apply.
      */
     public SrcMlSyntaxElement transform(SrcMlSyntaxElement element);
-
+    
 }

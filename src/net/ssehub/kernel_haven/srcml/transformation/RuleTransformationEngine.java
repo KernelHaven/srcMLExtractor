@@ -6,6 +6,10 @@ import java.util.List;
 import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.srcml.model.OtherSyntaxElement;
 import net.ssehub.kernel_haven.srcml.model.SrcMlSyntaxElement;
+import net.ssehub.kernel_haven.srcml.transformation.rules.CppElifRule;
+import net.ssehub.kernel_haven.srcml.transformation.rules.CppElseRule;
+import net.ssehub.kernel_haven.srcml.transformation.rules.CppEndifRule;
+import net.ssehub.kernel_haven.srcml.transformation.rules.CppIfRule;
 import net.ssehub.kernel_haven.srcml.transformation.rules.CppIncludeRule;
 import net.ssehub.kernel_haven.srcml.transformation.rules.TranslationUnitRule;
 
@@ -27,30 +31,34 @@ public class RuleTransformationEngine {
         // TODO add rules here
         rules.add(new TranslationUnitRule());
         rules.add(new CppIncludeRule());
+        
+        rules.add(new CppIfRule());
+        rules.add(new CppElifRule());
+        rules.add(new CppElseRule());
+        rules.add(new CppEndifRule());
     }
     
     /**
      * Runs this engine on the given {@link SrcMlSyntaxElement} hierarchy.
      * 
-     * @param topElement The root element of the hierarchy.
+     * @param element The element to transform.
      * 
      * @return The transformed hierarchy.
      */
-    public SrcMlSyntaxElement transform(SrcMlSyntaxElement topElement) {
+    public SrcMlSyntaxElement transform(SrcMlSyntaxElement element) {
         for (TransformationRule rule : rules) {
-            topElement = rule.transform(topElement);
+            element = rule.transform(element);
         }
         
-        int i = 0;
-        for (CodeElement child : topElement.iterateNestedElements()) {
+        for (int i = 0; i < element.getNestedElementCount(); i++) {
+            CodeElement child = element.getNestedElement(i);
             if (child instanceof SrcMlSyntaxElement) {
                 child = transform((SrcMlSyntaxElement) child);
-                topElement.setNestedElement(i, (SrcMlSyntaxElement) child);
+                element.setNestedElement(i, (SrcMlSyntaxElement) child);
             }
-            i++;
         }
         
-        return topElement;
+        return element;
     }
     
     /**

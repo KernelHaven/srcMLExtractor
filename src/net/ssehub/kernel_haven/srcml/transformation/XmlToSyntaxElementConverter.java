@@ -47,11 +47,21 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
     
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
-        elements.pop();
+        OtherSyntaxElement element = elements.pop();
         cppHandler.onNormalElementRemoved();
         
         if (qName.startsWith("cpp:") || cppHandler.inCpp()) {
             cppHandler.endElement(qName);
+        }
+        
+        // store conditions for #if, #elif, #ifdef, #ifndef
+        switch (qName) {
+        case "cpp:if":
+        case "cpp:ifdef":
+        case "cpp:ifndef":
+        case "cpp:elif":
+            element.addAttribute("condition", cppHandler.getCondition());
+            break;
         }
     }
     

@@ -21,14 +21,21 @@ public class CppIncludeRule implements TransformationRule {
         if (MATCHER.matches(element)) {
             OtherSyntaxElement fileNode = (OtherSyntaxElement) element.getNestedElement(2);
             
-            OtherSyntaxElement fileNameNode;
+            String filename;
             if (fileNode.getNestedElementCount() == 3) {
-                fileNameNode = (OtherSyntaxElement) fileNode.getNestedElement(1);
+                OtherSyntaxElement fileNameNode = (OtherSyntaxElement) fileNode.getNestedElement(1);
+                filename = fileNameNode.getName().substring("text:".length());
             } else {
-                fileNameNode = (OtherSyntaxElement) fileNode.getNestedElement(0);
+                OtherSyntaxElement fileNameNode = (OtherSyntaxElement) fileNode.getNestedElement(0);
+                filename = fileNameNode.getName().substring("text:".length());
+                if (filename.startsWith("\"") && filename.endsWith("\"")) {
+                    filename = filename.substring(1, filename.length() - 1);
+                }
             }
 
-            element = new OtherSyntaxElement("Include: " + fileNameNode.getName(), element.getPresenceCondition());
+            // TODO: created specialized CppInclude syntax element?
+            element = new OtherSyntaxElement("Include: " + filename, element.getLineStart(), element.getLineEnd(),
+                    element.getSourceFile(), element.getCondition(), element.getPresenceCondition());
         }
             
         

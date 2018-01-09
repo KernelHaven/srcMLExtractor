@@ -21,7 +21,7 @@ public class OtherSyntaxElement extends SrcMlSyntaxElement {
     
     private List<SrcMlSyntaxElement> nested;
     
-    private Map<String, String> attributes; // TODO is this needed?
+    private Map<String, Object> attributes;
     
     public OtherSyntaxElement(String name, Formula presenceCondition) {
         super(presenceCondition);
@@ -62,22 +62,22 @@ public class OtherSyntaxElement extends SrcMlSyntaxElement {
     }
 
     /**
-     * Adds an attribute to this element. The attributes are a direct representation of the XML attributes.
+     * Adds an attribute to this element.
      * 
      * @param key The attribute name. Not <code>null</code>.
-     * @param value The value of the attribute. Not <code>null</code>, may be empty.
+     * @param value The value of the attribute. Not <code>null</code>.
      */
-    public void addAttribute(String key, String value) {
+    public void addAttribute(String key, Object value) {
         attributes.put(key, value);
     }
     
     /**
-     * Retrieves an attribute of this element. The attributes are a direct representation of the XMl attributes.
+     * Retrieves an attribute of this element.
      * 
      * @param key The name of the attribute. Not <code>null</code>.
      * @return The value of the attribute. <code>null</code> if this element does not contain the given attribute.
      */
-    public String getAttribute(String key) {
+    public Object getAttribute(String key) {
         return attributes.get(key);
     }
     
