@@ -19,6 +19,13 @@ public class FunctionRule implements TransformationRule {
             new OtherElementMatcher("block", (OtherElementMatcher[]) null)
     );
     
+    private static final OtherElementMatcher PARAMETER_MATCHER = new OtherElementMatcher("parameter",
+            new OtherElementMatcher("decl", 
+                    new OtherElementMatcher("type", (OtherElementMatcher[]) null),
+                    new OtherElementMatcher("name", new OtherElementMatcher(null))
+            )
+    );
+    
     @Override
     public SrcMlSyntaxElement transform(SrcMlSyntaxElement element) {
         
@@ -27,10 +34,21 @@ public class FunctionRule implements TransformationRule {
             OtherSyntaxElement nameElement = (OtherSyntaxElement) element.getNestedElement(1).getNestedElement(0);
             String name = nameElement.getName().substring("text:".length());
             
-            // TODO: return type and parameter list
+            // TODO: return type, parameter types
             
             Function function = new Function(name, element.getLineStart(), element.getLineEnd(),
                     element.getSourceFile(), element.getCondition(), element.getPresenceCondition());
+            
+            for (CodeElement paramElement : element.getNestedElement(2).iterateNestedElements()) {
+                if (PARAMETER_MATCHER.matches(paramElement)) {
+                    OtherSyntaxElement paramNameElement = (OtherSyntaxElement) paramElement.getNestedElement(0)
+                            .getNestedElement(1).getNestedElement(0);
+                    
+                    String paramName = paramNameElement.getName().substring("text:".length());
+                    
+                    function.addParameter(paramName);
+                }
+            }
             
             List<CodeElement> body = new LinkedList<>();
             for (CodeElement bodyElement : element.getNestedElement(3).iterateNestedElements()) {

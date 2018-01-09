@@ -8,9 +8,11 @@ import net.ssehub.kernel_haven.util.logic.Formula;
 
 public class Function extends SrcMlSyntaxElement {
     
-    // TODO: parameter, return type
+    // TODO: return type, parameter types
     
     private List<SrcMlSyntaxElement> body;
+    
+    private List<String> parameters;
     
     private String name;
     
@@ -18,6 +20,7 @@ public class Function extends SrcMlSyntaxElement {
         super(presenceCondition);
         
         body = new ArrayList<>();
+        parameters = new ArrayList<>();
         this.name = name;
     }
     
@@ -26,11 +29,24 @@ public class Function extends SrcMlSyntaxElement {
         super(lineStart, lineEnd, sourceFile, condition, presenceCondition);
         
         body = new ArrayList<>();
+        parameters = new ArrayList<>();
         this.name = name;
     }
 
     public String getName() {
         return name;
+    }
+    
+    public void addParameter(String parameter) {
+        parameters.add(parameter);
+    }
+    
+    public int getNumParamters() {
+        return parameters.size();
+    }
+    
+    public String getParameter(int index) {
+        return parameters.get(index);
     }
     
     @Override
@@ -55,7 +71,15 @@ public class Function extends SrcMlSyntaxElement {
 
     @Override
     protected String elementToString() {
-        return "Function " + name;
+        StringBuilder paramString = new StringBuilder("(");
+        
+        for (String param : parameters) {
+            paramString.append(param).append(", ");
+        }
+        paramString.replace(paramString.length() - 2, paramString.length(), ""); // remove trailing ", "
+        paramString.append(")");
+        
+        return "Function " + name + paramString.toString();
     }
 
 }
