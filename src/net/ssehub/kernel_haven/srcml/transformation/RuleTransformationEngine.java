@@ -11,6 +11,7 @@ import net.ssehub.kernel_haven.srcml.transformation.rules.CppElseRule;
 import net.ssehub.kernel_haven.srcml.transformation.rules.CppEndifRule;
 import net.ssehub.kernel_haven.srcml.transformation.rules.CppIfRule;
 import net.ssehub.kernel_haven.srcml.transformation.rules.CppIncludeRule;
+import net.ssehub.kernel_haven.srcml.transformation.rules.FunctionRule;
 import net.ssehub.kernel_haven.srcml.transformation.rules.TranslationUnitRule;
 
 /**
@@ -30,6 +31,8 @@ public class RuleTransformationEngine {
         
         // TODO add rules here
         rules.add(new TranslationUnitRule());
+        rules.add(new FunctionRule());
+        
         rules.add(new CppIncludeRule());
         
         rules.add(new CppIfRule());
