@@ -71,6 +71,14 @@ public class FunctionRule implements TransformationRule {
                 }
             }
             
+            // if the function is empty, it contains one node with "text:{\n\n}"
+            if (body.size() == 1 && body.get(0) instanceof OtherSyntaxElement) {
+                OtherSyntaxElement ose = (OtherSyntaxElement) body.get(0);
+                if (ose.getName().startsWith("text:{") && ose.getName().endsWith("}")) {
+                    body.remove(0);
+                }
+            }
+            
             for (CodeElement bodyElement : body) {
                 function.addNestedElement(bodyElement);
             }
