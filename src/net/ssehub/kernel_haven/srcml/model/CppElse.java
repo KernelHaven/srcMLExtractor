@@ -3,7 +3,7 @@ package net.ssehub.kernel_haven.srcml.model;
 import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.util.logic.Formula;
 
-public class CppElse extends SrcMlSyntaxElement {
+public class CppElse extends CppStatement {
     
     public CppElse(Formula presenceCondition) {
         super(presenceCondition);

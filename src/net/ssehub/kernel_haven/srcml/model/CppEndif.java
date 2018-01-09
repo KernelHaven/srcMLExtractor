@@ -3,7 +3,7 @@ package net.ssehub.kernel_haven.srcml.model;
 import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.util.logic.Formula;
 
-public class CppEndif extends SrcMlSyntaxElement {
+public class CppEndif extends CppStatement {
     
     public CppEndif(Formula presenceCondition) {
         super(presenceCondition);

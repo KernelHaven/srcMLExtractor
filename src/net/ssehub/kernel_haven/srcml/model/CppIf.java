@@ -4,7 +4,7 @@ import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.util.logic.Formula;
 import net.ssehub.kernel_haven.util.logic.True;
 
-public class CppIf extends SrcMlSyntaxElement {
+public class CppIf extends CppStatement {
     
     private Formula ifCondition = True.INSTANCE;
     
