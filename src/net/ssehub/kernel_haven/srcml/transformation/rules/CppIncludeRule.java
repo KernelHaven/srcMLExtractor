@@ -1,5 +1,6 @@
 package net.ssehub.kernel_haven.srcml.transformation.rules;
 
+import net.ssehub.kernel_haven.srcml.model.CppInclude;
 import net.ssehub.kernel_haven.srcml.model.OtherSyntaxElement;
 import net.ssehub.kernel_haven.srcml.model.SrcMlSyntaxElement;
 import net.ssehub.kernel_haven.srcml.transformation.OtherElementMatcher;
@@ -33,9 +34,12 @@ public class CppIncludeRule implements TransformationRule {
                 }
             }
 
-            // TODO: created specialized CppInclude syntax element?
-            element = new OtherSyntaxElement("Include: " + filename, element.getLineStart(), element.getLineEnd(),
-                    element.getSourceFile(), element.getCondition(), element.getPresenceCondition());
+            CppInclude include = new CppInclude(element.getLineStart(), element.getLineEnd(), element.getSourceFile(),
+                    element.getCondition(), element.getPresenceCondition());
+            include.setFilename(filename);
+            // TODO: differentiate between abosule and system includes?
+            
+            element = include;
         }
             
         
