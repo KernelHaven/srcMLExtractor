@@ -32,6 +32,7 @@ int main(int argc, char **argv) {
 }
 
 int b(int a) {
+	;
 	#ifdef A
 		return -a;
 	#else
