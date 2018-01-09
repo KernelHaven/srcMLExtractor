@@ -217,9 +217,19 @@ public class CppHandler {
                     logConditionsStack("Closing <cpp:endif>");
                     break;
                     
+                case "cpp:define":
+                case "cpp:undef":
+                case "cpp:include":
+                case "cpp:pragma":
+                case "cpp:error":
+                case "cpp:warning":
+                case "cpp:line":
+                case "cpp:empty":
+                    // known cpp directives that we can ignore
+                    break;
+                    
                 default:
                     LOGGER.logWarning("Unknown CPP directive: " + qName);
-//                    throw new IllegalArgumentException("Unknown CPP directive: " + qName);
                 }
             }
             
