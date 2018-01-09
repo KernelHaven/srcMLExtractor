@@ -28,6 +28,10 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
 
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+        if (qName.startsWith("cpp:") || cppHandler.inCpp()) {
+            cppHandler.startElement(qName, attributes);
+        }
+        
         OtherSyntaxElement element = new OtherSyntaxElement(qName, -1, -1, null, cppHandler.getCondition(),
                 cppHandler.getPc());
         
@@ -39,10 +43,6 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         
         elements.push(element);
         cppHandler.onNormalElementAdded();
-        
-        if (qName.startsWith("cpp:") || cppHandler.inCpp()) {
-            cppHandler.startElement(qName, attributes);
-        }
     }
     
     @Override

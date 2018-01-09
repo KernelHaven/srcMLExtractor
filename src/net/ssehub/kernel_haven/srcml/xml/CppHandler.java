@@ -53,6 +53,8 @@ public class CppHandler {
     
     private static final boolean LOG_EXPR_STRING = false;
     
+    private static final boolean LOG_CONDITIONS_STACK = false;
+    
     /**
      * The stack of conditions. A new element has the immediate condition of peek(). A new element
      * (that is not a CPP directive) push()es true. A closing element pop()s.
@@ -91,12 +93,31 @@ public class CppHandler {
     private boolean inCppExprCall;
     
     /**
+     * The previous condition if we encounter a node that will override it (&ltcpp:elif&gt;, &ltcpp:else&gt;,
+     * &ltcpp:endif&gt;).
+     */
+    private Formula oldCondition;
+    
+    /**
      * Creates a new {@link CppHandler}.
      */
     public CppHandler() {
         conditions = new Stack<>();
         conditions.push(True.INSTANCE);
         inCppExprNodes = new Stack<>();
+        
+        logConditionsStack("Init");
+    }
+    
+    private void logConditionsStack(String where) {
+        if (LOG_CONDITIONS_STACK) {
+            StringBuilder line = new StringBuilder(where).append(": ");
+            for (Formula condition : conditions) {
+                line.append(condition.toString()).append(", ");
+            }
+            line.replace(line.length() - 2, line.length(), ""); // clear trailing ", "
+            System.out.println(line);
+        }
     }
     
     /**
@@ -126,18 +147,30 @@ public class CppHandler {
                 inCppExprString = new StringBuilder();
                 cppState = State.IN_CPP_EXPR;
                 
-//            } else {
-//                LOGGER.logWarning("Don't know what to do with opening " + qName + " inside " + inCpp);
             } else if (inCpp.equals("cpp:ifdef") && qName.equals("name")) {
                 inCppExprString = new StringBuilder();
-                cppState = State.IN_IFDEF;                
+                cppState = State.IN_IFDEF;
+                
             } else if (inCpp.equals("cpp:ifndef") && qName.equals("name")) {
                 inCppExprString = new StringBuilder();
                 cppState = State.IN_IFNDEF;                
             }
             
         } else if (qName.startsWith("cpp:")) {
+            // we enter a new <cpp:> node
             inCpp = qName;
+            
+            // when we encounter a node that will override it, clear the current immediate condition
+            switch (qName) {
+            case "cpp:else":
+            case "cpp:elif":
+            case "cpp:endif":
+                oldCondition = conditions.pop();
+                conditions.push(True.INSTANCE);
+                logConditionsStack("Opening cpp:node that clears");
+                break;
+            }
+            
         } else {
             throw new IllegalStateException("Got a starting element, but we are not inside a <cpp:> element");
         }
@@ -160,25 +193,28 @@ public class CppHandler {
                 // we reached the end of the CPP directive. modify the current condition accordingly
                 switch (qName) {
                 case "cpp:if":
+                case "cpp:ifdef":
+                case "cpp:ifndef":
                     // a normal if just replaces the current condition
                     conditions.push(cppExpr);
-                    break;
-                case "cpp:ifdef":
-                    // falls through
-                case "cpp:ifndef":
-                    conditions.push(cppExpr);
+                    logConditionsStack("Closing <cpp:if>");
                     break;
                 case "cpp:else":
                     // an else negates the previous condition
-                    conditions.push(new Negation(conditions.pop()));
+                    conditions.pop();
+                    conditions.push(new Negation(oldCondition));
+                    logConditionsStack("Closing <cpp:else>");
                     break;
                 case "cpp:elif":
                     // an elif negates the previous and appends the parsed condition
-                    conditions.push(new Conjunction(new Negation(conditions.pop()), cppExpr));
+                    conditions.pop();
+                    conditions.push(new Conjunction(new Negation(oldCondition), cppExpr));
+                    logConditionsStack("Closing <cpp:elif>");
                     break;
                 case "cpp:endif":
                     // an endif clears the condition
                     conditions.pop();
+                    logConditionsStack("Closing <cpp:endif>");
                     break;
                     
                 default:
@@ -391,6 +427,7 @@ public class CppHandler {
      */
     public void onNormalElementAdded() {
         conditions.push(True.INSTANCE);
+        logConditionsStack("onNormalElementAdded");
     }
 
     /**
@@ -399,6 +436,7 @@ public class CppHandler {
      */
     public void onNormalElementRemoved() {
         conditions.pop();
+        logConditionsStack("onNormalElementRemoved");
     }
     
 }
