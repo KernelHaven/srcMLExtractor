@@ -73,10 +73,12 @@ public class Function extends SrcMlSyntaxElement {
     protected String elementToString() {
         StringBuilder paramString = new StringBuilder("(");
         
-        for (String param : parameters) {
-            paramString.append(param).append(", ");
+        if (!parameters.isEmpty()) {
+            for (String param : parameters) {
+                paramString.append(param).append(", ");
+            }
+            paramString.replace(paramString.length() - 2, paramString.length(), ""); // remove trailing ", "
         }
-        paramString.replace(paramString.length() - 2, paramString.length(), ""); // remove trailing ", "
         paramString.append(")");
         
         return "Function " + name + paramString.toString();
