@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.ssehub.kernel_haven.code_model.CodeElement;
+import net.ssehub.kernel_haven.srcml.model.CppIf;
 import net.ssehub.kernel_haven.srcml.model.OtherSyntaxElement;
 import net.ssehub.kernel_haven.srcml.model.SrcMlSyntaxElement;
 import net.ssehub.kernel_haven.srcml.transformation.rules.CppIfRule;
@@ -19,22 +20,27 @@ import net.ssehub.kernel_haven.srcml.transformation.rules.TranslationUnitRule;
  */
 public class RuleTransformationEngine {
 
-    private List<TransformationRule> rules;
+    private List<TransformationRule> rulesPass0;
+    
+    private List<TransformationRule> rulesPass1;
     
     /**
      * Creates this engine with the default set of rules.
      */
     public RuleTransformationEngine() {
-        rules = new ArrayList<>();
+        rulesPass0 = new ArrayList<>();
+        rulesPass1 = new ArrayList<>();
         
         // TODO add rules here
-        rules.add(new CppIfRule());
-        rules.add(new CppIncludeRule());
+        rulesPass0.add(new CppIfRule());
         
-        rules.add(new TranslationUnitRule());
-        rules.add(new FunctionRule());
         
-        rules.add(new EmptyStatementRule());
+        rulesPass1.add(new CppIncludeRule());
+        
+        rulesPass1.add(new TranslationUnitRule());
+        rulesPass1.add(new FunctionRule());
+        
+        rulesPass1.add(new EmptyStatementRule());
     }
     
     /**
@@ -45,6 +51,10 @@ public class RuleTransformationEngine {
      * @return The transformed hierarchy.
      */
     public SrcMlSyntaxElement transform(SrcMlSyntaxElement element) {
+        return transformImpl(transformImpl(element, rulesPass0), rulesPass1);
+    }
+    
+    private SrcMlSyntaxElement transformImpl(SrcMlSyntaxElement element, List<TransformationRule> rules) {
         for (TransformationRule rule : rules) {
             element = rule.transform(element);
         }
@@ -52,7 +62,7 @@ public class RuleTransformationEngine {
         for (int i = 0; i < element.getNestedElementCount(); i++) {
             CodeElement child = element.getNestedElement(i);
             if (child instanceof SrcMlSyntaxElement) {
-                child = transform((SrcMlSyntaxElement) child);
+                child = transformImpl((SrcMlSyntaxElement) child, rules);
                 element.setNestedElement(i, (SrcMlSyntaxElement) child);
             }
         }
@@ -70,6 +80,27 @@ public class RuleTransformationEngine {
      */
     public static boolean isOtherSyntaxElementWithName(CodeElement element, String expectedName) {
         return element instanceof OtherSyntaxElement && ((OtherSyntaxElement) element).getName().equals(expectedName);
+    }
+    
+    /**
+     * Recursively checks whether there are any {@link CppIf} elements nested inside this element.
+     * 
+     * @param element The element to search in.
+     * 
+     * @return Whether there was a {@link CppIf} inside the given element or not.
+     */
+    public static boolean containsCppIf(CodeElement element) {
+        if (element instanceof CppIf) {
+            return true;
+        }
+        
+        for (int i = 0; i < element.getNestedElementCount(); i++) {
+            if (containsCppIf(element.getNestedElement(i))) {
+                return true;
+            }
+        }
+        
+        return false;
     }
     
 }

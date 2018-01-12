@@ -31,11 +31,16 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-int b(int a) {
+int b(
+int a
+#ifndef A
+	, int b
+#endif
+) {
 	;
 	#ifdef A
 		return -a;
 	#else
-		return 0;
+		return b;
 	#endif
 }

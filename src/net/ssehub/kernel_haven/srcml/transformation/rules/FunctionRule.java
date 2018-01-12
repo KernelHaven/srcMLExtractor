@@ -1,5 +1,7 @@
 package net.ssehub.kernel_haven.srcml.transformation.rules;
 
+import static net.ssehub.kernel_haven.srcml.transformation.RuleTransformationEngine.containsCppIf;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -10,6 +12,7 @@ import net.ssehub.kernel_haven.srcml.model.OtherSyntaxElement;
 import net.ssehub.kernel_haven.srcml.model.SrcMlSyntaxElement;
 import net.ssehub.kernel_haven.srcml.transformation.OtherElementMatcher;
 import net.ssehub.kernel_haven.srcml.transformation.TransformationRule;
+import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.logic.True;
 
 public class FunctionRule implements TransformationRule {
@@ -32,6 +35,13 @@ public class FunctionRule implements TransformationRule {
     public SrcMlSyntaxElement transform(SrcMlSyntaxElement element) {
         
         if (MATCHER.matches(element)) {
+            
+            if (containsCppIf(element.getNestedElement(0)) || containsCppIf(element.getNestedElement(1)) ||
+                    containsCppIf(element.getNestedElement(2))) {
+                Logger.get().logWarning("Found a CppIf inside name, type or parameter list of function",
+                        "Not transforming this function (TODO)"); // TODO
+                return element;
+            }
             
             OtherSyntaxElement nameElement = (OtherSyntaxElement) element.getNestedElement(1).getNestedElement(0);
             String name = nameElement.getName().substring("text:".length());
