@@ -167,7 +167,7 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
         // elif defined(B)
         assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!A && B", elements.get(1));
         // else
-        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!(!A && B)", elements.get(2));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!A && !B", elements.get(2));
     }
     
     /**
@@ -219,8 +219,8 @@ public class CPPTest extends AbstractSrcMLExtractorTest {
         // elif !defined(C)
         assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!(A && B) && !C", elements.get(2));
         // else
-        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!(!(A && B) && !C)", "!(!(A && B) && !C)",
-            elements.get(3));
+        assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "!(A && B) && !!C",
+                "!(A && B) && !!C", elements.get(3));
         assertStatement(SyntaxElementTypes.EMPTY_STATEMENT, "1", "1", elements.get(4));
     }
     

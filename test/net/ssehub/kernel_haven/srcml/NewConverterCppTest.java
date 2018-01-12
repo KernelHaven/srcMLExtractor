@@ -234,7 +234,7 @@ public class NewConverterCppTest {
         
         assertStatement(EmptyStatement.class, "A", "A", ifElem.getThenElement(0));
         assertStatement(EmptyStatement.class, "!A && B", "!A && B", ifElem.getElifElement(0, 0));
-        assertStatement(EmptyStatement.class, "!(!A && B)", "!(!A && B)", ifElem.getElseElement(0));
+        assertStatement(EmptyStatement.class, "!A && !B", "!A && !B", ifElem.getElseElement(0));
     }
     
     /**
@@ -293,7 +293,8 @@ public class NewConverterCppTest {
         
         assertStatement(EmptyStatement.class, "A && B", "A && B", ifElem.getThenElement(0));
         assertStatement(EmptyStatement.class, "!(A && B) && !C", "!(A && B) && !C", ifElem.getElifElement(0, 0));
-        assertStatement(EmptyStatement.class, "!(!(A && B) && !C)", "!(!(A && B) && !C)", ifElem.getElseElement(0));
+        assertStatement(EmptyStatement.class, "!(A && B) && !!C", "!(A && B) && !!C",
+                ifElem.getElseElement(0));
     }
     
     /**

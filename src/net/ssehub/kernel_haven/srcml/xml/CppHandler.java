@@ -1,5 +1,7 @@
 package net.ssehub.kernel_haven.srcml.xml;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Stack;
 
 import org.xml.sax.Attributes;
@@ -93,10 +95,12 @@ public class CppHandler {
     private boolean inCppExprCall;
     
     /**
-     * The previous condition if we encounter a node that will override it (&ltcpp:elif&gt;, &ltcpp:else&gt;,
-     * &ltcpp:endif&gt;).
+     * Stores all previous conditions inside an #if structure. This is needed, since #elif and #else need to negate
+     * all previous formulas.
+     * </p>
+     * This is a stack because #if structures can be nested. Each opening #if pushes a new list, each #endif pops.
      */
-    private Formula oldCondition;
+    private Stack<List<Formula>> previousInSameIf;
     
     /**
      * Creates a new {@link CppHandler}.
@@ -105,6 +109,7 @@ public class CppHandler {
         conditions = new Stack<>();
         conditions.push(True.INSTANCE);
         inCppExprNodes = new Stack<>();
+        previousInSameIf = new Stack<>();
         
         logConditionsStack("Init");
     }
@@ -165,7 +170,7 @@ public class CppHandler {
             case "cpp:else":
             case "cpp:elif":
             case "cpp:endif":
-                oldCondition = conditions.pop();
+                conditions.pop();
                 logConditionsStack("Opening cpp:node that clears");
                 break;
             }
@@ -193,28 +198,50 @@ public class CppHandler {
                 switch (qName) {
                 case "cpp:if":
                 case "cpp:ifdef":
-                case "cpp:ifndef":
+                case "cpp:ifndef": {
                     // a normal if just replaces the current condition
                     conditions.push(cppExpr);
+                    previousInSameIf.push(new LinkedList<>());
+                    previousInSameIf.peek().add(cppExpr);
+                    
                     logConditionsStack("Closing <cpp:if>");
-                    break;
-                case "cpp:else":
+                } break;
+                case "cpp:else": {
                     // an else negates the previous condition
                     // conditions.pop() already called on opening node
-                    conditions.push(new Negation(oldCondition));
+                    
+                    Formula negatedPrevious = new Negation(previousInSameIf.peek().get(0));
+                    for (int i = 1; i < previousInSameIf.peek().size(); i++) {
+                        negatedPrevious = new Conjunction(negatedPrevious,
+                                new Negation(previousInSameIf.peek().get(i)));
+                    }
+                    
+                    conditions.push(negatedPrevious);
+                    
                     logConditionsStack("Closing <cpp:else>");
-                    break;
-                case "cpp:elif":
+                } break;
+                case "cpp:elif": {
                     // an elif negates the previous and appends the parsed condition
                     // conditions.pop() already called on opening node
-                    conditions.push(new Conjunction(new Negation(oldCondition), cppExpr));
+                    
+                    Formula negatedPrevious = new Negation(previousInSameIf.peek().get(0));
+                    for (int i = 1; i < previousInSameIf.peek().size(); i++) {
+                        negatedPrevious = new Conjunction(negatedPrevious,
+                                new Negation(previousInSameIf.peek().get(i)));
+                    }
+                    
+                    conditions.push(new Conjunction(negatedPrevious, cppExpr));
+                    
+                    previousInSameIf.peek().add(cppExpr);
+                    
                     logConditionsStack("Closing <cpp:elif>");
-                    break;
-                case "cpp:endif":
+                } break;
+                case "cpp:endif": {
                     // an endif clears the condition
                     // conditions.pop() already called on opening node
+                    previousInSameIf.pop();
                     logConditionsStack("Closing <cpp:endif>");
-                    break;
+                } break;
                     
                 case "cpp:define":
                 case "cpp:undef":
