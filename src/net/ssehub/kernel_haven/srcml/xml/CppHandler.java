@@ -166,7 +166,6 @@ public class CppHandler {
             case "cpp:elif":
             case "cpp:endif":
                 oldCondition = conditions.pop();
-                conditions.push(True.INSTANCE);
                 logConditionsStack("Opening cpp:node that clears");
                 break;
             }
@@ -201,19 +200,19 @@ public class CppHandler {
                     break;
                 case "cpp:else":
                     // an else negates the previous condition
-                    conditions.pop();
+                    // conditions.pop() already called on opening node
                     conditions.push(new Negation(oldCondition));
                     logConditionsStack("Closing <cpp:else>");
                     break;
                 case "cpp:elif":
                     // an elif negates the previous and appends the parsed condition
-                    conditions.pop();
+                    // conditions.pop() already called on opening node
                     conditions.push(new Conjunction(new Negation(oldCondition), cppExpr));
                     logConditionsStack("Closing <cpp:elif>");
                     break;
                 case "cpp:endif":
                     // an endif clears the condition
-                    conditions.pop();
+                    // conditions.pop() already called on opening node
                     logConditionsStack("Closing <cpp:endif>");
                     break;
                     
