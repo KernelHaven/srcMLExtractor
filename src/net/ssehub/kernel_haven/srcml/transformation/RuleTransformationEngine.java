@@ -6,9 +6,6 @@ import java.util.List;
 import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.srcml.model.OtherSyntaxElement;
 import net.ssehub.kernel_haven.srcml.model.SrcMlSyntaxElement;
-import net.ssehub.kernel_haven.srcml.transformation.rules.CppElifRule;
-import net.ssehub.kernel_haven.srcml.transformation.rules.CppElseRule;
-import net.ssehub.kernel_haven.srcml.transformation.rules.CppEndifRule;
 import net.ssehub.kernel_haven.srcml.transformation.rules.CppIfRule;
 import net.ssehub.kernel_haven.srcml.transformation.rules.CppIncludeRule;
 import net.ssehub.kernel_haven.srcml.transformation.rules.EmptyStatementRule;
@@ -31,17 +28,13 @@ public class RuleTransformationEngine {
         rules = new ArrayList<>();
         
         // TODO add rules here
+        rules.add(new CppIfRule());
+        rules.add(new CppIncludeRule());
+        
         rules.add(new TranslationUnitRule());
         rules.add(new FunctionRule());
         
         rules.add(new EmptyStatementRule());
-        
-        rules.add(new CppIncludeRule());
-        
-        rules.add(new CppIfRule());
-        rules.add(new CppElifRule());
-        rules.add(new CppElseRule());
-        rules.add(new CppEndifRule());
     }
     
     /**

@@ -1,6 +1,6 @@
 package net.ssehub.kernel_haven.srcml.model;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import net.ssehub.kernel_haven.code_model.CodeElement;
@@ -13,13 +13,13 @@ public class CompoundStatement extends Statement {
     public CompoundStatement(Formula presenceCondition) {
         super(presenceCondition);
         
-        elements = new ArrayList<>();
+        elements = new LinkedList<>();
     }
     
     public CompoundStatement(int lineStart, int lineEnd, java.io.File sourceFile, Formula condition, Formula presenceCondition) {
         super(lineStart, lineEnd, sourceFile, condition, presenceCondition);
         
-        elements = new ArrayList<>();
+        elements = new LinkedList<>();
     }
 
     @Override
@@ -39,7 +39,11 @@ public class CompoundStatement extends Statement {
     
     @Override
     public void setNestedElement(int index, SrcMlSyntaxElement element) {
-        elements.set(index, element);
+        if (element == null) {
+            elements.remove(index);
+        } else {
+            elements.set(index, element);
+        }
     }
 
     @Override

@@ -39,7 +39,11 @@ public class File extends SrcMlSyntaxElement {
     
     @Override
     public void setNestedElement(int index, SrcMlSyntaxElement element) {
-        elements.set(index, element);
+        if (element == null) {
+            elements.remove(index);
+        } else {
+            elements.set(index, element);
+        }
     }
 
     @Override

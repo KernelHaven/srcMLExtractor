@@ -58,7 +58,11 @@ public class OtherSyntaxElement extends SrcMlSyntaxElement {
     
     @Override
     public void setNestedElement(int index, SrcMlSyntaxElement element) {
-        nested.set(index, element);
+        if (element == null) {
+            nested.remove(index);
+        } else {
+            nested.set(index, element);
+        }
     }
 
     /**

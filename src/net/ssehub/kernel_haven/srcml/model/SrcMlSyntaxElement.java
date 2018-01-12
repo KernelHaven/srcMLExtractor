@@ -57,6 +57,12 @@ public abstract class SrcMlSyntaxElement implements CodeElement {
      */
     protected abstract void addNestedElement(SrcMlSyntaxElement element);
     
+    /**
+     * Changes the child nested in this element.
+     * 
+     * @param index The child to replace.
+     * @param element The new child. <code>null</code> to remove this child.
+     */
     public abstract void setNestedElement(int index, SrcMlSyntaxElement element);
     
     @Override

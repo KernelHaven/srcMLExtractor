@@ -73,7 +73,7 @@ public class Function extends SrcMlSyntaxElement {
         if (index != 0) {
             throw new IndexOutOfBoundsException();
         }
-        if (!(element instanceof Statement)) {
+        if (element == null || !(element instanceof Statement)) {
             throw new IllegalArgumentException();
         }
         body = (Statement) element;
