@@ -10,6 +10,7 @@ import net.ssehub.kernel_haven.srcml.model.SrcMlSyntaxElement;
 import net.ssehub.kernel_haven.srcml.transformation.rules.CppIfRule;
 import net.ssehub.kernel_haven.srcml.transformation.rules.CppIncludeRule;
 import net.ssehub.kernel_haven.srcml.transformation.rules.EmptyStatementRule;
+import net.ssehub.kernel_haven.srcml.transformation.rules.ExpressionStatementRule;
 import net.ssehub.kernel_haven.srcml.transformation.rules.FunctionRule;
 import net.ssehub.kernel_haven.srcml.transformation.rules.ReturnRule;
 import net.ssehub.kernel_haven.srcml.transformation.rules.TranslationUnitRule;
@@ -43,6 +44,7 @@ public class RuleTransformationEngine {
         
         rulesPass1.add(new EmptyStatementRule());
         rulesPass1.add(new ReturnRule());
+        rulesPass1.add(new ExpressionStatementRule());
     }
     
     /**
