@@ -3,7 +3,6 @@ package net.ssehub.kernel_haven.srcml.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.util.logic.Formula;
 import net.ssehub.kernel_haven.util.logic.True;
 
@@ -56,7 +55,7 @@ public class Function extends SrcMlSyntaxElement {
     }
 
     @Override
-    public CodeElement getNestedElement(int index) throws IndexOutOfBoundsException {
+    public SrcMlSyntaxElement getNestedElement(int index) throws IndexOutOfBoundsException {
         if (index != 0) {
             throw new IndexOutOfBoundsException();
         }

@@ -17,8 +17,7 @@ public class ExpressionStatementRule implements TransformationRule {
         if (MATCHER.matches(element)) {
             
             element = new ExpressionStatement(element.getLineStart(), element.getLineEnd(), element.getSourceFile(),
-                    element.getCondition(), element.getPresenceCondition(),
-                    (SrcMlSyntaxElement) element.getNestedElement(0));
+                    element.getCondition(), element.getPresenceCondition(), element.getNestedElement(0));
             
         }
         

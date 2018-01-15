@@ -91,7 +91,7 @@ public class CppIfRule implements TransformationRule {
         }
         
         for (int i = ifPos + 1; i < endifPos; i++) {
-            SrcMlSyntaxElement child = (SrcMlSyntaxElement) parent.getNestedElement(i);
+            SrcMlSyntaxElement child = parent.getNestedElement(i);
             
             boolean found = false;
             boolean matchesCppNode = false;

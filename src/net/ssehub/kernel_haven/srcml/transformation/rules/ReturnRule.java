@@ -22,7 +22,7 @@ public class ReturnRule implements TransformationRule {
                 element = ret;
                 
             } else if (element.getNestedElementCount() == 3 && EXPR.matches(element.getNestedElement(1))) {
-                ret.setNestedElement(0, (SrcMlSyntaxElement) element.getNestedElement(1));
+                ret.setNestedElement(0, element.getNestedElement(1));
                 element = ret;
                 
             }

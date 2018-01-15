@@ -1,6 +1,5 @@
 package net.ssehub.kernel_haven.srcml.model;
 
-import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.util.logic.Formula;
 
 public class EmptyStatement extends Statement {
@@ -19,7 +18,7 @@ public class EmptyStatement extends Statement {
     }
 
     @Override
-    public CodeElement getNestedElement(int index) throws IndexOutOfBoundsException {
+    public SrcMlSyntaxElement getNestedElement(int index) throws IndexOutOfBoundsException {
         throw new IndexOutOfBoundsException();
     }
 

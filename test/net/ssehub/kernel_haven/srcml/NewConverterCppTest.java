@@ -404,7 +404,7 @@ public class NewConverterCppTest {
             // Extract the relevant, top level elements
             SrcMlSyntaxElement translationUnit = (SrcMlSyntaxElement) element;
             for (int i = 0; i < translationUnit.getNestedElementCount(); i++) {
-                result.add((SrcMlSyntaxElement) translationUnit.getNestedElement(i));                
+                result.add(translationUnit.getNestedElement(i));                
             }
         }
         

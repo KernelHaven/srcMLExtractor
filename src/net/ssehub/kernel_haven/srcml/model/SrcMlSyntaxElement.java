@@ -66,6 +66,9 @@ public abstract class SrcMlSyntaxElement implements CodeElement {
     public abstract void setNestedElement(int index, SrcMlSyntaxElement element);
     
     @Override
+    public abstract SrcMlSyntaxElement getNestedElement(int index) throws IndexOutOfBoundsException;
+    
+    @Override
     public int getLineStart() {
         return lineStart;
     }
@@ -126,7 +129,7 @@ public abstract class SrcMlSyntaxElement implements CodeElement {
         indentation += '\t';
         
         for (int i = 0; i < getNestedElementCount(); i++) {
-            result.append(((SrcMlSyntaxElement) getNestedElement(i)).toString(indentation));
+            result.append(getNestedElement(i).toString(indentation));
         }
         
         return result.toString();

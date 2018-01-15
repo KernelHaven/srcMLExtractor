@@ -2,7 +2,6 @@ package net.ssehub.kernel_haven.srcml.model;
 
 import java.io.File;
 
-import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.util.logic.Formula;
 
 public class ReturnStatement extends Statement {
@@ -23,7 +22,7 @@ public class ReturnStatement extends Statement {
     }
 
     @Override
-    public CodeElement getNestedElement(int index) throws IndexOutOfBoundsException {
+    public SrcMlSyntaxElement getNestedElement(int index) throws IndexOutOfBoundsException {
         if (expression == null || index != 0) {
             throw new IndexOutOfBoundsException();
         }
