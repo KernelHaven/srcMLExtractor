@@ -48,10 +48,8 @@ class Preparation extends PreparationTool {
             throw new SetUpException("Could not determine appropriate executable for srcML");
         }
         
-        if (null != execPath) {
-            init(resourceFolder, execPath, "srcML.zip");
-            exec = new File(resourceFolder, execPath);
-        }
+        init(resourceFolder, execPath, "srcML.zip");
+        exec = new File(resourceFolder, execPath);
     }
 
     /**
