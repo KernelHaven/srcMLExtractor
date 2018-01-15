@@ -31,16 +31,9 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-int b(
-int a
-#ifndef A
-	, int b
-#endif
-) {
-	;
-	#ifdef A
-		return -a;
-	#else
-		return b;
-	#endif
+int b(int a, int b) {
+	return;
+	return -1;
+	
+	return 13 * a & (4 % b);
 }
