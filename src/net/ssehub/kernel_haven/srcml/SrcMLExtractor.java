@@ -15,6 +15,7 @@ import net.ssehub.kernel_haven.SetUpException;
 import net.ssehub.kernel_haven.code_model.AbstractCodeModelExtractor;
 import net.ssehub.kernel_haven.code_model.SourceFile;
 import net.ssehub.kernel_haven.config.Configuration;
+import net.ssehub.kernel_haven.config.DefaultSettings;
 import net.ssehub.kernel_haven.srcml.transformation.XmlToSyntaxElementConverter;
 import net.ssehub.kernel_haven.srcml.xml.AbstractAstConverter;
 import net.ssehub.kernel_haven.srcml.xml.CXmlHandler;
@@ -46,26 +47,32 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
     
     public static boolean USE_NEW_CONVERTER = false;
     
+    private File sourceTree;
+    
     private File srcExec;
 
     @Override
     protected void init(Configuration config) throws SetUpException {
         Preparation preparator = new Preparation(config);
         srcExec = preparator.prepareExec();
+        sourceTree = config.getValue(DefaultSettings.SOURCE_TREE);
     }
 
     @Override
     protected SourceFile runOnFile(File target) throws ExtractorException {
-        if (!target.exists()) {
+        File absoulteTarget = new File(sourceTree, target.getPath());
+        if (!absoulteTarget.exists()) {
             throw new ExtractorException("srcML could not parse specified file, which does not exist: "
-                + target.getAbsolutePath());
+                    + absoulteTarget.getAbsolutePath());
         }
+        
         try {
             PipedOutputStream out = new PipedOutputStream();
             PipedInputStream stdout = new PipedInputStream(out);
             ByteArrayOutputStream stderr = new ByteArrayOutputStream();
             
-            ProcessBuilder builder = new ProcessBuilder(srcExec.getAbsolutePath(), target.getAbsolutePath());
+            ProcessBuilder builder = new ProcessBuilder(srcExec.getAbsolutePath(), absoulteTarget.getAbsolutePath());
+            
 //            builder.directory(srcExec.getParentFile());
             // set LD_LIBRARY_PATH to ../lib
             // only needed for linux, but does no harm on windows.

@@ -375,7 +375,7 @@ public class NewConverterCppTest {
             
             SrcMLExtractor extractor = new SrcMLExtractor();
             extractor.init(config);
-            result = extractor.runOnFile(srcFile);
+            result = extractor.runOnFile(new File(file));
         } catch (SetUpException | ExtractorException exc) {
             Assert.fail("Failed to initialize SrcMLExtractor: " + exc.getMessage());
         }

@@ -131,14 +131,14 @@ public class AbstractSrcMLExtractorTest {
         try {
             Properties props = new Properties();
             props.setProperty("resource_dir", RESOURCE_DIR.getAbsolutePath());
-            props.setProperty("source_tree", "testdata/");
+            props.setProperty("source_tree", AllTests.TESTDATA.getPath());
             props.setProperty("code.extractor.files", file);
             
             TestConfiguration config = new TestConfiguration(props);
             
             SrcMLExtractor extractor = new SrcMLExtractor();
             extractor.init(config);
-            result = extractor.runOnFile(srcFile);
+            result = extractor.runOnFile(new File(file));
         } catch (SetUpException | ExtractorException exc) {
             Assert.fail("Failed to initialize SrcMLExtractor: " + exc.getMessage());
         }
