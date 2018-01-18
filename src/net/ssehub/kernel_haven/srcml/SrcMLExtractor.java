@@ -56,6 +56,10 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
 
     @Override
     protected SourceFile runOnFile(File target) throws ExtractorException {
+        if (!target.exists()) {
+            throw new ExtractorException("srcML could not parse specified file, which does not exist: "
+                + target.getAbsolutePath());
+        }
         try {
             PipedOutputStream out = new PipedOutputStream();
             PipedInputStream stdout = new PipedInputStream(out);
