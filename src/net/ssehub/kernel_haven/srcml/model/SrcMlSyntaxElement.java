@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 
 import net.ssehub.kernel_haven.code_model.CodeElement;
+import net.ssehub.kernel_haven.code_model.SyntaxCodeElement;
 import net.ssehub.kernel_haven.code_model.SyntaxElement;
 import net.ssehub.kernel_haven.util.logic.Formula;
 
@@ -15,7 +16,7 @@ import net.ssehub.kernel_haven.util.logic.Formula;
  * 
  * @author Adam
  */
-public abstract class SrcMlSyntaxElement implements CodeElement {
+public abstract class SrcMlSyntaxElement implements SyntaxCodeElement {
 
     private int lineStart;
     
