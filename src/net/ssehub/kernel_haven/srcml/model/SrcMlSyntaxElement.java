@@ -1,11 +1,15 @@
 package net.ssehub.kernel_haven.srcml.model;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.util.List;
 
 import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.code_model.SyntaxElement;
+import net.ssehub.kernel_haven.srcml.model.annotations.BranchingElement;
+import net.ssehub.kernel_haven.srcml.model.annotations.ControlFlowElement;
 import net.ssehub.kernel_haven.util.logic.Formula;
+import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
  * Super-class for classes that are used to represent the code model created by srcML.
@@ -14,6 +18,7 @@ import net.ssehub.kernel_haven.util.logic.Formula;
  * </p>
  * 
  * @author Adam
+ * @author Sascha El-Sharkawy
  */
 public abstract class SrcMlSyntaxElement implements CodeElement {
 
@@ -39,6 +44,49 @@ public abstract class SrcMlSyntaxElement implements CodeElement {
         this.sourceFile = sourceFile;
         this.condition = condition;
         this.presenceCondition = presenceCondition;
+    }
+    
+    /**
+     * Test if the class of the object or any super class is annotated with the specified annotation.
+     * @param annotation The annotation to test (should be one of this model). Must be an annotation to mark <b>classes
+     *     </b>.
+     * @return <tt>true</tt> if the class of the object or one of its parent classes are annotated with the specified
+     *     annotation, <tt>false</tt> otherwise.
+     */
+    protected final boolean hasAnnotation(@NonNull Class<? extends Annotation> annotation) {
+        boolean hasAnnotation = false;
+        Class<?> clazzToTest = this.getClass();
+        
+        while (!hasAnnotation && null != clazzToTest) {
+            hasAnnotation = clazzToTest.isAnnotationPresent(annotation);
+            
+            if (!hasAnnotation) {
+                // Will return null if clazzToTest is already Object.class
+                clazzToTest = clazzToTest.getSuperclass();
+            }
+        }
+        
+        return hasAnnotation;
+    }
+    
+    /**
+     * Specifies whether this element is a control flow element: These are control structures and loops, which can
+     * contain further elements and, thus, raise the complexity.
+     * @return <tt>true</tt> if this element is a control flow element, <tt>false</tt> otherwise.
+     * @see {@link ControlFlowElement}
+     */
+    public final boolean isControlFlowElement() {
+        return this.getClass().isAnnotationPresent(ControlFlowElement.class);
+    }
+    
+    /**
+     * Specifies whether this element is a branching element: These are elements, which add a new branch to the control
+     *     flow graph. 
+     * @return <tt>true</tt> if this element is a control flow element, <tt>false</tt> otherwise.
+     * @see {@link BranchingElement}
+     */
+    public final boolean isBranchingElement() {
+        return this.getClass().isAnnotationPresent(BranchingElement.class);
     }
 
     @Override
