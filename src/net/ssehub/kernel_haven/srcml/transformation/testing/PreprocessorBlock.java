@@ -24,6 +24,10 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
         return nestedElements.iterator();
     }
     
+    public void add(ITranslationUnit child) {
+        nestedElements.add(child);
+    }
+    
     @Override
     public String toString() {
         StringBuffer result = new StringBuffer();

@@ -40,7 +40,7 @@ public class PreprocessorTranslation implements ITransformationRule {
                 // if, ifdef, ifndef
                 createIf(parent, oldUnit);
             } else if (oldUnit.getType().startsWith("cpp:el")) {
-                // else, elsif
+                // else, elif
                 createElse(parent, oldUnit);
             } else if (oldUnit.getType().startsWith("cpp:endif")) {
                 // endif

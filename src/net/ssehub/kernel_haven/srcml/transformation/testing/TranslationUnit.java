@@ -7,7 +7,7 @@ import java.util.List;
 
 public class TranslationUnit implements ITranslationUnit {
     private String type;
-    private List<Object> elements = new ArrayList<>();
+    //private List<Object> elements = new ArrayList<>();
     private List<String> tokens = new ArrayList<>();
     private List<ITranslationUnit> nestedElements = new ArrayList<>();
     
@@ -17,7 +17,8 @@ public class TranslationUnit implements ITranslationUnit {
     
     public void addToken(CodeUnit token) {
         tokens.add(token.getCode());
-        elements.add(token);
+//        elements.add(token);
+        nestedElements.add(token);
     }
     
     public List<String> getTokenList() {
@@ -25,7 +26,7 @@ public class TranslationUnit implements ITranslationUnit {
     }
     
     public void addTranslationUnit(TranslationUnit unit) {
-        elements.add(unit);
+//        elements.add(unit);
         nestedElements.add(unit);
     }
     
@@ -40,7 +41,7 @@ public class TranslationUnit implements ITranslationUnit {
         result.append(type.toUpperCase());
         result.append(":");
         boolean lastWasUnit = false;
-        for (Object elem : elements) {
+        for (Object elem : nestedElements) {
             if (elem instanceof CodeUnit) {
                 if (lastWasUnit) {
                     result.append("\n");
@@ -68,16 +69,16 @@ public class TranslationUnit implements ITranslationUnit {
         if (index != -1) {
             nestedElements.set(index, newUnit);
         }
-        index = elements.indexOf(oldUnit);
-        if (index != -1) {
-            elements.set(index, newUnit);
-        }
+//        index = elements.indexOf(oldUnit);
+//        if (index != -1) {
+//            elements.set(index, newUnit);
+//        }
     }
     
     @Override
     public void removeNested(ITranslationUnit oldUnit) {
         nestedElements.remove(oldUnit);
-        elements.remove(oldUnit);
+//        elements.remove(oldUnit);
     }
 
 }

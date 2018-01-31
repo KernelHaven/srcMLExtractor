@@ -1,5 +1,6 @@
 package net.ssehub.kernel_haven.srcml.transformation.testing;
 
+import java.util.Collections;
 import java.util.Iterator;
 
 public class PreprocessorEndIf implements ITranslationUnit {
@@ -9,8 +10,7 @@ public class PreprocessorEndIf implements ITranslationUnit {
 
     @Override
     public Iterator<ITranslationUnit> iterator() {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.emptyIterator();
     }
 
     @Override
