@@ -65,22 +65,26 @@ public class PreprocessorBlockStructure implements ITransformationRule {
             // Stop collection
             parentblocks.removeFirst();
             
-            // And mark endif block for removal (is no longer needed)
-            NestedElement element = new NestedElement();
-            element.parent = parent;
-            element.child = child;
-            getEncapsulatedElements(parentblocks.peekFirst()).add(element);
+            markForReording(parent, child);
         } else {
-            NestedElement element = new NestedElement();
-            element.parent = parent;
-            element.child = child;
-            getEncapsulatedElements(parentblocks.peekFirst()).add(element);
+            markForReording(parent, child);
         }
        
         for (ITranslationUnit nested : child) {
             
             // Recursive part
             createStructure(child, nested);
+        }
+    }
+
+    private void markForReording(ITranslationUnit parent, ITranslationUnit child) {
+        PreprocessorBlock currentblock = parentblocks.peekFirst();
+        
+        if (null != currentblock && parent != currentblock) {
+            NestedElement element = new NestedElement();
+            element.parent = parent;
+            element.child = child;
+            getEncapsulatedElements(currentblock).add(element);
         }
     }
 
