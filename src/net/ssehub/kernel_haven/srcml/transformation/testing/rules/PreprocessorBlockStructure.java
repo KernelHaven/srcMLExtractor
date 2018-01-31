@@ -51,6 +51,7 @@ public class PreprocessorBlockStructure implements ITransformationRule {
 
     private void createStructure(ITranslationUnit parent, ITranslationUnit child) {
         if (child instanceof PreprocessorIf) {
+            markForReording(parent, child);
             // Create block, but don't do anything
             PreprocessorIf currentBlock = (PreprocessorIf) child;
             getEncapsulatedElements(currentBlock);
@@ -58,6 +59,7 @@ public class PreprocessorBlockStructure implements ITransformationRule {
         } else if (child instanceof PreprocessorElse) {
             // From now on collect elements for else(if) block
             parentblocks.removeFirst();
+            markForReording(parent, child);
             PreprocessorBlock currentBlock = (PreprocessorBlock) child;
             getEncapsulatedElements(currentBlock);
             parentblocks.addFirst(currentBlock);
@@ -80,7 +82,11 @@ public class PreprocessorBlockStructure implements ITransformationRule {
     private void markForReording(ITranslationUnit parent, ITranslationUnit child) {
         PreprocessorBlock currentblock = parentblocks.peekFirst();
         
-        if (null != currentblock && parent != currentblock) {
+        /*
+         * Mark elements for reordering if their exist a target CPP block
+         * Mark PreprocessorEndIfs for removal in any case
+         */
+        if ((null != currentblock && parent != currentblock) || (child instanceof PreprocessorEndIf)) {
             NestedElement element = new NestedElement();
             element.parent = parent;
             element.child = child;
