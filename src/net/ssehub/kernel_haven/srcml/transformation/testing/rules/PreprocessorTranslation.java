@@ -11,23 +11,39 @@ import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorIf;
 import net.ssehub.kernel_haven.srcml.transformation.testing.TranslationUnit;
 import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorBlock.Type;
 
+/**
+ * Translates preprocessor control structures into a simpler form for parsing. More precisely it translates:<br/>
+ * <tt>#ifdef, #if, #else, #elseif, #endif</tt><br/>
+ * This rule converts {@link TranslationUnit}s into {@link PreprocessorBlock}s
+ * @author El-Sharkawy
+ *
+ */
 public class PreprocessorTranslation implements ITransformationRule {
     private Stack<PreprocessorIf> parents = new Stack<>();
 
+    @Override
     public void transform(ITranslationUnit base) {
         for (ITranslationUnit nested : base) {
             replaceCPPs(base, nested);
         }
     }
 
+    /**
+     * Recursive translation function.
+     * @param parent The parent (translated elements will be exchanges in the parent).
+     * @param child The child (to check and to translate)
+     */
     private void replaceCPPs(ITranslationUnit parent, ITranslationUnit child) {
         if (child instanceof TranslationUnit) {
             TranslationUnit oldUnit = (TranslationUnit) child;
             if (oldUnit.getType().startsWith("cpp:if")) {
+                // if, ifdef, ifndef
                 createIf(parent, oldUnit);
             } else if (oldUnit.getType().startsWith("cpp:el")) {
+                // else, elsif
                 createElse(parent, oldUnit);
             } else if (oldUnit.getType().startsWith("cpp:endif")) {
+                // endif
                 parents.pop();
                 parent.replaceNested(oldUnit, new PreprocessorEndIf());
             }
@@ -70,10 +86,10 @@ public class PreprocessorTranslation implements ITransformationRule {
         }
         switch (tokens.get(1)) {
         case "ifdef":
-            newUnit = new PreprocessorIf(Type.IFDEF, condition.toString());
+            newUnit = new PreprocessorIf(Type.IFDEF, "defined(" + condition.toString() + ")");
             break;
         case "ifndef":
-            newUnit = new PreprocessorIf(Type.IFDEF, "!" + condition.toString());
+            newUnit = new PreprocessorIf(Type.IFDEF, "!defined(" + condition.toString() + ")");
             break;
         case "if":
             newUnit = new PreprocessorIf(Type.IF, condition.toString());

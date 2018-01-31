@@ -11,7 +11,6 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
     }
     
     private Type type;
-//    String pc;
     String condition;
     private List<ITranslationUnit> nestedElements = new ArrayList<>();
     

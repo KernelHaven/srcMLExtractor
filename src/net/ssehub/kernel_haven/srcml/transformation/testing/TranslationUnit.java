@@ -15,12 +15,9 @@ public class TranslationUnit implements ITranslationUnit {
         this.type = type;
     }
     
-    public void addToken(String token) {
-        token = token.trim();
-        if (!token.isEmpty()) {
-            tokens.add(token);
-            elements.add(token);
-        }
+    public void addToken(CodeUnit token) {
+        tokens.add(token.getCode());
+        elements.add(token);
     }
     
     public List<String> getTokenList() {
@@ -44,12 +41,9 @@ public class TranslationUnit implements ITranslationUnit {
         result.append(":");
         boolean lastWasUnit = false;
         for (Object elem : elements) {
-            if (elem instanceof String) {
+            if (elem instanceof CodeUnit) {
                 if (lastWasUnit) {
-                    result.append("\n");                    
-//                    result.append("\ncontinued ");                    
-//                    result.append(type.toUpperCase());                    
-//                    result.append(": ");
+                    result.append("\n");
                 } else {
                     result.append(" ");
                 }
@@ -61,18 +55,6 @@ public class TranslationUnit implements ITranslationUnit {
             }
         }
         return result.toString();
-//        StringBuffer result = new StringBuffer();
-//        result.append(type);
-//        result.append(":");
-//        for (String token : tokens) {
-//            result.append(" ");
-//            result.append(token);
-//        }
-//        for (TranslationUnit translationUnit : nestedElements) {
-//            result.append("\n  ");
-//            result.append(translationUnit);
-//        }
-//        return result.toString();
     }
 
     @Override

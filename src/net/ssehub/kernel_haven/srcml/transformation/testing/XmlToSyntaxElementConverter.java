@@ -98,8 +98,11 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
     
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException {
-        String str = new String(ch, start, length);
-        elements.peek().addToken(str);
+        String str = new String(ch, start, length).trim();
+        if (!str.isEmpty()) {
+            CodeUnit unit = new CodeUnit(str);
+            elements.peek().addToken(unit);
+        }
     }
     
     @Override
