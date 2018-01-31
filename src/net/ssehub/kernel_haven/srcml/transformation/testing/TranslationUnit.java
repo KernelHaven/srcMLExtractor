@@ -91,5 +91,11 @@ public class TranslationUnit implements ITranslationUnit {
             elements.set(index, newUnit);
         }
     }
+    
+    @Override
+    public void removeNested(ITranslationUnit oldUnit) {
+        nestedElements.remove(oldUnit);
+        elements.remove(oldUnit);
+    }
 
 }

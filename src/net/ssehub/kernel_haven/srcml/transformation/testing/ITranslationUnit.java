@@ -5,5 +5,7 @@ public interface ITranslationUnit extends Iterable<ITranslationUnit> {
     public String getType();
     
     public void replaceNested(ITranslationUnit oldUnit, ITranslationUnit newUnit);
+    
+    public void removeNested(ITranslationUnit oldUnit);
 
 }

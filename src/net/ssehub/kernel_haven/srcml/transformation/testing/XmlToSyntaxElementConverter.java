@@ -107,9 +107,9 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         ITranslationUnit unit = elements.pop();
         System.out.println("Before: ");
         System.out.println(unit);
-        System.out.println("After: ");
         Converter converter = new Converter();
-        converter.replaceCPPs(unit);
+        converter.convert(unit);
+        System.out.println("After: ");
         System.out.println(unit);
         return null;
     }
