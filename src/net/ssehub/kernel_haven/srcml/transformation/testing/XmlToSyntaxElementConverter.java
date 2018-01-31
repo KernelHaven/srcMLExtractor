@@ -10,6 +10,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 import net.ssehub.kernel_haven.srcml.model.SrcMlSyntaxElement;
+import net.ssehub.kernel_haven.srcml.transformation.testing.ast.TranslationUnitToAstConverter;
 import net.ssehub.kernel_haven.srcml.xml.AbstractAstConverter;
 
 public class XmlToSyntaxElementConverter extends AbstractAstConverter {
@@ -108,12 +109,19 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
     @Override
     protected SrcMlSyntaxElement getAst() {
         ITranslationUnit unit = elements.pop();
-        System.out.println("Before: ");
+        System.out.println("1: ");
         System.out.println(unit);
         Converter converter = new Converter();
         converter.convert(unit);
-        System.out.println("After: ");
+        System.out.println("2: ");
         System.out.println(unit);
+        System.out.println("3: ");
+        TranslationUnitToAstConverter converter2 = new TranslationUnitToAstConverter();
+        System.out.println(converter2.convert(unit));
+        
+        System.out.println();
+        System.out.println();
+        System.out.println();
         return null;
     }
 
