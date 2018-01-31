@@ -13,6 +13,12 @@ import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorElse;
 import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorEndIf;
 import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorIf;
 
+/**
+ * Moves {@link ITransformationRule}s which are encapsulated by CPP statements into the CPP statement as a nested
+ * element.
+ * @author El-Sharkawy
+ *
+ */
 public class PreprocessorBlockStructure implements ITransformationRule {
     
     private static class NestedElement {

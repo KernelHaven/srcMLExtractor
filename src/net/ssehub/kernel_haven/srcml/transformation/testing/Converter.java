@@ -2,6 +2,7 @@ package net.ssehub.kernel_haven.srcml.transformation.testing;
 
 import net.ssehub.kernel_haven.srcml.transformation.testing.rules.ITransformationRule;
 import net.ssehub.kernel_haven.srcml.transformation.testing.rules.PreprocessorBlockStructure;
+import net.ssehub.kernel_haven.srcml.transformation.testing.rules.PreprocessorConditionComputationRule;
 import net.ssehub.kernel_haven.srcml.transformation.testing.rules.PreprocessorTranslation;
 
 public class Converter {
@@ -10,6 +11,8 @@ public class Converter {
         ITransformationRule rule = new PreprocessorTranslation();
         rule.transform(baseUnit);
         rule = new PreprocessorBlockStructure();
+        rule.transform(baseUnit);
+        rule = new PreprocessorConditionComputationRule();
         rule.transform(baseUnit);
     }
 

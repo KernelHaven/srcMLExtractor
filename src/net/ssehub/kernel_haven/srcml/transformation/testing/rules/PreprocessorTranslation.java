@@ -57,7 +57,7 @@ public class PreprocessorTranslation implements ITransformationRule {
     private void createElse(ITranslationUnit parent, TranslationUnit child) {
         PreprocessorIf startingIf = parents.peek();
         List<String> tokens = child.getTokenList();
-        PreprocessorBlock newUnit = null;
+        PreprocessorElse newUnit = null;
         StringBuffer condition = new StringBuffer();
         for (int i = 2; i < tokens.size(); i++) {
             condition.append(tokens.get(i));

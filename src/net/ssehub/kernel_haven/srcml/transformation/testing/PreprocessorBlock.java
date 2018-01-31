@@ -11,7 +11,19 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
     }
     
     private Type type;
-    String condition;
+    
+    /**
+     * Unparsed condition as found in code.
+     * <tt>#elif B -> B</tt>
+     */
+    private String condition;
+    
+    /**
+     * Unparsed condition, considering previous if's and elif's, will also compute the condition for an else, but
+     * won't consider the enclosing conditions.
+     * <tt>elif B -> !A && B</tt>
+     */
+    private String effectiveCondition;
     private List<ITranslationUnit> nestedElements = new ArrayList<>();
     
     public PreprocessorBlock(Type type, String condition) {
@@ -19,6 +31,28 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
         this.condition = condition;
     }
 
+    /**
+     * Returns the condition as retrieved from the parser, will be <tt>null</tt> for an else statement.
+     * @return The condition.
+     */
+    public String getCondition() {
+        return condition;
+    }
+    
+    /**
+     * Returns the unparsed effective condition, considering previous if's and elif's, will also compute the condition
+     * for an else, but won't consider the enclosing conditions.
+     * <tt>elif B -> !A && B</tt>
+     * @return The effective condition not considering surrounding blocks.
+     */
+    public String getEffectiveCondition() {
+        return effectiveCondition;
+    }
+    
+    protected void setEffectiveCondition(String effectiveCondition) {
+        this.effectiveCondition = effectiveCondition;
+    }
+    
     @Override
     public Iterator<ITranslationUnit> iterator() {
         return nestedElements.iterator();
@@ -33,9 +67,9 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
         StringBuffer result = new StringBuffer();
         result.append("#");
         result.append(type.name());
-        if (null != condition) {
+        if (null != getEffectiveCondition()) {
             result.append(" ");
-            result.append(condition);
+            result.append(getEffectiveCondition());
         }
         for (ITranslationUnit elem : nestedElements) {
             result.append("\n    ");

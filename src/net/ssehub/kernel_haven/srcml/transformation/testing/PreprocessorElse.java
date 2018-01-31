@@ -9,4 +9,12 @@ public class PreprocessorElse extends PreprocessorBlock {
         this.startElement = startElement;
     }
 
+    public PreprocessorIf getStartingIf() {
+        return startElement;
+    }
+    
+    @Override
+    public void setEffectiveCondition(String effectiveCondition) {
+        super.setEffectiveCondition(effectiveCondition);
+    }
 }
