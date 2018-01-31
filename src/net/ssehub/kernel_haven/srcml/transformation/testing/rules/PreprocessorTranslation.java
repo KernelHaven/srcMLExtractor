@@ -67,7 +67,7 @@ public class PreprocessorTranslation implements ITransformationRule {
             newUnit = new PreprocessorElse(Type.ELSE, null, startingIf);
             startingIf.addSibling(newUnit);
             break;
-        case "elseif":
+        case "elif":
             newUnit = new PreprocessorElse(Type.ELSEIF, condition.toString(), startingIf);
             startingIf.addSibling(newUnit);
             break;
