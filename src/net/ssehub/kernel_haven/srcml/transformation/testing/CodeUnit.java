@@ -40,4 +40,14 @@ public class CodeUnit implements ITranslationUnit {
         return code;
     }
 
+    @Override
+    public int size() {
+        return 0;
+    }
+
+    @Override
+    public ITranslationUnit getNestedElement(int index) {
+        throw new IndexOutOfBoundsException(CodeUnit.class.getSimpleName() + " has no nested elements, "
+            + "requested was: " + index);
+    }
 }

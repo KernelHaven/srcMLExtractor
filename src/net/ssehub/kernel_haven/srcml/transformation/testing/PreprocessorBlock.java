@@ -61,4 +61,14 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
     public void removeNested(ITranslationUnit oldUnit) {
         nestedElements.remove(oldUnit);
     }
+    
+    @Override
+    public int size() {
+        return nestedElements.size();
+    }
+
+    @Override
+    public ITranslationUnit getNestedElement(int index) {
+        return nestedElements.get(index);
+    }
 }

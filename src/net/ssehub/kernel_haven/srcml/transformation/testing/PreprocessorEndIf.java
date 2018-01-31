@@ -33,4 +33,14 @@ public class PreprocessorEndIf implements ITranslationUnit {
         return "#" + getType();
     }
 
+    @Override
+    public int size() {
+        return 0;
+    }
+
+    @Override
+    public ITranslationUnit getNestedElement(int index) {
+        throw new IndexOutOfBoundsException(PreprocessorEndIf.class.getSimpleName() + " has no nested elements, "
+            + "requested was: " + index);
+    }
 }

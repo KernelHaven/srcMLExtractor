@@ -81,4 +81,14 @@ public class TranslationUnit implements ITranslationUnit {
 //        elements.remove(oldUnit);
     }
 
+    @Override
+    public int size() {
+        return nestedElements.size();
+    }
+
+    @Override
+    public ITranslationUnit getNestedElement(int index) {
+        return nestedElements.get(index);
+    }
+
 }

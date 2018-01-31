@@ -14,5 +14,4 @@ public class PreprocessorIf extends PreprocessorBlock {
     public void addSibling(PreprocessorBlock sibling) {
         siblings.add(sibling);
     }
-    
 }
