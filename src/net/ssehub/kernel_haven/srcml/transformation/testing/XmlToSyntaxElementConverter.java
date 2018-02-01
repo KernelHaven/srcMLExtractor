@@ -72,6 +72,7 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         // Control structures
         tmpSet.add("if");
         tmpSet.add("else");
+        tmpSet.add("elseif");
         tmpSet.add("while");
         tmpSet.add("for");
         tmpSet.add("do");

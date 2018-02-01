@@ -97,6 +97,40 @@ public class TranslationUnitToAstConverter {
         case "do":
             // 2nd is block everything after is condition, we skip last element (a semicolon)
             return createLoop(unit, LoopType.DO_WHILE, 1, 3, unit.size() - 2);
+        
+        case "if":
+            // (Multiple) statements come after last condition element (CodeUnit)
+            int lastConditionElement = -1;
+            for (int i = 0; i < unit.size() && lastConditionElement == -1; i++) {
+                if (!(unit.getNestedElement(i) instanceof CodeUnit)) {
+                    lastConditionElement = (i - 1);
+                }
+            }
+            IfStructure ifStatement = new IfStructure(pc, sourceFile, makeCode(unit, 0, lastConditionElement));
+            for (int i = lastConditionElement + 1; i < unit.size(); i++) {
+                SyntaxElement converted = convert(unit.getNestedElement(i)); // TODO SE: handle else and elseif
+                if (converted != null) {
+                    ifStatement.addNestedElement(converted);
+                }
+            }
+            return ifStatement;
+        
+        case "else":
+            // TODO SE: @Adam Proper data type required, elseif still missing
+            CompoundStatement elseBlock = new CompoundStatement(pc, sourceFile);
+            for (int i = 0; i < unit.size(); i++) {
+                ITranslationUnit child = unit.getNestedElement(i);
+                if (child instanceof CodeUnit) {
+                    // ignore { and }
+                } else {
+                    SyntaxElement converted = convert(child); // TODO
+                    if (converted != null) {
+                        elseBlock.addNestedElement(converted);
+                    }
+                }
+            }
+            
+            return elseBlock;
             
         case "struct":
             /*
@@ -151,19 +185,20 @@ public class TranslationUnitToAstConverter {
         }
         
         }
-        
+
         // TODO
         return null;
     }
 
     private Loop createLoop(TranslationUnit unit, LoopType type, int blockIndex, int condStartIndex, int condEndIndex) {
+        
         SyntaxElement condition = makeCode(unit, condStartIndex, condEndIndex);
-        Loop loop = new Loop(getPc(), sourceFile, condition, type);
+        Loop cStructure = new Loop(getPc(), sourceFile, condition, type);
         SyntaxElement loopBlock = convert(unit.getNestedElement(blockIndex)); // TODO
         if (loopBlock != null) {
-            loop.addNestedElement(loopBlock);
+            cStructure.addNestedElement(loopBlock);
         }
-        return loop;
+        return cStructure;
     }
     
     private SyntaxElement convertPreprocessorBlock(PreprocessorBlock cppBlock) {

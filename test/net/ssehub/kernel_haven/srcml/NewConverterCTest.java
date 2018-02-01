@@ -17,7 +17,7 @@ import org.junit.Test;
 import net.ssehub.kernel_haven.SetUpException;
 import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.code_model.SourceFile;
-import net.ssehub.kernel_haven.srcml.model.SrcMlSyntaxElement;
+import net.ssehub.kernel_haven.srcml.transformation.testing.ast.SyntaxElement;
 import net.ssehub.kernel_haven.test_utils.TestConfiguration;
 import net.ssehub.kernel_haven.util.ExtractorException;
 import net.ssehub.kernel_haven.util.Logger;
@@ -58,19 +58,24 @@ public class NewConverterCTest {
     
     @Test
     public void test() {
-        SourceFile ast = loadFile("Komplex2.c");
-        List<SrcMlSyntaxElement> elements = getElements(ast);
+//        SourceFile ast = loadFile("Komplex2.c");
+//        SourceFile ast = loadFile("../test.c");
+        SourceFile ast = loadFile("../blubb.c");
+//        SourceFile ast = loadFile("../NestedCppIfs.c");
+        List<SyntaxElement> elements = getElements(ast);
         System.out.println(ast.iterator().next());
         
-        assertEquals("Got unexpected number of elements", 1, elements.size());
+        //assertEquals("Got unexpected number of elements", 1, elements.size());
     }
     
     @Test
     public void returnStatement() {
         SourceFile ast = loadFile("Statement_SingleReturn.c");
-        List<SrcMlSyntaxElement> elements = getElements(ast);
+        List<SyntaxElement> elements = getElements(ast);
         
         assertEquals("Got unexpected number of elements", 1, elements.size());
+        SyntaxElement statement = elements.get(0);
+//        System.out.println(statement);
     }
     
     /**
@@ -78,20 +83,20 @@ public class NewConverterCTest {
      * @param file A file, which was translated with {@link SrcMLExtractor}.
      * @return The top level elements.
      */
-    private List<SrcMlSyntaxElement> getElements(SourceFile file) {
-        List<SrcMlSyntaxElement> result = new ArrayList<>();
+    private List<SyntaxElement> getElements(SourceFile file) {
+        List<SyntaxElement> result = new ArrayList<>();
         Assert.assertEquals("The SourceFile has more than only one translation unit: "
             + file.getPath().getAbsolutePath(), 1, file.getTopElementCount());
         
         // Extract translation unit
         for (CodeElement element : file) {
-            if (!(element instanceof SrcMlSyntaxElement)) {
+            if (!(element instanceof SyntaxElement)) {
                 Assert.fail("SourceFile \"" + file.getPath().getAbsolutePath()
                     + "\" contains a non SrcMlSyntaxElement: " + element);
             }
             
             // Extract the relevant, top level elements
-            SrcMlSyntaxElement translationUnit = (SrcMlSyntaxElement) element;
+            SyntaxElement translationUnit = (SyntaxElement) element;
             for (int i = 0; i < translationUnit.getNestedElementCount(); i++) {
                 result.add(translationUnit.getNestedElement(i));                
             }
