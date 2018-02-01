@@ -11,6 +11,7 @@ import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorElse;
 import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorIf;
 import net.ssehub.kernel_haven.srcml.transformation.testing.TranslationUnit;
 import net.ssehub.kernel_haven.srcml.transformation.testing.ast.CppBlock.Type;
+import net.ssehub.kernel_haven.srcml.transformation.testing.ast.Loop.LoopType;
 import net.ssehub.kernel_haven.util.logic.Conjunction;
 import net.ssehub.kernel_haven.util.logic.Formula;
 import net.ssehub.kernel_haven.util.logic.True;
@@ -84,8 +85,19 @@ public class TranslationUnitToAstConverter {
         case "goto":      // falls through 
         case "return":    // falls through 
         case "empty_stmt": 
-            return new SingleStatement(pc, sourceFile, new Code(getPc(), sourceFile, ";"));
+            return new SingleStatement(pc, sourceFile, makeCode(unit, 0, unit.size() - 1));
+        case "for":
+            // Last nested is the loop block, everything before is the condition
+            return createLoop(unit, LoopType.FOR, unit.size() - 1, 0, unit.size() - 2);
+            
+        case "while":
+            // Last nested is the loop block, everything before is the condition
+            return createLoop(unit, LoopType.WHILE, unit.size() - 1, 0, unit.size() - 2);
         
+        case "do":
+            // 2nd is block everything after is condition, we skip last element (a semicolon)
+            return createLoop(unit, LoopType.DO_WHILE, 1, 3, unit.size() - 2);
+            
         case "struct":
             /*
              * 2nd last nested is the struct block (definition of attributes).
@@ -100,7 +112,6 @@ public class TranslationUnitToAstConverter {
             
         case "unit": {
             File file = new File(pc, sourceFile);
-            // TODO SE: consider only Code Units inside of Unit
             for (int i = 0; i < unit.size(); i++) {
                 SyntaxElement converted = convert(unit.getNestedElement(i)); // TODO
                 if (converted != null) {
@@ -143,6 +154,16 @@ public class TranslationUnitToAstConverter {
         
         // TODO
         return null;
+    }
+
+    private Loop createLoop(TranslationUnit unit, LoopType type, int blockIndex, int condStartIndex, int condEndIndex) {
+        SyntaxElement condition = makeCode(unit, condStartIndex, condEndIndex);
+        Loop loop = new Loop(getPc(), sourceFile, condition, type);
+        SyntaxElement loopBlock = convert(unit.getNestedElement(blockIndex)); // TODO
+        if (loopBlock != null) {
+            loop.addNestedElement(loopBlock);
+        }
+        return loop;
     }
     
     private SyntaxElement convertPreprocessorBlock(PreprocessorBlock cppBlock) {
