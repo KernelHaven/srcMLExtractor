@@ -1,15 +1,17 @@
 package net.ssehub.kernel_haven.srcml.transformation.testing.rules;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
-import java.util.Stack;
 
 import net.ssehub.kernel_haven.srcml.transformation.testing.ITranslationUnit;
 import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorBlock;
+import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorBlock.Type;
 import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorElse;
 import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorEndIf;
 import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorIf;
 import net.ssehub.kernel_haven.srcml.transformation.testing.TranslationUnit;
-import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorBlock.Type;
+import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
  * Translates preprocessor control structures into a simpler form for parsing. More precisely it translates:<br/>
@@ -19,7 +21,7 @@ import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorBlock.Ty
  *
  */
 public class PreprocessorTranslation implements ITransformationRule {
-    private Stack<PreprocessorIf> parents = new Stack<>();
+    private Deque<PreprocessorIf> parents = new ArrayDeque<>();
 
     @Override
     public void transform(ITranslationUnit base) {
@@ -44,7 +46,7 @@ public class PreprocessorTranslation implements ITransformationRule {
                 createElse(parent, oldUnit);
             } else if (oldUnit.getType().startsWith("cpp:endif")) {
                 // endif
-                parents.pop();
+                parents.removeFirst();
                 parent.replaceNested(oldUnit, new PreprocessorEndIf());
             }
         }
@@ -54,8 +56,14 @@ public class PreprocessorTranslation implements ITransformationRule {
         }
     }
 
-    private void createElse(ITranslationUnit parent, TranslationUnit child) {
-        PreprocessorIf startingIf = parents.peek();
+    /**
+     * Translates an <tt>&#35;else</tt> or <tt>&#35;elif</tt> statement into a {@link PreprocessorElse}.
+     * @param parent The parent to exchange the translated element.
+     * @param child An <tt>&#35;else</tt> or <tt>&#35;elif</tt> statement to be translated
+     *     into a {@link PreprocessorElse}
+     */
+    private void createElse(@NonNull ITranslationUnit parent, TranslationUnit child) {
+        PreprocessorIf startingIf = parents.peekFirst();
         List<String> tokens = child.getTokenList();
         PreprocessorElse newUnit = null;
         StringBuffer condition = new StringBuffer();
@@ -77,6 +85,13 @@ public class PreprocessorTranslation implements ITransformationRule {
         }
     }
 
+    /**
+     * Translates an <tt>&#35;if</tt>, <tt>&#35;ifdef</tt>, or <tt>&#35;ifndef</tt>
+     * statement into a {@link PreprocessorIf}.
+     * @param parent The parent to exchange the translated element.
+     * @param child An <tt>&#35;if</tt>, <tt>&#35;ifdef</tt>, or <tt>&#35;ifndef</tt> statement to be translated
+     *     into a {@link PreprocessorIf}
+     */
     private void createIf(ITranslationUnit parent, TranslationUnit child) {
         List<String> tokens = child.getTokenList();
         PreprocessorIf newUnit = null;
@@ -97,7 +112,7 @@ public class PreprocessorTranslation implements ITransformationRule {
         }
         if (null != newUnit) {
             parent.replaceNested(child, newUnit);
-            parents.push(newUnit);
+            parents.addFirst(newUnit);
         }
     }
 }
