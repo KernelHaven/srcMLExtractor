@@ -21,6 +21,11 @@ import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorIf;
  */
 public class PreprocessorBlockStructure implements ITransformationRule {
     
+    /**
+     * Simple data structure/container. Stores the current, obsolete parent and its child (which shall be moved).
+     * @author El-Sharkawy
+     *
+     */
     private static class NestedElement {
         ITranslationUnit parent;
         ITranslationUnit child;
@@ -36,15 +41,23 @@ public class PreprocessorBlockStructure implements ITransformationRule {
 
     @Override
     public void transform(ITranslationUnit base) {
+        // Identify elements but do not change elements to avoid concurrent modification exceptions
         for (int i = 0; i < base.size(); i++) {
-            createStructure(base, base.getNestedElement(i));
+            identifyStructure(base, base.getNestedElement(i));
         }
         
+        // Apply changes
         for (Map.Entry<PreprocessorBlock, List<NestedElement>> entry : encapsulatedElementsMap.entrySet()) {
             reorderElements(entry.getKey());
         }
     }
     
+    /**
+     * Returns the list of elements, which shall be nested below the specified {@link PreprocessorBlock}.
+     * @param cppBlock The specified {@link PreprocessorBlock} under which the elements shall be nested, may be
+     *     <tt>null</tt> in case of an {@link PreprocessorEndIf} shall be removed from the top level.
+     * @return
+     */
     private List<NestedElement> getEncapsulatedElements(PreprocessorBlock cppBlock) {
         List<NestedElement> list = encapsulatedElementsMap.get(cppBlock);
         if (null == list) {
@@ -55,7 +68,13 @@ public class PreprocessorBlockStructure implements ITransformationRule {
         return list;
     }
 
-    private void createStructure(ITranslationUnit parent, ITranslationUnit child) {
+    /**
+     * First part, will recursively identify all encapsulated elements and the target {@link PreprocessorBlock} under
+     * which they shall be nested to.
+     * @param parent The current (potentially obsolete) parent.
+     * @param child The child, which may be moved.
+     */
+    private void identifyStructure(ITranslationUnit parent, ITranslationUnit child) {
         if (child instanceof PreprocessorIf) {
             markForReording(parent, child);
             // Create block, but don't do anything
@@ -80,10 +99,15 @@ public class PreprocessorBlockStructure implements ITransformationRule {
        
         for (int i = 0; i < child.size(); i++) {
             // Recursive part
-            createStructure(child, child.getNestedElement(i));
+            identifyStructure(child, child.getNestedElement(i));
         }
     }
 
+    /**
+     * Marks an element for moving. 
+     * @param parent The current, obsolete parent
+     * @param child The child to be moved.
+     */
     private void markForReording(ITranslationUnit parent, ITranslationUnit child) {
         PreprocessorBlock currentblock = parentblocks.peekFirst();
         
@@ -99,8 +123,12 @@ public class PreprocessorBlockStructure implements ITransformationRule {
         }
     }
 
+    /**
+     * Moves all identified elements to the block.
+     * @param block The {@link PreprocessorBlock} for which the action shall be performed.
+     */
     private void reorderElements(PreprocessorBlock block) {
-        // Move elements to cpp block
+        // Move elements to CPP block
         List<NestedElement> list = getEncapsulatedElements(block);
         for (NestedElement oldNesting : list) {
             oldNesting.parent.removeNested(oldNesting.child);

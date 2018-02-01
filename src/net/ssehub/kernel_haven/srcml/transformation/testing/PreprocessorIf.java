@@ -53,9 +53,4 @@ public class PreprocessorIf extends PreprocessorBlock {
     public PreprocessorElse getElseBlock(int index) {
         return siblings.get(index);
     }
-    
-    @Override
-    public String getEffectiveCondition() {
-        return getCondition();
-    }
 }

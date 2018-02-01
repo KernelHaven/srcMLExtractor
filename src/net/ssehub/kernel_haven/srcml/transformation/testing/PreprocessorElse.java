@@ -32,9 +32,4 @@ public class PreprocessorElse extends PreprocessorBlock {
     public @NonNull PreprocessorIf getStartingIf() {
         return startElement;
     }
-    
-    @Override
-    public void setEffectiveCondition(String effectiveCondition) {
-        super.setEffectiveCondition(effectiveCondition);
-    }
 }

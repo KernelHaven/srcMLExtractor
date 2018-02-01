@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.ssehub.kernel_haven.srcml.xml.SrcMlConditionGrammar;
+import net.ssehub.kernel_haven.util.logic.Formula;
 
 /**
  * Abstract super class for preprocessor if and else blocks.
@@ -30,11 +31,11 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
     private String condition;
     
     /**
-     * Unparsed condition, considering previous if's and elif's, will also compute the condition for an else, but
+     * Parsed condition, considering previous if's and elif's, will also compute the condition for an else, but
      * won't consider the enclosing conditions.
      * <tt>elif B -> !A && B</tt>
      */
-    private String effectiveCondition;
+    private Formula parsedCondition;
     private List<ITranslationUnit> nestedElements = new ArrayList<>();
     
     /**
@@ -57,25 +58,25 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
     }
     
     /**
-     * Returns the unparsed effective condition, considering previous if's and elif's, will also compute the condition
+     * Returns the parsed effective condition, considering previous if's and elif's, will also compute the condition
      * for an else, but won't consider the enclosing conditions.
      * <tt>elif B -> !A && B</tt>
      * @return The effective condition not considering surrounding blocks.
      */
-    public String getEffectiveCondition() {
-        return effectiveCondition;
+    public Formula getEffectiveCondition() {
+        return parsedCondition;
     }
-    
+
     /**
      * Sets the effective condition (for all <tt>&#35;else</tt> and <tt>&#35;elif</tt> statements
      * it considers also the negation of previous blocks).
      * @param effectiveCondition The effective condition considering previous elements (not the presence condition, also
      *     considering surrounding blocks!).
      */
-    protected void setEffectiveCondition(String effectiveCondition) {
-        this.effectiveCondition = effectiveCondition;
+    public void setEffectiveCondition(Formula parsedCondition) {
+        this.parsedCondition = parsedCondition;
     }
-    
+
     /**
      * Adds a nested element, which is enclosed by this by preprocessor block.
      * @param child The nested element to add.
@@ -89,9 +90,9 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
         StringBuffer result = new StringBuffer();
         result.append("#");
         result.append(type.name());
-        if (null != getEffectiveCondition()) {
+        if (null != parsedCondition.toString()) {
             result.append(" ");
-            result.append(getEffectiveCondition());
+            result.append(parsedCondition.toString());
         }
         for (ITranslationUnit elem : nestedElements) {
             result.append("\n    ");

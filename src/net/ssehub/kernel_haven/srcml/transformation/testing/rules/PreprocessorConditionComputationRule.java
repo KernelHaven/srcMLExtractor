@@ -4,18 +4,43 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.ssehub.kernel_haven.srcml.transformation.testing.ITranslationUnit;
+import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorBlock;
 import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorBlock.Type;
+import net.ssehub.kernel_haven.srcml.xml.SrcMlConditionGrammar;
+import net.ssehub.kernel_haven.util.Logger;
+import net.ssehub.kernel_haven.util.logic.Formula;
+import net.ssehub.kernel_haven.util.logic.parser.ExpressionFormatException;
+import net.ssehub.kernel_haven.util.logic.parser.Parser;
+import net.ssehub.kernel_haven.util.logic.parser.VariableCache;
 import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorElse;
 import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorIf;
 
+/**
+ * Computes the effective conditions for all {@link PreprocessorBlock}s, i.e., consideration of negated conditions of
+ * previous siblings for all <tt>&#35;else</tt> and <tt>&#35;elif</tt> blocks. However, this won't compute the
+ * presence conditions, i.e., consideration of surrounding blocks.
+ * @author El-Sharkawy
+ *
+ */
 public class PreprocessorConditionComputationRule implements ITransformationRule {
+    
+    /**
+     * This parser (and its cache) are used for the whole file and are reseted by parsing a new file as long this
+     * class won't become static.
+     */
+    private Parser<Formula> parser = new Parser<>(new SrcMlConditionGrammar(new VariableCache()));
 
     @Override
     public void transform(ITranslationUnit node) {
         for (int j = 0; j < node.size(); j++) {
             ITranslationUnit nested = node.getNestedElement(j);
             
-            if (nested instanceof PreprocessorElse) {
+            if (nested instanceof PreprocessorIf) {
+                // Only parsing of condition required
+                PreprocessorIf ifStatement = (PreprocessorIf) nested;
+                parseAndSetCondition(ifStatement, ifStatement.getCondition());
+            } else if (nested instanceof PreprocessorElse) {
+                // Computation of effective condition
                 PreprocessorElse elseStatement = (PreprocessorElse) nested;
                 PreprocessorIf start = elseStatement.getStartingIf();
                 List<PreprocessorElse> previous = new ArrayList<>();
@@ -38,12 +63,31 @@ public class PreprocessorConditionComputationRule implements ITransformationRule
                     effectiveCondition.append(" && !");
                     effectiveCondition.append(elseStatement.getCondition());
                 }
-                elseStatement.setEffectiveCondition(effectiveCondition.toString());
+                
+                // Parse and set the computed condition
+                parseAndSetCondition(elseStatement, effectiveCondition.toString());
             }
             
             transform(nested);
         }
-        
     }
 
+    /**
+     * Parses the passed condition into a Formula and sets it directly to the given {@link PreprocessorBlock}. Will
+     * report any parsing error to the Logger.
+     * @param block The block to which the condition belongs to.
+     * @param condition The unparsed condition in a form that the {@link SrcMlConditionGrammar} can handle it.
+     */
+    private void parseAndSetCondition(PreprocessorBlock block, String condition) {
+        try {
+            Formula parsedCondition = parser.parse(condition);
+            if (null != parsedCondition) {
+                block.setEffectiveCondition(parsedCondition);
+            } else {
+                Logger.get().logError("Could not parse effective expression: " + condition);
+            }
+        } catch (ExpressionFormatException exc) {
+            Logger.get().logException("Could not parse effective expression: " + condition, exc);
+        }
+    }
 }
