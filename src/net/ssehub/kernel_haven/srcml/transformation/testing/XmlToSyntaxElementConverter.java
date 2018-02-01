@@ -10,6 +10,7 @@ import java.util.Set;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
+import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.srcml.model.SrcMlSyntaxElement;
 import net.ssehub.kernel_haven.srcml.transformation.testing.ast.SyntaxElement;
 import net.ssehub.kernel_haven.srcml.transformation.testing.ast.TranslationUnitToAstConverter;
@@ -129,7 +130,7 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
     }
     
     @Override
-    protected SrcMlSyntaxElement getAst() {
+    protected CodeElement getAst() {
         ITranslationUnit unit = elements.removeFirst();
         System.out.println("1: ");
         System.out.println(unit);
@@ -138,12 +139,13 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         System.out.println("2: ");
         System.out.println(unit);
         System.out.println("3: ");
-        TranslationUnitToAstConverter converter2 = new TranslationUnitToAstConverter();
-        System.out.println(converter2.convert(unit));
+        TranslationUnitToAstConverter converter2 = new TranslationUnitToAstConverter(getFile().getPath());
+        CodeElement astResult = converter2.convert(unit);
+        System.out.println(astResult);
         
         System.out.println();
         System.out.println();
         System.out.println();
-        return null;
+        return astResult;
     }
 }

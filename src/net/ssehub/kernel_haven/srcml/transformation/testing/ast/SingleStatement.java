@@ -1,5 +1,7 @@
 package net.ssehub.kernel_haven.srcml.transformation.testing.ast;
 
+import java.io.File;
+
 import net.ssehub.kernel_haven.util.logic.Formula;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
@@ -7,8 +9,8 @@ public class SingleStatement extends SyntaxElement {
 
     private SyntaxElement code;
     
-    public SingleStatement(@NonNull Formula presenceCondition, SyntaxElement code) {
-        super(presenceCondition);
+    public SingleStatement(@NonNull Formula presenceCondition, File sourceFile, SyntaxElement code) {
+        super(presenceCondition, sourceFile);
         this.code = code;
     }
     

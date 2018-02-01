@@ -1,14 +1,21 @@
 package net.ssehub.kernel_haven.srcml.transformation.testing.ast;
 
+import java.io.File;
+import java.util.List;
+
+import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.util.logic.Formula;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
+import net.ssehub.kernel_haven.util.null_checks.Nullable;
 
-public abstract class SyntaxElement {
+public abstract class SyntaxElement implements CodeElement {
 
     private @NonNull Formula presenceCondition;
+    private File sourceFile;
     
-    public SyntaxElement(@NonNull Formula presenceCondition) {
+    public SyntaxElement(@NonNull Formula presenceCondition, File sourceFile) {
         this.presenceCondition = presenceCondition;
+        this.sourceFile = sourceFile;
     }
     
     public Formula getPresenceCondition() {
@@ -23,7 +30,8 @@ public abstract class SyntaxElement {
         return 0;
     }
     
-    public void addNestedElement(@NonNull SyntaxElement element) {
+    @Override
+    public void addNestedElement(@NonNull CodeElement element) {
         throw new IndexOutOfBoundsException();
     }
     
@@ -57,4 +65,38 @@ public abstract class SyntaxElement {
         return result.toString();
     }
     
+    /**
+     * Line start is not supported by <a href="http://www.srcml.org">srcML</a>.
+     * @return -1
+     */
+    @Override
+    public int getLineStart() {
+        return -1;
+    }
+    
+    /**
+     * Line end is not supported by <a href="http://www.srcml.org">srcML</a>.
+     * @return -1
+     */
+    @Override
+    public int getLineEnd() {
+        return -1;
+    }
+
+    @Override
+    public @NonNull File getSourceFile() {
+        return sourceFile;
+    }
+
+    @Override
+    public @Nullable Formula getCondition() {
+        // TODO SE: @Adam please fix this
+        return null;
+    }
+
+    @Override
+    public @NonNull List<@NonNull String> serializeCsv() {
+        // TODO SE: @Adam please fix this
+        return null;
+    }
 }
