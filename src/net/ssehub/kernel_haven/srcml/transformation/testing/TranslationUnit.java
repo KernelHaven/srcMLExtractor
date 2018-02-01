@@ -2,12 +2,10 @@ package net.ssehub.kernel_haven.srcml.transformation.testing;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 public class TranslationUnit implements ITranslationUnit {
     private String type;
-    //private List<Object> elements = new ArrayList<>();
     private List<String> tokens = new ArrayList<>();
     private List<ITranslationUnit> nestedElements = new ArrayList<>();
     
@@ -17,7 +15,6 @@ public class TranslationUnit implements ITranslationUnit {
     
     public void addToken(CodeUnit token) {
         tokens.add(token.getCode());
-//        elements.add(token);
         nestedElements.add(token);
     }
     
@@ -26,7 +23,6 @@ public class TranslationUnit implements ITranslationUnit {
     }
     
     public void addTranslationUnit(TranslationUnit unit) {
-//        elements.add(unit);
         nestedElements.add(unit);
     }
     
@@ -59,26 +55,16 @@ public class TranslationUnit implements ITranslationUnit {
     }
 
     @Override
-    public Iterator<ITranslationUnit> iterator() {
-        return nestedElements.iterator();
-    }
-
-    @Override
     public void replaceNested(ITranslationUnit oldUnit, ITranslationUnit newUnit) {
         int index = nestedElements.indexOf(oldUnit);
         if (index != -1) {
             nestedElements.set(index, newUnit);
         }
-//        index = elements.indexOf(oldUnit);
-//        if (index != -1) {
-//            elements.set(index, newUnit);
-//        }
     }
     
     @Override
     public void removeNested(ITranslationUnit oldUnit) {
         nestedElements.remove(oldUnit);
-//        elements.remove(oldUnit);
     }
 
     @Override

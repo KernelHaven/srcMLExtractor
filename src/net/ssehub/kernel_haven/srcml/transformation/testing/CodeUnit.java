@@ -1,23 +1,26 @@
 package net.ssehub.kernel_haven.srcml.transformation.testing;
 
-import java.util.Collections;
-import java.util.Iterator;
-
+/**
+ * Represent unparsed code fragments, e.g., a function signature or a (partial) expression of a statement.
+ * These are the texts between the XML tags in <a href="http://www.srcml.org/doc/c_srcML.html">srcML</a> and will be
+ * gathered through by SAX's {@link org.xml.sax.ContentHandler#characters(char[], int, int)}.  
+ * @author El-Sharkawy
+ *
+ */
 public class CodeUnit implements ITranslationUnit {
     
     private String code;
     
+    /**
+     * Sole constructor for this class.
+     * @param code A single char sequence/token, which is not intended to be parsed in a later step.
+     */
     public CodeUnit(String code) {
         this.code = code;
     }
     
     public String getCode() {
         return code;
-    }
-
-    @Override
-    public Iterator<ITranslationUnit> iterator() {
-        return Collections.emptyIterator();
     }
 
     @Override

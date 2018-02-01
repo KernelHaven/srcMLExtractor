@@ -36,8 +36,8 @@ public class PreprocessorBlockStructure implements ITransformationRule {
 
     @Override
     public void transform(ITranslationUnit base) {
-        for (ITranslationUnit nested : base) {
-            createStructure(base, nested);
+        for (int i = 0; i < base.size(); i++) {
+            createStructure(base, base.getNestedElement(i));
         }
         
         for (Map.Entry<PreprocessorBlock, List<NestedElement>> entry : encapsulatedElementsMap.entrySet()) {
@@ -78,10 +78,9 @@ public class PreprocessorBlockStructure implements ITransformationRule {
             markForReording(parent, child);
         }
        
-        for (ITranslationUnit nested : child) {
-            
+        for (int i = 0; i < child.size(); i++) {
             // Recursive part
-            createStructure(child, nested);
+            createStructure(child, child.getNestedElement(i));
         }
     }
 

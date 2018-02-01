@@ -12,7 +12,9 @@ public class PreprocessorConditionComputationRule implements ITransformationRule
 
     @Override
     public void transform(ITranslationUnit node) {
-        for (ITranslationUnit nested : node) {
+        for (int j = 0; j < node.size(); j++) {
+            ITranslationUnit nested = node.getNestedElement(j);
+            
             if (nested instanceof PreprocessorElse) {
                 PreprocessorElse elseStatement = (PreprocessorElse) nested;
                 PreprocessorIf start = elseStatement.getStartingIf();

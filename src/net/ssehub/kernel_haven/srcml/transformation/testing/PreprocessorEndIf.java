@@ -1,17 +1,12 @@
 package net.ssehub.kernel_haven.srcml.transformation.testing;
 
-import java.util.Collections;
-import java.util.Iterator;
-
+/**
+ * Marker to indicate the end of a preprocessor if-elif-else structure, which is only needed as long the surrounded
+ * elements are not nested inside the {@link PreprocessorBlock}s (flat structure vs hierarchy).
+ * @author El-Sharkawy
+ *
+ */
 public class PreprocessorEndIf implements ITranslationUnit {
-
-    public PreprocessorEndIf() {
-    }
-
-    @Override
-    public Iterator<ITranslationUnit> iterator() {
-        return Collections.emptyIterator();
-    }
 
     @Override
     public String getType() {

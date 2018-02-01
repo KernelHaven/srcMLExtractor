@@ -65,8 +65,8 @@ public class TranslationUnitToAstConverter {
         case "unit": {
             File file = new File(pc);
             
-            for (ITranslationUnit child : unit) {
-                SyntaxElement converted = convert(child); // TODO
+            for (int i = 0; i < unit.size(); i++) {
+                SyntaxElement converted = convert(unit.getNestedElement(i)); // TODO
                 if (converted != null) {
                     file.addNestedElement(converted);
                 }
@@ -88,7 +88,8 @@ public class TranslationUnitToAstConverter {
         
         case "block": {
             CompoundStatement block = new CompoundStatement(pc);
-            for (ITranslationUnit child : unit) {
+            for (int i = 0; i < unit.size(); i++) {
+                ITranslationUnit child = unit.getNestedElement(i);
                 if (child instanceof CodeUnit) {
                     // ignore { and }
                 } else {

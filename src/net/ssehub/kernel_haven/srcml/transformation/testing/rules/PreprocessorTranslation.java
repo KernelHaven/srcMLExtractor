@@ -23,8 +23,8 @@ public class PreprocessorTranslation implements ITransformationRule {
 
     @Override
     public void transform(ITranslationUnit base) {
-        for (ITranslationUnit nested : base) {
-            replaceCPPs(base, nested);
+        for (int i = 0; i < base.size(); i++) {
+            replaceCPPs(base, base.getNestedElement(i));
         }
     }
 
@@ -49,8 +49,8 @@ public class PreprocessorTranslation implements ITransformationRule {
             }
         }
         
-        for (ITranslationUnit nested : child) {
-            replaceCPPs(child, nested);
+        for (int i = 0; i < child.size(); i++) {
+            replaceCPPs(child, child.getNestedElement(i));
         }
     }
 

@@ -1,20 +1,41 @@
 package net.ssehub.kernel_haven.srcml.transformation.testing;
 
 import java.io.File;
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Stack;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 import net.ssehub.kernel_haven.srcml.model.SrcMlSyntaxElement;
+import net.ssehub.kernel_haven.srcml.transformation.testing.ast.SyntaxElement;
 import net.ssehub.kernel_haven.srcml.transformation.testing.ast.TranslationUnitToAstConverter;
+import net.ssehub.kernel_haven.srcml.transformation.testing.rules.IntermediateParser;
 import net.ssehub.kernel_haven.srcml.xml.AbstractAstConverter;
+import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
+/**
+ * Translates the XML output of <a href="http://www.srcml.org">srcML</a> into {@link SrcMlSyntaxElement}. This is done
+ * in 3 steps:
+ * <ol>
+ *     <li>The XML output is parsed by this class to create {@link ITranslationUnit}s.</li>
+ *     <li>The {@link ITranslationUnit}s are refined by the {@link IntermediateParser} to be closer to the target AST structure,
+ *     to simplify the final parsing.</li>
+ *     <li>The {@link ITranslationUnit}s are parsed into {@link SyntaxElement} by the
+ *     {@link TranslationUnitToAstConverter}</li>
+ * </ol>
+ * @author El-Sharkawy
+ *
+ */
 public class XmlToSyntaxElementConverter extends AbstractAstConverter {
     
+    /**
+     * White list of supported XML tags, which will be processed by this converter. These are the top level elements of
+     * the <a href="http://www.srcml.org/doc/c_srcML.html">srcML C and CPP grammar</a>.
+     */
     private static final Set<String> SUPPORTED_ELEMENTS;
     
     static {
@@ -68,13 +89,14 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         SUPPORTED_ELEMENTS = Collections.unmodifiableSet(tmpSet);
     }
     
-    private Stack<TranslationUnit> elements;
+    private Deque<TranslationUnit> elements = new ArrayDeque<TranslationUnit>();
     
-    
-    public XmlToSyntaxElementConverter(File path) {
+    /**
+     * Sole constructor for this classes.
+     * @param path The relative path to the source file in the source tree. Must not be <code>null</code>.
+     */
+    public XmlToSyntaxElementConverter(@NonNull File path) {
         super(path);
-        
-        elements = new Stack<>();
     }
 
     @Override
@@ -82,9 +104,9 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         if (SUPPORTED_ELEMENTS.contains(qName)) {
             TranslationUnit newElement = new TranslationUnit(qName);
             if (!elements.isEmpty()) {
-                elements.peek().addTranslationUnit(newElement);
+                elements.peekFirst().addTranslationUnit(newElement);
             }
-            elements.add(newElement);
+            elements.addFirst(newElement);
         }
     }
     
@@ -92,7 +114,7 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
     public void endElement(String uri, String localName, String qName) throws SAXException {
         if (SUPPORTED_ELEMENTS.contains(qName)) {
             if (elements.size() > 1) {
-                elements.pop();
+                elements.removeFirst();
             }
         }
     }
@@ -102,16 +124,16 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         String str = new String(ch, start, length).trim();
         if (!str.isEmpty()) {
             CodeUnit unit = new CodeUnit(str);
-            elements.peek().addToken(unit);
+            elements.peekFirst().addToken(unit);
         }
     }
     
     @Override
     protected SrcMlSyntaxElement getAst() {
-        ITranslationUnit unit = elements.pop();
+        ITranslationUnit unit = elements.removeFirst();
         System.out.println("1: ");
         System.out.println(unit);
-        Converter converter = new Converter();
+        IntermediateParser converter = new IntermediateParser();
         converter.convert(unit);
         System.out.println("2: ");
         System.out.println(unit);
@@ -124,5 +146,4 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         System.out.println();
         return null;
     }
-
 }

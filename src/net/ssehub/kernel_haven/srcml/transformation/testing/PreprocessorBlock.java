@@ -1,11 +1,22 @@
 package net.ssehub.kernel_haven.srcml.transformation.testing;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
+import net.ssehub.kernel_haven.srcml.xml.SrcMlConditionGrammar;
+
+/**
+ * Abstract super class for preprocessor if and else blocks.
+ * @author El-Sharkawy
+ *
+ */
 public abstract class PreprocessorBlock implements ITranslationUnit {
     
+    /**
+     * Denotes the exact kind of preprocessor element.
+     * @author El-Sharkawy
+     *
+     */
     public static enum Type {
         IF, IFDEF, IFNDEF, ELSEIF, ELSE;
     }
@@ -26,6 +37,12 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
     private String effectiveCondition;
     private List<ITranslationUnit> nestedElements = new ArrayList<>();
     
+    /**
+     * Sole constructor for sub classes.
+     * @param type Denotes the exact CPP statement.
+     * @param condition The condition of the if, should be in form that the {@link SrcMlConditionGrammar} can handle it,
+     *     may be <tt>null</tt> in case of an <tt>&#35;else</tt>-statement.
+     */
     public PreprocessorBlock(Type type, String condition) {
         this.type = type;
         this.condition = condition;
@@ -49,15 +66,20 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
         return effectiveCondition;
     }
     
+    /**
+     * Sets the effective condition (for all <tt>&#35;else</tt> and <tt>&#35;elif</tt> statements
+     * it considers also the negation of previous blocks).
+     * @param effectiveCondition The effective condition considering previous elements (not the presence condition, also
+     *     considering surrounding blocks!).
+     */
     protected void setEffectiveCondition(String effectiveCondition) {
         this.effectiveCondition = effectiveCondition;
     }
     
-    @Override
-    public Iterator<ITranslationUnit> iterator() {
-        return nestedElements.iterator();
-    }
-    
+    /**
+     * Adds a nested element, which is enclosed by this by preprocessor block.
+     * @param child The nested element to add.
+     */
     public void add(ITranslationUnit child) {
         nestedElements.add(child);
     }

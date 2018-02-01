@@ -6,6 +6,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.code_model.SourceFile;
+import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
  * Basis implementation of visitors/strategies for the SAXparser, which are responsible for the translation of the
@@ -22,7 +23,7 @@ public abstract class AbstractAstConverter extends DefaultHandler {
      * @param path The relative path to the source file in the source tree. Must
      *             not be <code>null</code>.
      */
-    protected AbstractAstConverter(File path) {
+    protected AbstractAstConverter(@NonNull File path) {
         this.file = new SourceFile(path);
     }
     
