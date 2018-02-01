@@ -2,8 +2,8 @@ package net.ssehub.kernel_haven.srcml.transformation.testing.rules;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.List;
 
+import net.ssehub.kernel_haven.srcml.transformation.testing.CodeUnit;
 import net.ssehub.kernel_haven.srcml.transformation.testing.ITranslationUnit;
 import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorBlock;
 import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorBlock.Type;
@@ -64,13 +64,12 @@ public class PreprocessorTranslation implements ITransformationRule {
      */
     private void createElse(@NonNull ITranslationUnit parent, TranslationUnit child) {
         PreprocessorIf startingIf = parents.peekFirst();
-        List<String> tokens = child.getTokenList();
         PreprocessorElse newUnit = null;
         StringBuffer condition = new StringBuffer();
-        for (int i = 2; i < tokens.size(); i++) {
-            condition.append(tokens.get(i));
+        for (int i = 2; i < child.size(); i++) {
+            condition.append(((CodeUnit)child.getNestedElement(i)).getCode());
         }
-        switch (tokens.get(1)) {
+        switch (((CodeUnit)child.getNestedElement(1)).getCode()) {
         case "else":
             newUnit = new PreprocessorElse(Type.ELSE, null, startingIf);
             startingIf.addSibling(newUnit);
@@ -93,13 +92,12 @@ public class PreprocessorTranslation implements ITransformationRule {
      *     into a {@link PreprocessorIf}
      */
     private void createIf(ITranslationUnit parent, TranslationUnit child) {
-        List<String> tokens = child.getTokenList();
         PreprocessorIf newUnit = null;
         StringBuffer condition = new StringBuffer();
-        for (int i = 2; i < tokens.size(); i++) {
-            condition.append(tokens.get(i));
+        for (int i = 2; i < child.size(); i++) {
+            condition.append(((CodeUnit)child.getNestedElement(i)).getCode());
         }
-        switch (tokens.get(1)) {
+        switch (((CodeUnit)child.getNestedElement(1)).getCode()) {
         case "ifdef":
             newUnit = new PreprocessorIf(Type.IFDEF, "defined(" + condition.toString() + ")");
             break;

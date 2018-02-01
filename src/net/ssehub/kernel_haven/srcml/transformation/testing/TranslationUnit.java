@@ -1,12 +1,10 @@
 package net.ssehub.kernel_haven.srcml.transformation.testing;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class TranslationUnit implements ITranslationUnit {
     private String type;
-    private List<String> tokens = new ArrayList<>();
     private List<ITranslationUnit> nestedElements = new ArrayList<>();
     
     public TranslationUnit(String type) {
@@ -14,12 +12,7 @@ public class TranslationUnit implements ITranslationUnit {
     }
     
     public void addToken(CodeUnit token) {
-        tokens.add(token.getCode());
         nestedElements.add(token);
-    }
-    
-    public List<String> getTokenList() {
-        return Collections.unmodifiableList(tokens);
     }
     
     public void addTranslationUnit(TranslationUnit unit) {
