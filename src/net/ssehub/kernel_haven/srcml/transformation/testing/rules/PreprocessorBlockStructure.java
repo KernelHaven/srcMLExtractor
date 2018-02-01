@@ -31,13 +31,18 @@ public class PreprocessorBlockStructure implements ITransformationRule {
         ITranslationUnit child;
     }
     
+    private static class BlockParent {
+        ITranslationUnit parent;
+        PreprocessorBlock child;
+    }
+    
     /**
      * Stores for each {@link PreprocessorBlock} the encapsulated translation units, that are the nodes which are on
      * the same layer but should be nested inside the {@link PreprocessorBlock}
      */
     private Map<PreprocessorBlock, List<NestedElement>> encapsulatedElementsMap = new HashMap<>();
     
-    private Deque<PreprocessorBlock> parentblocks = new ArrayDeque<>();
+    private Deque<BlockParent> parentblocks = new ArrayDeque<>();
 
     @Override
     public void transform(ITranslationUnit base) {
@@ -76,25 +81,31 @@ public class PreprocessorBlockStructure implements ITransformationRule {
      */
     private void identifyStructure(ITranslationUnit parent, ITranslationUnit child) {
         if (child instanceof PreprocessorIf) {
-            markForReording(parent, child);
+            markForReordering(parent, child);
             // Create block, but don't do anything
             PreprocessorIf currentBlock = (PreprocessorIf) child;
+           BlockParent block = new BlockParent();
+           block.parent = parent;
+           block.child = currentBlock;
             getEncapsulatedElements(currentBlock);
-            parentblocks.addFirst(currentBlock);
+            parentblocks.addFirst(block);
         } else if (child instanceof PreprocessorElse) {
             // From now on collect elements for else(if) block
             parentblocks.removeFirst();
-            markForReording(parent, child);
+            markForReordering(parent, child);
             PreprocessorBlock currentBlock = (PreprocessorBlock) child;
             getEncapsulatedElements(currentBlock);
-            parentblocks.addFirst(currentBlock);
+           BlockParent block = new BlockParent();
+           block.parent = parent;
+           block.child = currentBlock;
+            parentblocks.addFirst(block);
         } else if (child instanceof PreprocessorEndIf) {
             // Stop collection
             parentblocks.removeFirst();
             
-            markForReording(parent, child);
+            markForReordering(parent, child);
         } else {
-            markForReording(parent, child);
+            markForReordering(parent, child);
         }
        
         for (int i = 0; i < child.size(); i++) {
@@ -108,18 +119,29 @@ public class PreprocessorBlockStructure implements ITransformationRule {
      * @param parent The current, obsolete parent
      * @param child The child to be moved.
      */
-    private void markForReording(ITranslationUnit parent, ITranslationUnit child) {
-        PreprocessorBlock currentblock = parentblocks.peekFirst();
+    private void markForReordering(ITranslationUnit parent, ITranslationUnit child) {
+//        PreprocessorBlock currentblock = parentblocks.peekFirst();
+        BlockParent currentblock = parentblocks.peekFirst();
         
         /*
          * Mark elements for reordering if their exist a target CPP block
          * Mark PreprocessorEndIfs for removal in any case
          */
-        if ((null != currentblock && parent != currentblock) || (child instanceof PreprocessorEndIf)) {
+        if (null != currentblock && null != currentblock.parent) {
+            boolean isNested = (parent != currentblock.child);
+            boolean isNotSubNested = (currentblock.parent == parent);
+            if (isNested && isNotSubNested) {
+                NestedElement element = new NestedElement();
+                element.parent = parent;
+                element.child = child;
+                getEncapsulatedElements(currentblock.child).add(element);
+            }
+        } else if (child instanceof PreprocessorEndIf) {
             NestedElement element = new NestedElement();
             element.parent = parent;
             element.child = child;
-            getEncapsulatedElements(currentblock).add(element);
+            PreprocessorBlock oldParent = currentblock != null ? currentblock.child : null;
+            getEncapsulatedElements(oldParent).add(element);
         }
     }
 

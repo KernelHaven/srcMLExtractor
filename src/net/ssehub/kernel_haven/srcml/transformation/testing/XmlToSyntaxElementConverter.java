@@ -86,6 +86,7 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         tmpSet.add("decl_stmt");
         tmpSet.add("expr_stmt");
         tmpSet.add("empty_stmt");
+        tmpSet.add("return");
         
         SUPPORTED_ELEMENTS = Collections.unmodifiableSet(tmpSet);
     }

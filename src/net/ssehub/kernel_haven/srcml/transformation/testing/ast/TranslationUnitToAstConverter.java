@@ -81,8 +81,9 @@ public class TranslationUnitToAstConverter {
         case "expr_stmt": // falls through
         case "continue":  // falls through
         case "break":     // falls through
-        case "goto":
-        case "empty_stmt": // falls through
+        case "goto":      // falls through 
+        case "return":    // falls through 
+        case "empty_stmt": 
             return new SingleStatement(pc, sourceFile, new Code(getPc(), sourceFile, ";"));
         
         case "struct":
