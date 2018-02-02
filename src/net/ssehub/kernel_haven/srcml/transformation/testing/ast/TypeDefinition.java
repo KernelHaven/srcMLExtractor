@@ -17,7 +17,7 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
 public class TypeDefinition extends SyntaxElementWithChildreen {
 
     public static enum TypeDefType {
-        STRUCT, ENUM, TYPEDEF;
+        STRUCT, ENUM, TYPEDEF, UNION;
     }
     
     private SyntaxElement declaration;

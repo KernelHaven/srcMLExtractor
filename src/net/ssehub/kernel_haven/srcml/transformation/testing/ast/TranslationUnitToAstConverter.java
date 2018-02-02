@@ -154,6 +154,12 @@ public class TranslationUnitToAstConverter {
         case "typedef":
             // TODO SE: Consider that a typedef may also contain a parsed syntax element
             return createTypeDef(unit, pc, TypeDefType.TYPEDEF, -1, 0, unit.size() - 2);
+        case "union":
+            /*
+             * 2nd last nested is the union block (definition of attributes).
+             * Last is a semicolon, which is no longer needed -> will be removed
+             */
+            return createTypeDef(unit, pc, TypeDefType.UNION, unit.size() - 2, 0, unit.size() - 3);
             
         case "unit": {
             File file = new File(pc, sourceFile);
