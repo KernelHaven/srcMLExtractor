@@ -9,6 +9,7 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
  * Represents a declaration (and initialization) of a new data structure, outside of a function. More precisely one of:
  * <ul>
  *     <li><a href="http://www.srcml.org/doc/c_srcML.html#struct-definition">Struct definition/declaration</a></li>
+ *     <li><a href="http://www.srcml.org/doc/c_srcML.html#enum-definition">Enum definition/declaration</a></li>
  * </ul>
  * @author El-Sharkawy
  *
@@ -16,7 +17,7 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
 public class TypeDefinition extends SyntaxElementWithChildreen {
 
     public static enum TypeDefType {
-        STRUCT, ENUM;
+        STRUCT, ENUM, TYPEDEF;
     }
     
     private SyntaxElement declaration;

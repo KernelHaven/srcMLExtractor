@@ -151,6 +151,9 @@ public class TranslationUnitToAstConverter {
 //                struct.addNestedElement(structContent);
 //            }
 //            return struct;
+        case "typedef":
+            // TODO SE: Consider that a typedef may also contain a parsed syntax element
+            return createTypeDef(unit, pc, TypeDefType.TYPEDEF, -1, 0, unit.size() - 2);
             
         case "unit": {
             File file = new File(pc, sourceFile);
@@ -200,9 +203,11 @@ public class TranslationUnitToAstConverter {
 
     private SyntaxElement createTypeDef(TranslationUnit unit, Formula pc, TypeDefType type, int blockIndex, int condStartIndex, int condEndIndex) {
         TypeDefinition typeDef = new TypeDefinition(pc, sourceFile, makeCode(unit, condStartIndex, condEndIndex), type);
-        SyntaxElement typeDefContent = convert(unit.getNestedElement(blockIndex)); // TODO
-        if (typeDefContent != null) {
-            typeDef.addNestedElement(typeDefContent);
+        if (-1 != blockIndex) {
+            SyntaxElement typeDefContent = convert(unit.getNestedElement(blockIndex)); // TODO
+            if (typeDefContent != null) {
+                typeDef.addNestedElement(typeDefContent);
+            }
         }
         return typeDef;
     }
