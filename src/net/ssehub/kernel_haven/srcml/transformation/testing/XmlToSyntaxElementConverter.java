@@ -78,6 +78,7 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         tmpSet.add("do");
         tmpSet.add("switch");
         tmpSet.add("case");
+        tmpSet.add("default");
         tmpSet.add("break");
         tmpSet.add("continue");
         tmpSet.add("goto");
