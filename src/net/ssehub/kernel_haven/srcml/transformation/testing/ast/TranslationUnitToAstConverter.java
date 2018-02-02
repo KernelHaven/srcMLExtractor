@@ -79,6 +79,7 @@ public class TranslationUnitToAstConverter {
         
         switch (unit.getType()) {
         
+        case "label":     // falls through TODO SE: Labels will currently treated as statement
         case "decl_stmt": // falls through
         case "expr_stmt": // falls through
         case "continue":  // falls through
