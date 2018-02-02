@@ -26,11 +26,16 @@ public class Preprocessing {
      * @param baseUnit The root element of the AST, which represents to complete parsed file.
      */
     public void convert(ITranslationUnit baseUnit) {
+        // Preprocessor statements
         ITransformationRule rule = new PreprocessorTranslation();
         rule.transform(baseUnit);
         rule = new PreprocessorBlockStructure();
         rule.transform(baseUnit);
         rule = new PreprocessorConditionComputationRule();
+        rule.transform(baseUnit);
+        
+        // C-Code
+        rule = new SwitchCaseStructure();
         rule.transform(baseUnit);
     }
 }
