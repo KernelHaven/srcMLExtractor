@@ -14,7 +14,7 @@ import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.srcml.model.SrcMlSyntaxElement;
 import net.ssehub.kernel_haven.srcml.transformation.testing.ast.SyntaxElement;
 import net.ssehub.kernel_haven.srcml.transformation.testing.ast.TranslationUnitToAstConverter;
-import net.ssehub.kernel_haven.srcml.transformation.testing.rules.IntermediateParser;
+import net.ssehub.kernel_haven.srcml.transformation.testing.rules.Preprocessing;
 import net.ssehub.kernel_haven.srcml.xml.AbstractAstConverter;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
@@ -23,7 +23,7 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
  * in 3 steps:
  * <ol>
  *     <li>The XML output is parsed by this class to create {@link ITranslationUnit}s.</li>
- *     <li>The {@link ITranslationUnit}s are refined by the {@link IntermediateParser} to be closer to the target AST structure,
+ *     <li>The {@link ITranslationUnit}s are refined by the {@link Preprocessing} to be closer to the target AST structure,
  *     to simplify the final parsing.</li>
  *     <li>The {@link ITranslationUnit}s are parsed into {@link SyntaxElement} by the
  *     {@link TranslationUnitToAstConverter}</li>
@@ -137,7 +137,7 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         ITranslationUnit unit = elements.removeFirst();
         System.out.println("1: ");
         System.out.println(unit);
-        IntermediateParser converter = new IntermediateParser();
+        Preprocessing converter = new Preprocessing();
         converter.convert(unit);
         System.out.println("2: ");
         System.out.println(unit);

@@ -19,7 +19,7 @@ import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorEndIf;
  * @author El-Sharkawy
  *
  */
-public class IntermediateParser {
+public class Preprocessing {
     
     /**
      * Restructures the {@link ITranslationUnit}s.

@@ -146,15 +146,16 @@ public class TranslationUnitToAstConverter {
              * Last is a semicolon, which is no longer needed -> will be removed
              */
             return createTypeDef(unit, pc, TypeDefType.STRUCT, unit.size() - 2, 0, unit.size() - 3);
-//            Struct struct = new Struct(pc, sourceFile, makeCode(unit, 0, unit.size() - 3));
-//            SyntaxElement structContent = convert(unit.getNestedElement(unit.size() - 2)); // TODO
-//            if (structContent != null) {
-//                struct.addNestedElement(structContent);
-//            }
-//            return struct;
         case "typedef":
-            // TODO SE: Consider that a typedef may also contain a parsed syntax element
-            return createTypeDef(unit, pc, TypeDefType.TYPEDEF, -1, 0, unit.size() - 2);
+            /*
+             * * A typedef maybe has a block-statement at the second definition, if it combines the definition of a
+             *   struct with an alias/typedef of the new struct. Thus, we need to check if we also need to parse the
+             *   second nested element.
+             * * Last is a semicolon, which is no longer needed -> will be removed
+             */
+            int blockIndex = (unit.size() >= 2 && !(unit.getNestedElement(1) instanceof CodeUnit)) ? 1 : -1;
+            int startIndex = (blockIndex != -1) ? blockIndex + 1: 0;
+            return createTypeDef(unit, pc, TypeDefType.TYPEDEF, blockIndex, startIndex, unit.size() - 2);
         case "union":
             /*
              * 2nd last nested is the union block (definition of attributes).
@@ -208,8 +209,30 @@ public class TranslationUnitToAstConverter {
         return null;
     }
 
-    private SyntaxElement createTypeDef(TranslationUnit unit, Formula pc, TypeDefType type, int blockIndex, int condStartIndex, int condEndIndex) {
-        TypeDefinition typeDef = new TypeDefinition(pc, sourceFile, makeCode(unit, condStartIndex, condEndIndex), type);
+    private boolean isInline(TranslationUnit unit) {
+        boolean isInline = false;
+        if (unit.size() > 0) {
+            ITranslationUnit lastElement = unit.getNestedElement(unit.size() - 1);
+            if (!(lastElement instanceof CodeUnit && ";".equals(((CodeUnit) lastElement).getCode()))) {
+                isInline = true;
+            }
+        }
+        return isInline;
+    }
+
+    private SyntaxElement createTypeDef(TranslationUnit unit, Formula pc, TypeDefType type, int blockIndex, int declStartIndex, int declEndIndex) {
+        /*
+         * blockIndex and declEndIndex are computed from the end, expecting as last element a semicolon, which is only
+         * optional. This will fix the indices.
+         */
+        if (isInline(unit)) {
+            if (-1 != blockIndex) {
+                blockIndex++;
+            }
+            declEndIndex++;
+        }
+        
+        TypeDefinition typeDef = new TypeDefinition(pc, sourceFile, makeCode(unit, declStartIndex, declEndIndex), type);
         if (-1 != blockIndex) {
             SyntaxElement typeDefContent = convert(unit.getNestedElement(blockIndex)); // TODO
             if (typeDefContent != null) {
