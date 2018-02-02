@@ -59,8 +59,8 @@ public class NewConverterCTest {
     @Test
     public void test() {
 //        SourceFile ast = loadFile("Komplex2.c");
-//        SourceFile ast = loadFile("../test.c");
-        SourceFile ast = loadFile("../blubb.c");
+        SourceFile ast = loadFile("../test.c");
+//        SourceFile ast = loadFile("../blubb.c");
 //        SourceFile ast = loadFile("../NestedCppIfs.c");
         List<SyntaxElement> elements = getElements(ast);
         System.out.println(ast.iterator().next());

@@ -12,6 +12,7 @@ import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorIf;
 import net.ssehub.kernel_haven.srcml.transformation.testing.TranslationUnit;
 import net.ssehub.kernel_haven.srcml.transformation.testing.ast.CppBlock.Type;
 import net.ssehub.kernel_haven.srcml.transformation.testing.ast.Loop.LoopType;
+import net.ssehub.kernel_haven.srcml.transformation.testing.ast.TypeDefinition.TypeDefType;
 import net.ssehub.kernel_haven.util.logic.Conjunction;
 import net.ssehub.kernel_haven.util.logic.Formula;
 import net.ssehub.kernel_haven.util.logic.True;
@@ -131,18 +132,25 @@ public class TranslationUnitToAstConverter {
             }
             
             return elseBlock;
-            
+        
+        case "enum":
+            /*
+             * 2nd last nested is the enum block (definition of literals).
+             * Last is a semicolon, which is no longer needed -> will be removed
+             */
+            return createTypeDef(unit, pc, TypeDefType.ENUM, unit.size() - 2, 0, unit.size() - 3);
         case "struct":
             /*
              * 2nd last nested is the struct block (definition of attributes).
              * Last is a semicolon, which is no longer needed -> will be removed
              */
-            Struct struct = new Struct(pc, sourceFile, makeCode(unit, 0, unit.size() - 3));
-            SyntaxElement structContent = convert(unit.getNestedElement(unit.size() - 2)); // TODO
-            if (structContent != null) {
-                struct.addNestedElement(structContent);
-            }
-            return struct;
+            return createTypeDef(unit, pc, TypeDefType.STRUCT, unit.size() - 2, 0, unit.size() - 3);
+//            Struct struct = new Struct(pc, sourceFile, makeCode(unit, 0, unit.size() - 3));
+//            SyntaxElement structContent = convert(unit.getNestedElement(unit.size() - 2)); // TODO
+//            if (structContent != null) {
+//                struct.addNestedElement(structContent);
+//            }
+//            return struct;
             
         case "unit": {
             File file = new File(pc, sourceFile);
@@ -188,6 +196,15 @@ public class TranslationUnitToAstConverter {
 
         // TODO
         return null;
+    }
+
+    private SyntaxElement createTypeDef(TranslationUnit unit, Formula pc, TypeDefType type, int blockIndex, int condStartIndex, int condEndIndex) {
+        TypeDefinition typeDef = new TypeDefinition(pc, sourceFile, makeCode(unit, condStartIndex, condEndIndex), type);
+        SyntaxElement typeDefContent = convert(unit.getNestedElement(blockIndex)); // TODO
+        if (typeDefContent != null) {
+            typeDef.addNestedElement(typeDefContent);
+        }
+        return typeDef;
     }
 
     private Loop createLoop(TranslationUnit unit, LoopType type, int blockIndex, int condStartIndex, int condEndIndex) {
