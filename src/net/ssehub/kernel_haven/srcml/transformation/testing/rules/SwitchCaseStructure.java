@@ -55,7 +55,8 @@ public class SwitchCaseStructure implements ITransformationRule {
                 TranslationUnit caseStatement = (TranslationUnit) nested;
                 int startIndex = i + 1;
                 boolean nextCaseReached = false;
-                while (startIndex < switchBlock.size() && !nextCaseReached) {
+                // Very last element is closing bracket of the block, this shall be skipped
+                while (startIndex < switchBlock.size() - 1 && !nextCaseReached) {
                     ITranslationUnit elementToMove = switchBlock.getNestedElement(startIndex);
                     if (!isCaseStatement(elementToMove)) {
                         caseStatement.add(elementToMove);

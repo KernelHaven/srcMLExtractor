@@ -10,6 +10,7 @@ import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorBlock;
 import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorElse;
 import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorIf;
 import net.ssehub.kernel_haven.srcml.transformation.testing.TranslationUnit;
+import net.ssehub.kernel_haven.srcml.transformation.testing.ast.CaseStatement.CaseType;
 import net.ssehub.kernel_haven.srcml.transformation.testing.ast.CppBlock.Type;
 import net.ssehub.kernel_haven.srcml.transformation.testing.ast.Loop.LoopType;
 import net.ssehub.kernel_haven.srcml.transformation.testing.ast.TypeDefinition.TypeDefType;
@@ -203,10 +204,45 @@ public class TranslationUnitToAstConverter {
             return block;
         }
         
+        case "switch":
+            /*
+             * Last element is switch-BLock, before comes the condition
+             */
+            SwitchStatement switchStatement = new SwitchStatement(getPc(), sourceFile,
+                makeCode(unit, 0, unit.size() - 2));
+            SyntaxElement switchBlock = convert(unit.getNestedElement(unit.size() - 1)); // TODO
+            if (switchBlock != null) {
+                switchStatement.addNestedElement(switchBlock);
+            }
+            return switchStatement;
+        
+        case "case":
+            /*
+             * 3 Elements belong to the condition, afterwards come nested statements
+             */
+            return convertCaseStatement(unit, 2, CaseType.CASE);
+        
+        case "default":
+            /*
+             * First Element is the condition, afterwards come nested statements
+             */
+            return convertCaseStatement(unit, 0, CaseType.DEFAULT);
+        
         }
 
         // TODO
         return null;
+    }
+
+    private CaseStatement convertCaseStatement(TranslationUnit unit, int condEndIndex, CaseType type) {
+        CaseStatement caseStatement = new CaseStatement(getPc(), sourceFile, makeCode(unit, 0, condEndIndex), CaseType.CASE);
+        for (int i = condEndIndex + 1; i < unit.size(); i++) {
+            SyntaxElement nestedStatement = convert(unit.getNestedElement(i)); // TODO
+            if (caseStatement != null) {
+                caseStatement.addNestedElement(nestedStatement);
+            }
+        }
+        return caseStatement;
     }
 
     private boolean isInline(TranslationUnit unit) {
@@ -217,6 +253,7 @@ public class TranslationUnitToAstConverter {
                 isInline = true;
             }
         }
+        
         return isInline;
     }
 
