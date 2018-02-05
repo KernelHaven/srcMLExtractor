@@ -12,8 +12,10 @@ import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorIf;
 import net.ssehub.kernel_haven.srcml.transformation.testing.TranslationUnit;
 import net.ssehub.kernel_haven.srcml.transformation.testing.ast.CaseStatement.CaseType;
 import net.ssehub.kernel_haven.srcml.transformation.testing.ast.CppBlock.Type;
+import net.ssehub.kernel_haven.srcml.transformation.testing.ast.ElseStatement.ElseType;
 import net.ssehub.kernel_haven.srcml.transformation.testing.ast.Loop.LoopType;
 import net.ssehub.kernel_haven.srcml.transformation.testing.ast.TypeDefinition.TypeDefType;
+import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.logic.Conjunction;
 import net.ssehub.kernel_haven.util.logic.Formula;
 import net.ssehub.kernel_haven.util.logic.True;
@@ -80,7 +82,6 @@ public class TranslationUnitToAstConverter {
         
         switch (unit.getType()) {
         
-        case "label":     // falls through TODO SE: Labels will currently treated as statement
         case "decl_stmt": // falls through
         case "expr_stmt": // falls through
         case "continue":  // falls through
@@ -89,6 +90,9 @@ public class TranslationUnitToAstConverter {
         case "return":    // falls through 
         case "empty_stmt": 
             return new SingleStatement(pc, sourceFile, makeCode(unit, 0, unit.size() - 1));
+        case "label":
+            return new Label(pc, sourceFile, makeCode(unit, 0, unit.size() - 1));
+        
         case "for":
             // Last nested is the loop block, everything before is the condition
             return createLoop(unit, LoopType.FOR, unit.size() - 1, 0, unit.size() - 2);
@@ -117,10 +121,36 @@ public class TranslationUnitToAstConverter {
                 }
             }
             return ifStatement;
-        
+            
+        case "elseif":
+            // Determine last code element
+            int lastCodeElement = -1;
+            while (!(unit.getNestedElement((lastCodeElement + 1)) instanceof TranslationUnit)) {
+                lastCodeElement++;
+            }
+            
+            if (lastCodeElement >= 0) {
+                SyntaxElement condition = makeCode(unit, 0, lastCodeElement);
+                ElseStatement elifBlock = new ElseStatement(pc, sourceFile, condition, ElseType.ELSE_IF);
+                for (int i = 0; i < unit.size(); i++) {
+                    ITranslationUnit child = unit.getNestedElement(i);
+                    if (child instanceof CodeUnit) {
+                        // ignore { and }
+                    } else {
+                        SyntaxElement converted = convert(child); // TODO
+                        if (converted != null) {
+                            elifBlock.addNestedElement(converted);
+                        }
+                    }
+                }
+                return elifBlock;
+            } else {
+                Logger.get().logError("Unexpected structure of elseif-statement: " + unit.toString());
+            }
+            
         case "else":
-            // TODO SE: @Adam Proper data type required, elseif still missing
-            CompoundStatement elseBlock = new CompoundStatement(pc, sourceFile);
+            // TODO SE: @Adam elseif still missing
+            ElseStatement elseBlock = new ElseStatement(pc, sourceFile, null, ElseType.ELSE);
             for (int i = 0; i < unit.size(); i++) {
                 ITranslationUnit child = unit.getNestedElement(i);
                 if (child instanceof CodeUnit) {

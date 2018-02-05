@@ -35,6 +35,8 @@ public class Preprocessing {
         rule.transform(baseUnit);
         
         // C-Code
+        rule = new ElseIfFixture();
+        rule.transform(baseUnit);
         rule = new SwitchCaseStructure();
         rule.transform(baseUnit);
     }
