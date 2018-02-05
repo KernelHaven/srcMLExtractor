@@ -28,6 +28,7 @@ import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.logic.Conjunction;
 import net.ssehub.kernel_haven.util.logic.Formula;
 import net.ssehub.kernel_haven.util.logic.True;
+import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
  * Translates the {@link ITranslationUnit}-structure into a {@link SyntaxElement} (AST). This is the final parsing step.
@@ -37,11 +38,14 @@ import net.ssehub.kernel_haven.util.logic.True;
  */
 public class TranslationUnitToAstConverter {
 
-    private Stack<Formula> cppConditions;
-    private java.io.File sourceFile;
+    private @NonNull Stack<@NonNull Formula> cppPresenceConditions;
+    private @NonNull Stack<@NonNull Formula> cppEffectiveConditions;
     
-    public TranslationUnitToAstConverter(java.io.File sourceFile) {
-        cppConditions = new Stack<>();
+    private java.io. @NonNull File sourceFile;
+    
+    public TranslationUnitToAstConverter(java.io. @NonNull File sourceFile) {
+        cppPresenceConditions = new Stack<>();
+        cppEffectiveConditions = new Stack<>();
         this.sourceFile = sourceFile;
     }
     
@@ -51,7 +55,11 @@ public class TranslationUnitToAstConverter {
      * @return The current presence condition (may be {@link True#INSTANCE} in case of no presence condition).
      */
     private Formula getPc() {
-        return cppConditions.isEmpty() ? True.INSTANCE : cppConditions.peek();
+        return cppPresenceConditions.isEmpty() ? True.INSTANCE : cppPresenceConditions.peek();
+    }
+    
+    private Formula getEffectiveCondition() {
+        return cppEffectiveConditions.isEmpty() ? True.INSTANCE : cppEffectiveConditions.peek();
     }
     
     /**
@@ -59,13 +67,19 @@ public class TranslationUnitToAstConverter {
      * the result on top of the stack.
      * @param cppCondition
      */
-    private void pushFormula(Formula cppCondition) {
-        if (cppConditions.isEmpty()) {
-            cppConditions.push(cppCondition);
+    private void pushFormula(@NonNull Formula cppCondition) {
+        cppEffectiveConditions.push(cppCondition);
+        if (cppPresenceConditions.isEmpty()) {
+            cppPresenceConditions.push(cppCondition);
         } else {
             // TODO SE: Use of a cache?
-            cppConditions.push(new Conjunction(cppConditions.peek(), cppCondition));
+            cppPresenceConditions.push(new Conjunction(cppPresenceConditions.peek(), cppCondition));
         }
+    }
+    
+    private void popFormula() {
+        cppPresenceConditions.pop();
+        cppEffectiveConditions.pop();
     }
     
     /**
@@ -98,9 +112,15 @@ public class TranslationUnitToAstConverter {
         case "goto":      // falls through 
         case "return":    // falls through 
         case "empty_stmt": 
-            return new SingleStatement(pc, sourceFile, makeCode(unit, 0, unit.size() - 1));
+            SingleStatement singleStatement = new SingleStatement(pc, makeCode(unit, 0, unit.size() - 1));
+            singleStatement.setSourceFile(sourceFile);
+            singleStatement.setCondition(getEffectiveCondition());
+            return singleStatement;
         case "label":
-            return new Label(pc, sourceFile, makeCode(unit, 0, unit.size() - 1));
+            Label label = new Label(pc, makeCode(unit, 0, unit.size() - 1));
+            label.setSourceFile(sourceFile);
+            label.setCondition(getEffectiveCondition());
+            return label;
         
         case "for":
             // Last nested is the loop block, everything before is the condition
@@ -122,12 +142,12 @@ public class TranslationUnitToAstConverter {
                     lastConditionElement = (i - 1);
                 }
             }
-            IfStructure ifStatement = new IfStructure(pc, sourceFile, makeCode(unit, 0, lastConditionElement));
+            IfStructure ifStatement = new IfStructure(pc, makeCode(unit, 0, lastConditionElement));
+            ifStatement.setSourceFile(sourceFile);
+            ifStatement.setCondition(getEffectiveCondition());
             for (int i = lastConditionElement + 1; i < unit.size(); i++) {
-                SyntaxElement converted = convert(unit.getNestedElement(i)); // TODO SE: handle else and elseif
-                if (converted != null) {
-                    ifStatement.addNestedElement(converted);
-                }
+                // TODO SE: handle else and elseif
+                ifStatement.addNestedElement(convert(unit.getNestedElement(i)));
             }
             return ifStatement;
             
@@ -140,16 +160,15 @@ public class TranslationUnitToAstConverter {
             
             if (lastCodeElement >= 0) {
                 SyntaxElement condition = makeCode(unit, 0, lastCodeElement);
-                ElseStatement elifBlock = new ElseStatement(pc, sourceFile, condition, ElseType.ELSE_IF);
+                ElseStatement elifBlock = new ElseStatement(pc, condition, ElseType.ELSE_IF);
+                elifBlock.setSourceFile(sourceFile);
+                elifBlock.setCondition(getEffectiveCondition());
                 for (int i = 0; i < unit.size(); i++) {
                     ITranslationUnit child = unit.getNestedElement(i);
                     if (child instanceof CodeUnit) {
                         // ignore { and }
                     } else {
-                        SyntaxElement converted = convert(child); // TODO
-                        if (converted != null) {
-                            elifBlock.addNestedElement(converted);
-                        }
+                        elifBlock.addNestedElement(convert(child));
                     }
                 }
                 return elifBlock;
@@ -159,16 +178,15 @@ public class TranslationUnitToAstConverter {
             
         case "else":
             // TODO SE: @Adam elseif still missing
-            ElseStatement elseBlock = new ElseStatement(pc, sourceFile, null, ElseType.ELSE);
+            ElseStatement elseBlock = new ElseStatement(pc, null, ElseType.ELSE);
+            elseBlock.setSourceFile(sourceFile);
+            elseBlock.setCondition(getEffectiveCondition());
             for (int i = 0; i < unit.size(); i++) {
                 ITranslationUnit child = unit.getNestedElement(i);
                 if (child instanceof CodeUnit) {
                     // ignore { and }
                 } else {
-                    SyntaxElement converted = convert(child); // TODO
-                    if (converted != null) {
-                        elseBlock.addNestedElement(converted);
-                    }
+                    elseBlock.addNestedElement(convert(child));
                 }
             }
             
@@ -204,39 +222,36 @@ public class TranslationUnitToAstConverter {
             return createTypeDef(unit, pc, TypeDefType.UNION, unit.size() - 2, 0, unit.size() - 3);
             
         case "unit": {
-            File file = new File(pc, sourceFile);
+            File file = new File(pc);
+            file.setSourceFile(sourceFile);
+            file.setCondition(getEffectiveCondition());
             for (int i = 0; i < unit.size(); i++) {
-                SyntaxElement converted = convert(unit.getNestedElement(i)); // TODO
-                if (converted != null) {
-                    file.addNestedElement(converted);
-                }
+                file.addNestedElement(convert(unit.getNestedElement(i)));
             }
             
             return file;
         }
         
         case "function": {
-            Function f = new Function(pc, sourceFile, makeCode(unit, 0, unit.size() - 2)); // last nested is the function block
+            Function f = new Function(pc, makeCode(unit, 0, unit.size() - 2)); // last nested is the function block
+            f.setSourceFile(sourceFile);
+            f.setCondition(getEffectiveCondition());
             
-            SyntaxElement converted = convert(unit.getNestedElement(unit.size() - 1)); // TODO
-            if (converted != null) {
-                f.addNestedElement(converted);
-            }
+            f.addNestedElement(convert(unit.getNestedElement(unit.size() - 1)));
             
             return f;
         }
         
         case "block": {
-            CompoundStatement block = new CompoundStatement(pc, sourceFile);
+            CompoundStatement block = new CompoundStatement(pc);
+            block.setSourceFile(sourceFile);
+            block.setCondition(getEffectiveCondition());
             for (int i = 0; i < unit.size(); i++) {
                 ITranslationUnit child = unit.getNestedElement(i);
                 if (child instanceof CodeUnit) {
                     // ignore { and }
                 } else {
-                    SyntaxElement converted = convert(child); // TODO
-                    if (converted != null) {
-                        block.addNestedElement(converted);
-                    }
+                    block.addNestedElement(convert(child));
                 }
             }
             
@@ -247,12 +262,10 @@ public class TranslationUnitToAstConverter {
             /*
              * Last element is switch-BLock, before comes the condition
              */
-            SwitchStatement switchStatement = new SwitchStatement(getPc(), sourceFile,
-                makeCode(unit, 0, unit.size() - 2));
-            SyntaxElement switchBlock = convert(unit.getNestedElement(unit.size() - 1)); // TODO
-            if (switchBlock != null) {
-                switchStatement.addNestedElement(switchBlock);
-            }
+            SwitchStatement switchStatement = new SwitchStatement(getPc(), makeCode(unit, 0, unit.size() - 2));
+            switchStatement.setSourceFile(sourceFile);
+            switchStatement.setCondition(getEffectiveCondition());
+            switchStatement.addNestedElement(convert(unit.getNestedElement(unit.size() - 1)));
             return switchStatement;
         
         case "case":
@@ -269,17 +282,15 @@ public class TranslationUnitToAstConverter {
         
         }
 
-        // TODO
-        return null;
+        throw new RuntimeException("Unexpected unit type: " + unit.getType());
     }
 
     private CaseStatement convertCaseStatement(TranslationUnit unit, int condEndIndex, CaseType type) {
-        CaseStatement caseStatement = new CaseStatement(getPc(), sourceFile, makeCode(unit, 0, condEndIndex), CaseType.CASE);
+        CaseStatement caseStatement = new CaseStatement(getPc(), makeCode(unit, 0, condEndIndex), CaseType.CASE);
+        caseStatement.setSourceFile(sourceFile);
+        caseStatement.setCondition(getEffectiveCondition());
         for (int i = condEndIndex + 1; i < unit.size(); i++) {
-            SyntaxElement nestedStatement = convert(unit.getNestedElement(i)); // TODO
-            if (caseStatement != null) {
-                caseStatement.addNestedElement(nestedStatement);
-            }
+            caseStatement.addNestedElement(convert(unit.getNestedElement(i)));
         }
         return caseStatement;
     }
@@ -308,12 +319,11 @@ public class TranslationUnitToAstConverter {
             declEndIndex++;
         }
         
-        TypeDefinition typeDef = new TypeDefinition(pc, sourceFile, makeCode(unit, declStartIndex, declEndIndex), type);
+        TypeDefinition typeDef = new TypeDefinition(pc, makeCode(unit, declStartIndex, declEndIndex), type);
+        typeDef.setSourceFile(sourceFile);
+        typeDef.setCondition(getEffectiveCondition());
         if (-1 != blockIndex) {
-            SyntaxElement typeDefContent = convert(unit.getNestedElement(blockIndex)); // TODO
-            if (typeDefContent != null) {
-                typeDef.addNestedElement(typeDefContent);
-            }
+            typeDef.addNestedElement(convert(unit.getNestedElement(blockIndex)));
         }
         return typeDef;
     }
@@ -321,28 +331,26 @@ public class TranslationUnitToAstConverter {
     private Loop createLoop(TranslationUnit unit, LoopType type, int blockIndex, int condStartIndex, int condEndIndex) {
         
         SyntaxElement condition = makeCode(unit, condStartIndex, condEndIndex);
-        Loop cStructure = new Loop(getPc(), sourceFile, condition, type);
-        SyntaxElement loopBlock = convert(unit.getNestedElement(blockIndex)); // TODO
-        if (loopBlock != null) {
-            cStructure.addNestedElement(loopBlock);
-        }
-        return cStructure;
+        Loop loop = new Loop(getPc(),  condition, type);
+        loop.setSourceFile(sourceFile);
+        loop.setCondition(getEffectiveCondition());
+        loop.addNestedElement(convert(unit.getNestedElement(blockIndex)));
+        return loop;
     }
     
     private SyntaxElement convertPreprocessorBlock(PreprocessorBlock cppBlock) {
         Formula condition = cppBlock.getEffectiveCondition();
         pushFormula(condition);
         Type type = Type.valueOf(cppBlock.getType());
-        CppBlock translatedBlock = new CppBlock(getPc(), sourceFile, condition, type);
+        CppBlock translatedBlock = new CppBlock(getPc(), condition, type);
+        translatedBlock.setSourceFile(sourceFile);
+        translatedBlock.setCondition(getEffectiveCondition());
         
         for (int i = 0; i < cppBlock.size(); i++) {
             ITranslationUnit child = cppBlock.getNestedElement(i);
-            SyntaxElement converted = convert(child); // TODO
-            if (converted != null) {
-                translatedBlock.addNestedElement(converted);
-            }
+            translatedBlock.addNestedElement(convert(child));
         }
-        cppConditions.pop();
+        popFormula();
         
         return translatedBlock;
     }
@@ -363,12 +371,17 @@ public class TranslationUnitToAstConverter {
                 code.append(((CodeUnit) child).getCode());
             } else if (child instanceof PreprocessorBlock) {
                 Formula condition = ((PreprocessorBlock) child).getEffectiveCondition();
-                result.add(new Code(getPc(), sourceFile, code.toString()));
+                Code codeElement = new Code(getPc(), code.toString());
+                codeElement.setSourceFile(sourceFile);
+                codeElement.setCondition(getEffectiveCondition());
+                result.add(codeElement);
                 
                 pushFormula(condition);
                 code = new StringBuilder();
                 Type type = Type.valueOf(((PreprocessorBlock) child).getType());
-                CppBlock cppif = new CppBlock(getPc(), sourceFile, condition, type);
+                CppBlock cppif = new CppBlock(getPc(), condition, type);
+                cppif.setSourceFile(sourceFile);
+                cppif.setCondition(getEffectiveCondition());
                 SyntaxElement nested = makeCode(child, 0, child.size() - 1);
                 if (nested instanceof CodeList) {
                     for (int j = 0; j < nested.getNestedElementCount(); j++) {
@@ -379,7 +392,7 @@ public class TranslationUnitToAstConverter {
                 }
                 
                 result.add(cppif);
-                cppConditions.pop();
+                popFormula();
             } else {
                 throw new RuntimeException("makeCode() Expected "
                     + CodeUnit.class.getSimpleName() + "CodeUnit or " + PreprocessorBlock.class.getSimpleName()
@@ -389,7 +402,10 @@ public class TranslationUnitToAstConverter {
         }
         
         if (code.length() > 0) {
-            result.add(new Code(getPc(), sourceFile, code.toString()));
+            Code codeElement = new Code(getPc(), code.toString());
+            codeElement.setSourceFile(sourceFile);
+            codeElement.setCondition(getEffectiveCondition());
+            result.add(codeElement);
         }
         
         if (result.size() == 0) {
@@ -399,7 +415,9 @@ public class TranslationUnitToAstConverter {
             return result.get(0);
             
         } else {
-            CodeList list = new CodeList(getPc(), sourceFile);
+            CodeList list = new CodeList(getPc());
+            list.setSourceFile(sourceFile);
+            list.setCondition(getEffectiveCondition());
             for (SyntaxElement r : result) {
                 list.addNestedElement(r);
             }

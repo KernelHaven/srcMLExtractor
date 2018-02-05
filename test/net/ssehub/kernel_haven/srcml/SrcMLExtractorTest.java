@@ -19,8 +19,8 @@ public class SrcMLExtractorTest extends AbstractSrcMLExtractorTest {
     public void test() {
         SrcMLExtractor.USE_NEW_CONVERTER = true;
 //        SourceFile ast = loadFile("FunctionsAndCPP.c");
-//        SourceFile ast = loadFile("NestedCppIfs.c");
-        SourceFile ast = loadFile("test.c");
+        SourceFile ast = loadFile("NestedCppIfs.c");
+//        SourceFile ast = loadFile("test.c");
 //        SourceFile ast = loadFile("FunctionWithIfdefHeader.c");
 //        SourceFile ast = loadFile("test2.c");
         System.out.println(ast.iterator().next());
