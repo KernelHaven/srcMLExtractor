@@ -23,4 +23,9 @@ public class SingleStatement extends SyntaxElement {
         return "Statement:\n" + code.toString("\t\t\t\t");
     }
 
+    @Override
+    public void accept(ISyntaxElementVisitor visitor) {
+        visitor.visitSingleStatement(this);
+    }
+
 }

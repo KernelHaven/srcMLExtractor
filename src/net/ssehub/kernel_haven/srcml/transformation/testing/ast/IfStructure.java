@@ -13,10 +13,19 @@ public class IfStructure extends SyntaxElementWithChildreen {
         super(presenceCondition, sourceFile);
         this.condition = condition;
     }
+    
+    public SyntaxElement getIfCondition() {
+        return condition;
+    }
 
     @Override
     protected String elementToString() {
         return "if\n" + (condition == null ? "\t\t\t\tnull" : condition.toString("\t\t\t\t")); // TODO
+    }
+
+    @Override
+    public void accept(@NonNull ISyntaxElementVisitor visitor) {
+        visitor.visitIfStructure(this);
     }
 
 }

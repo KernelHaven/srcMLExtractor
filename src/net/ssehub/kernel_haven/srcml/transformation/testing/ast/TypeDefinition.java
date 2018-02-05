@@ -30,11 +30,20 @@ public class TypeDefinition extends SyntaxElementWithChildreen {
         this.declaration = declaration;
         this.type = type;
     }
+    
+    public SyntaxElement getDeclaration() {
+        return declaration;
+    }
 
     @Override
     protected String elementToString() {
         return type.name() + "-Definition\n"
             + (declaration == null ? "\t\t\t\tnull" : declaration.toString("\t\t\t\t")); // TODO
+    }
+
+    @Override
+    public void accept(ISyntaxElementVisitor visitor) {
+        visitor.visitTypeDefinition(this);
     }
 
 }

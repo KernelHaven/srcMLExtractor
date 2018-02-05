@@ -15,5 +15,10 @@ public class CodeList extends SyntaxElementWithChildreen {
     protected String elementToString() {
         return "CodeList";
     }
+
+    @Override
+    public void accept(@NonNull ISyntaxElementVisitor visitor) {
+        visitor.visitCodeList(this);
+    }
     
 }

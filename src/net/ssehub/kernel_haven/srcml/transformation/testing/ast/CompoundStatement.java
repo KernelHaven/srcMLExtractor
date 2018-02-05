@@ -16,4 +16,9 @@ public class CompoundStatement extends SyntaxElementWithChildreen {
         return "CompoundStatement";
     }
 
+    @Override
+    public void accept(@NonNull ISyntaxElementVisitor visitor) {
+        visitor.visitCompoundStatement(this);
+    }
+
 }

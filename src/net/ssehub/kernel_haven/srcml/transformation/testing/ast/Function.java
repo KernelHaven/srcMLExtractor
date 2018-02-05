@@ -13,10 +13,19 @@ public class Function extends SyntaxElementWithChildreen {
         super(presenceCondition, sourceFile);
         this.header = header;
     }
+    
+    public SyntaxElement getHeader() {
+        return header;
+    }
 
     @Override
     protected String elementToString() {
         return "Function\n" + (header == null ? "\t\t\t\tnull" : header.toString("\t\t\t\t")); // TODO
+    }
+
+    @Override
+    public void accept(@NonNull ISyntaxElementVisitor visitor) {
+        visitor.visitFunction(this);
     }
 
 }

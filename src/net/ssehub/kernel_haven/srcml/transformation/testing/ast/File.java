@@ -14,4 +14,9 @@ public class File extends SyntaxElementWithChildreen {
         return "File";
     }
 
+    @Override
+    public void accept(ISyntaxElementVisitor visitor) {
+        visitor.visitFile(this);
+    }
+
 }

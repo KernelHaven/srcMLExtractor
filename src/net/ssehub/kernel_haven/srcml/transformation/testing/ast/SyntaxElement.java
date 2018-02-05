@@ -99,4 +99,6 @@ public abstract class SyntaxElement implements CodeElement {
         // TODO SE: @Adam please fix this
         return null;
     }
+    
+    public abstract void accept(@NonNull ISyntaxElementVisitor visitor);
 }

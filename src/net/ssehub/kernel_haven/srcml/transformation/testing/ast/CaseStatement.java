@@ -26,10 +26,19 @@ public class CaseStatement extends SyntaxElementWithChildreen {
         this.caseCondition = caseCondition;
         this.type = type;
     }
+    
+    public SyntaxElement getCaseCondition() {
+        return caseCondition;
+    }
 
     @Override
     protected String elementToString() {
         return type.name() + " " + (caseCondition == null ? "" : caseCondition.toString("")); // TODO
+    }
+
+    @Override
+    public void accept(ISyntaxElementVisitor visitor) {
+        visitor.visitCaseStatement(this);
     }
 
 }

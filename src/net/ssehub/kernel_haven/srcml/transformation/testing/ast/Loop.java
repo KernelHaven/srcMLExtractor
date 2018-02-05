@@ -24,10 +24,19 @@ public class Loop extends SyntaxElementWithChildreen {
         this.condition = condition;
         this.type = type;
     }
+    
+    public SyntaxElement getLoopCondition() {
+        return condition;
+    }
 
     @Override
     protected String elementToString() {
         return type.name() + "-loop\n" + (condition == null ? "\t\t\t\tnull" : condition.toString("\t\t\t\t")); // TODO
+    }
+
+    @Override
+    public void accept(@NonNull ISyntaxElementVisitor visitor) {
+        visitor.visitLoop(this);
     }
 
 }

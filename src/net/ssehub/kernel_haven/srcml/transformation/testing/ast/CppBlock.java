@@ -34,4 +34,9 @@ public class CppBlock extends SyntaxElementWithChildreen {
         return "#" + type.name() + " " + condition.toString();
     }
 
+    @Override
+    public void accept(@NonNull ISyntaxElementVisitor visitor) {
+        visitor.visitCppBlock(this);
+    }
+
 }

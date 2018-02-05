@@ -34,10 +34,19 @@ public class ElseStatement extends SyntaxElementWithChildreen {
         this.elseIfCondition = elseIfCondition;
         this.type = type;
     }
+    
+    public SyntaxElement getElseIfCondition() {
+        return elseIfCondition;
+    }
 
     @Override
     protected String elementToString() {
         return type.name() + " " + (elseIfCondition == null ? "" : elseIfCondition.toString("")); // TODO
+    }
+
+    @Override
+    public void accept(@NonNull ISyntaxElementVisitor visitor) {
+        visitor.visitElseStatement(this);
     }
 
 }

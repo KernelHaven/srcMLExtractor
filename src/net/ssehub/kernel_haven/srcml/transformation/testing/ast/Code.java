@@ -21,5 +21,10 @@ public class Code extends SyntaxElement {
     protected String elementToString() {
         return text;
     }
+
+    @Override
+    public void accept(ISyntaxElementVisitor visitor) {
+        visitor.visitCode(this);
+    }
     
 }
