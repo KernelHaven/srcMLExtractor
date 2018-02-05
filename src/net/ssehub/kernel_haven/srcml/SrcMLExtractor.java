@@ -45,7 +45,7 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
     
     private static final Logger LOGGER = Logger.get();
     
-    public static boolean USE_NEW_CONVERTER = false;
+    public static boolean USE_NEW_CONVERTER = true;
     
     private File sourceTree;
     
