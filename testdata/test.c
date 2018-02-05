@@ -160,3 +160,11 @@ static inline void funcAttrs() {
 	funcComplexTypes();
 }
 
+int structDecl() {
+	/*struct {
+		int a;
+	} str;
+	str.a = 1;
+	
+	return str.a;*/
+}

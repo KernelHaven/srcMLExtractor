@@ -62,7 +62,7 @@ public class NewConverterCTest {
         SourceFile ast = loadFile("../test.c");
 //        SourceFile ast = loadFile("../blubb.c");
 //        SourceFile ast = loadFile("../NestedCppIfs.c");
-        List<SyntaxElement> elements = getElements(ast);
+//        List<SyntaxElement> elements = getElements(ast);
         System.out.println(ast.iterator().next());
         
         //assertEquals("Got unexpected number of elements", 1, elements.size());
@@ -74,7 +74,7 @@ public class NewConverterCTest {
         List<SyntaxElement> elements = getElements(ast);
         
         assertEquals("Got unexpected number of elements", 1, elements.size());
-        SyntaxElement statement = elements.get(0);
+//        SyntaxElement statement = elements.get(0);
 //        System.out.println(statement);
     }
     

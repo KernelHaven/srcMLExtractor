@@ -342,6 +342,7 @@ public class TranslationUnitToAstConverter {
                 translatedBlock.addNestedElement(converted);
             }
         }
+        cppConditions.pop();
         
         return translatedBlock;
     }
