@@ -11,9 +11,8 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 import net.ssehub.kernel_haven.code_model.CodeElement;
+import net.ssehub.kernel_haven.code_model.ast.SyntaxElement;
 import net.ssehub.kernel_haven.srcml.model.SrcMlSyntaxElement;
-import net.ssehub.kernel_haven.srcml.transformation.testing.ast.SyntaxElement;
-import net.ssehub.kernel_haven.srcml.transformation.testing.ast.TranslationUnitToAstConverter;
 import net.ssehub.kernel_haven.srcml.transformation.testing.rules.Preprocessing;
 import net.ssehub.kernel_haven.srcml.xml.AbstractAstConverter;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
