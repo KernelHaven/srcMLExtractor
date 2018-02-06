@@ -446,14 +446,16 @@ public class TranslationUnitToAstConverter {
                 }
                 code.append(((CodeUnit) child).getCode());
             } else if (child instanceof PreprocessorBlock) {
-                Formula condition = ((PreprocessorBlock) child).getEffectiveCondition();
-                Code codeElement = new Code(getPc(), code.toString());
-                codeElement.setSourceFile(sourceFile);
-                codeElement.setCondition(getEffectiveCondition());
-                result.add(codeElement);
+                if (code.length() > 0) {
+                    Code codeElement = new Code(getPc(), code.toString());
+                    codeElement.setSourceFile(sourceFile);
+                    codeElement.setCondition(getEffectiveCondition());
+                    result.add(codeElement);
+                    code = new StringBuilder();
+                }
                 
+                Formula condition = ((PreprocessorBlock) child).getEffectiveCondition();
                 pushFormula(condition);
-                code = new StringBuilder();
                 Type type = Type.valueOf(((PreprocessorBlock) child).getType());
                 CppBlock cppif = new CppBlock(getPc(), condition, type);
                 cppif.setSourceFile(sourceFile);
