@@ -1,24 +1,30 @@
 package net.ssehub.kernel_haven.srcml;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 
 import net.ssehub.kernel_haven.SetUpException;
 import net.ssehub.kernel_haven.code_model.CodeElement;
-import net.ssehub.kernel_haven.code_model.ISyntaxElementType;
 import net.ssehub.kernel_haven.code_model.SourceFile;
-import net.ssehub.kernel_haven.code_model.SyntaxElement;
+import net.ssehub.kernel_haven.code_model.ast.CppBlock;
+import net.ssehub.kernel_haven.code_model.ast.CppBlock.Type;
+import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
 import net.ssehub.kernel_haven.test_utils.TestConfiguration;
 import net.ssehub.kernel_haven.util.ExtractorException;
 import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.Util;
+import net.ssehub.kernel_haven.util.logic.Formula;
 
 /**
  * Abstract tests to test the {@link SrcMLExtractor}.
@@ -27,8 +33,8 @@ import net.ssehub.kernel_haven.util.Util;
  */
 public class AbstractSrcMLExtractorTest {
     
-    private static final File RESOURCE_DIR = AllTests.TESTDATA;
-
+private static final File RESOURCE_DIR = new File(AllTests.TESTDATA, "tmpRes");
+    
     /**
      * Initializes the logger.
      */
@@ -39,17 +45,14 @@ public class AbstractSrcMLExtractorTest {
         }
     }
     
-    /**
-     * Removes the temporary res folder.
-     */
-    @AfterClass
-    public static void afterClass() {
-        File resFolder = new File(AllTests.TESTDATA, "net.ssehub.kernel_haven.srcml.SrcMLExtractor");
-        try {
-            Util.deleteFolder(resFolder);
-        } catch (IOException e) {
-            Assert.fail("Tmp folder could not be cleaned up: " + e.getMessage());
-        }
+    @Before
+    public void setup() {
+        RESOURCE_DIR.mkdir();
+    }
+    
+    @After
+    public void teardown() throws IOException {
+        Util.deleteFolder(RESOURCE_DIR);
     }
     
     /**
@@ -57,20 +60,20 @@ public class AbstractSrcMLExtractorTest {
      * @param file A file, which was translated with {@link SrcMLExtractor}.
      * @return The top level elements.
      */
-    List<SyntaxElement> getElements(SourceFile file) {
-        List<SyntaxElement> result = new ArrayList<>();
+    protected List<ISyntaxElement> getElements(SourceFile file) {
+        List<ISyntaxElement> result = new ArrayList<>();
         Assert.assertEquals("The SourceFile has more than only one translation unit: "
             + file.getPath().getAbsolutePath(), 1, file.getTopElementCount());
         
         // Extract translation unit
         for (CodeElement element : file) {
-            if (!(element instanceof SyntaxElement)) {
-                Assert.fail("SourceFile \"" + file.getPath().getAbsolutePath() + "\" contains a non SyntaxElement: "
+            if (!(element instanceof ISyntaxElement)) {
+                Assert.fail("SourceFile \"" + file.getPath().getAbsolutePath() + "\" contains a non SrcMlSyntaxElement: "
                     + element);
             }
             
             // Extract the relevant, top level elements
-            SyntaxElement translationUnit = (SyntaxElement) element;
+            ISyntaxElement translationUnit = (ISyntaxElement) element;
             for (int i = 0; i < translationUnit.getNestedElementCount(); i++) {
                 result.add(translationUnit.getNestedElement(i));                
             }
@@ -80,48 +83,10 @@ public class AbstractSrcMLExtractorTest {
     }
     
     /**
-     * Tests the statement.
-     * @param type The expected syntax type
-     * @param condition The expected condition in c-style.
-     * @param element The element to test.
-     */
-    protected void assertStatement(ISyntaxElementType type, String condition, SyntaxElement element) {
-        assertStatement(type, condition, null, element);
-    }
-    
-    /**
-     * Tests the statement.
-     * @param type The expected syntax type
-     * @param condition The expected condition in c-style.
-     * @param presenceCondition The expected presence/compound in c-style. This contains also all surrounding
-     *     conditions.
-     * @param element The element to test.
-     */
-    protected void assertStatement(ISyntaxElementType type, String condition, String presenceCondition,
-        SyntaxElement element) {
-        
-        // Syntax check
-        Assert.assertSame("Wrong syntax element", type, element.getType());
-        
-        // Check of current condition
-        if (null != condition) {
-            Assert.assertEquals("Wrong condition", condition, element.getCondition().toString());
-        } else {
-            Assert.assertNull("Element has a condition, but wasn't expected.", element.getCondition());
-        }
-        
-        // Check of presence condition
-        if (null != presenceCondition) {
-            Assert.assertEquals("Wrong presence/compound condition", presenceCondition,
-                element.getPresenceCondition().toString());
-        }
-    }
-    
-    /**
-     * Helper method which uses the {@link EaseeExtractor} to load the build model from the
-     * specified file.
-     * @param file The model file to parse.
-     * @return The parsed build model, ready for testing the result.
+     * Helper method which runs the {@link SrcMLExtractor} on the specified source file.
+     *  
+     * @param file The source file to parse.
+     * @return The parsed code model, ready for testing the result.
      */
     protected SourceFile loadFile(String file) {
         File srcFile = new File(AllTests.TESTDATA, file);
@@ -131,7 +96,7 @@ public class AbstractSrcMLExtractorTest {
         try {
             Properties props = new Properties();
             props.setProperty("resource_dir", RESOURCE_DIR.getAbsolutePath());
-            props.setProperty("source_tree", AllTests.TESTDATA.getPath());
+            props.setProperty("source_tree", "testdata/");
             props.setProperty("code.extractor.files", file);
             
             TestConfiguration config = new TestConfiguration(props);
@@ -145,6 +110,58 @@ public class AbstractSrcMLExtractorTest {
         
         Assert.assertNotNull("Test file wasn't translated: " + file, result);
         return result;
+    }
+    
+    /**
+     * Tests the statement.
+     * @param type The expected syntax type
+     * @param condition The expected condition in c-style.
+     * @param presenceCondition The expected presence/compound in c-style. This contains also all surrounding
+     *     conditions.
+     * @param element The element to test.
+     */
+    @SuppressWarnings("unchecked")
+    protected <T> T assertElement(Class<T> type, String condition, String presenceCondition,
+            CodeElement element) {
+        
+        // Syntax check
+        Assert.assertTrue("Wrong syntax element type: expected " + type.getSimpleName() + "; actual: "
+                + element.getClass().getSimpleName(), element.getClass().equals(type));
+        
+        // Check of current condition
+        if (null != condition) {
+            Assert.assertEquals("Wrong condition", condition, element.getCondition().toString());
+        } else {
+            Assert.assertNull("Element has a condition, but wasn't expected.", element.getCondition());
+        }
+        
+        // Check of presence condition
+        if (null != presenceCondition) {
+            Assert.assertEquals("Wrong presence/compound condition", presenceCondition,
+                element.getPresenceCondition().toString());
+        }
+        
+        return (T) element;
+    }
+    
+    protected CppBlock assertIf(String condition, String presenceCondition, Formula ifCondition, int numNested,
+            Type type, CodeElement element) {
+        
+        assertElement(CppBlock.class, condition, presenceCondition, element);
+        
+        CppBlock cppIf = (CppBlock) element;
+        
+        assertEquals("Wrong type", type, cppIf.getType());
+        
+        assertEquals("Wrong number of nested statements", numNested, cppIf.getNestedElementCount());
+        
+        if (ifCondition == null) {
+            assertNull("Wrong CPP-If condition",cppIf.getCondition());
+        } else {
+            assertEquals("Wrong CPP-If condition", ifCondition, cppIf.getCondition());
+        }
+        
+        return cppIf;
     }
 
 }

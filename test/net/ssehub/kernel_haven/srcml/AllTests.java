@@ -14,6 +14,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
     CppTest.class,
+    CTest.class,
     })
 public class AllTests {
     public static final File TESTDATA = new File("testdata");

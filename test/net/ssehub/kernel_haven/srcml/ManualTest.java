@@ -5,12 +5,11 @@ import org.junit.Test;
 import net.ssehub.kernel_haven.code_model.SourceFile;
 
 /**
- * Tests the srcML extractor.
+ * Helper class for manual testing of the extractor.
  * 
- * @author El-Sharkawy
+ * @author Adam
  */
-public class SrcMLExtractorTest extends AbstractSrcMLExtractorTest {
-    
+public class ManualTest extends AbstractSrcMLExtractorTest {
     
     /**
      * Dummy "test" that simply logs the result to console.
@@ -22,7 +21,12 @@ public class SrcMLExtractorTest extends AbstractSrcMLExtractorTest {
 //        SourceFile ast = loadFile("test.c");
 //        SourceFile ast = loadFile("FunctionWithIfdefHeader.c");
         SourceFile ast = loadFile("test2.c");
-        System.out.println(ast.iterator().next());
+        System.out.println(ast.getElement(0));
+    }
+    
+    @Override
+    protected SourceFile loadFile(String file) {
+        return super.loadFile("manual/" + file);
     }
     
 }
