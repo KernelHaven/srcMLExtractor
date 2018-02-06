@@ -17,6 +17,7 @@ import org.junit.BeforeClass;
 import net.ssehub.kernel_haven.SetUpException;
 import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.code_model.SourceFile;
+import net.ssehub.kernel_haven.code_model.ast.Code;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock.Type;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
@@ -121,10 +122,10 @@ private static final File RESOURCE_DIR = new File(AllTests.TESTDATA, "tmpRes");
      * @param element The element to test.
      */
     @SuppressWarnings("unchecked")
-    protected <T> T assertElement(Class<T> type, String condition, String presenceCondition,
+    protected <T extends ISyntaxElement> T assertElement(Class<T> type, String condition, String presenceCondition,
             CodeElement element) {
         
-        // Syntax check
+        // Class check
         Assert.assertTrue("Wrong syntax element type: expected " + type.getSimpleName() + "; actual: "
                 + element.getClass().getSimpleName(), element.getClass().equals(type));
         
@@ -162,6 +163,16 @@ private static final File RESOURCE_DIR = new File(AllTests.TESTDATA, "tmpRes");
         }
         
         return cppIf;
+    }
+    
+    protected void assertCode(String text, CodeElement element) {
+        // Class check
+        Assert.assertTrue("Wrong syntax element type: expected " + Code.class.getSimpleName() + "; actual: "
+                + element.getClass().getSimpleName(), element.getClass().equals(Code.class));
+        
+        Code code = (Code) element;
+        
+        assertEquals("Wrong code String", text, code.getText());
     }
 
 }

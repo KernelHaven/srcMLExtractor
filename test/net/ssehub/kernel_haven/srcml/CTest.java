@@ -8,28 +8,15 @@ import org.junit.Test;
 
 import net.ssehub.kernel_haven.code_model.SourceFile;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
+import net.ssehub.kernel_haven.code_model.ast.SingleStatement;
 
 /**
  * Tests the translation of C-statements.
  * 
- * TODO: no useful tests yet.
- * 
  * @author El-Sharkawy
- *
+ * @author Adam
  */
 public class CTest extends AbstractSrcMLExtractorTest {
-    
-    @Test
-    public void test() {
-//        SourceFile ast = loadFile("Komplex2.c");
-        SourceFile ast = loadFile("../test.c");
-//        SourceFile ast = loadFile("../blubb.c");
-//        SourceFile ast = loadFile("../NestedCppIfs.c");
-//        List<SyntaxElement> elements = getElements(ast);
-        System.out.println(ast.iterator().next());
-        
-        //assertEquals("Got unexpected number of elements", 1, elements.size());
-    }
     
     @Test
     public void returnStatement() {
@@ -37,8 +24,9 @@ public class CTest extends AbstractSrcMLExtractorTest {
         List<ISyntaxElement> elements = getElements(ast);
         
         assertEquals("Got unexpected number of elements", 1, elements.size());
-//        SyntaxElement statement = elements.get(0);
-//        System.out.println(statement);
+        
+        SingleStatement ret = assertElement(SingleStatement.class, "1", "1", elements.get(0));
+        assertCode("return true ;", ret.getCode());
     }
     
     @Override

@@ -23,7 +23,6 @@ import net.ssehub.kernel_haven.util.logic.Variable;
  * 
  * @author Adam
  * @author El-Sharkawy
- *
  */
 public class CppTest extends AbstractSrcMLExtractorTest {
     
