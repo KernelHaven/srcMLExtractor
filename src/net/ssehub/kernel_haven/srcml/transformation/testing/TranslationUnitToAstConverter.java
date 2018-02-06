@@ -18,8 +18,8 @@ import net.ssehub.kernel_haven.code_model.ast.File;
 import net.ssehub.kernel_haven.code_model.ast.Function;
 import net.ssehub.kernel_haven.code_model.ast.IfStructure;
 import net.ssehub.kernel_haven.code_model.ast.Label;
-import net.ssehub.kernel_haven.code_model.ast.Loop;
-import net.ssehub.kernel_haven.code_model.ast.Loop.LoopType;
+import net.ssehub.kernel_haven.code_model.ast.LoopStatement;
+import net.ssehub.kernel_haven.code_model.ast.LoopStatement.LoopType;
 import net.ssehub.kernel_haven.code_model.ast.SingleStatement;
 import net.ssehub.kernel_haven.code_model.ast.SwitchStatement;
 import net.ssehub.kernel_haven.code_model.ast.SyntaxElement;
@@ -337,10 +337,10 @@ public class TranslationUnitToAstConverter {
         return typeDef;
     }
 
-    private Loop createLoop(TranslationUnit unit, LoopType type, int blockIndex, int condStartIndex, int condEndIndex) {
+    private LoopStatement createLoop(TranslationUnit unit, LoopType type, int blockIndex, int condStartIndex, int condEndIndex) {
         
         SyntaxElement condition = makeCode(unit, condStartIndex, condEndIndex);
-        Loop loop = new Loop(getPc(),  condition, type);
+        LoopStatement loop = new LoopStatement(getPc(),  condition, type);
         loop.setSourceFile(sourceFile);
         loop.setCondition(getEffectiveCondition());
         loop.addNestedElement(convert(unit.getNestedElement(blockIndex)));
