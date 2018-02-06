@@ -8,6 +8,7 @@ import net.ssehub.kernel_haven.code_model.ast.CaseStatement;
 import net.ssehub.kernel_haven.code_model.ast.CaseStatement.CaseType;
 import net.ssehub.kernel_haven.code_model.ast.Code;
 import net.ssehub.kernel_haven.code_model.ast.CodeList;
+import net.ssehub.kernel_haven.code_model.ast.Comment;
 import net.ssehub.kernel_haven.code_model.ast.CompoundStatement;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock.Type;
@@ -116,11 +117,18 @@ public class TranslationUnitToAstConverter {
             singleStatement.setSourceFile(sourceFile);
             singleStatement.setCondition(getEffectiveCondition());
             return singleStatement;
+        
         case "label":
             Label label = new Label(pc, makeCode(unit, 0, unit.size() - 1));
             label.setSourceFile(sourceFile);
             label.setCondition(getEffectiveCondition());
             return label;
+        
+        case "comment":
+            Comment comment = new Comment(pc, makeCode(unit, 0, unit.size() - 1));
+            comment.setSourceFile(sourceFile);
+            comment.setCondition(getEffectiveCondition());
+            return comment;
         
         case "for":
             // Last nested is the loop block, everything before is the condition
