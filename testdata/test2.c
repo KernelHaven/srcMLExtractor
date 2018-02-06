@@ -1,3 +1,19 @@
+
+#include <stdio.h>
+
+#define STRICT_MATH
+#include "math.h"
+#undef STRICT_MATH
+
+#warning Test
+#error Test
+
+#pragma
+
+#line 13
+
+#
+
 int compare(int a, int b) {
 	if (a < b) {
 		return -1;

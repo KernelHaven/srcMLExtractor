@@ -12,6 +12,7 @@ import net.ssehub.kernel_haven.code_model.ast.CodeList;
 import net.ssehub.kernel_haven.code_model.ast.Comment;
 import net.ssehub.kernel_haven.code_model.ast.CompoundStatement;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock;
+import net.ssehub.kernel_haven.code_model.ast.CppStatement;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock.Type;
 import net.ssehub.kernel_haven.code_model.ast.File;
 import net.ssehub.kernel_haven.code_model.ast.Function;
@@ -299,10 +300,47 @@ public class TranslationUnitToAstConverter {
              * First Element is the condition, afterwards come nested statements
              */
             return convertCaseStatement(unit, 0, CaseType.DEFAULT);
-        
+            
+            
+        case "cpp:define":
+            return convertCppStatement(unit, CppStatement.Type.DEFINE);
+
+        case "cpp:undef":
+            return convertCppStatement(unit, CppStatement.Type.UNDEF);
+            
+        case "cpp:include":
+            return convertCppStatement(unit, CppStatement.Type.INCLUDE);
+            
+        case "cpp:pragma":
+            return convertCppStatement(unit, CppStatement.Type.PRAGMA);
+            
+        case "cpp:error":
+            return convertCppStatement(unit, CppStatement.Type.ERROR);
+            
+        case "cpp:warning":
+            return convertCppStatement(unit, CppStatement.Type.WARNING);
+            
+        case "cpp:line":
+            return convertCppStatement(unit, CppStatement.Type.LINE);
+            
+        case "cpp:empty":
+            return convertCppStatement(unit, CppStatement.Type.EMPTY);
         }
 
         throw new RuntimeException("Unexpected unit type: " + unit.getType());
+    }
+    
+    private CppStatement convertCppStatement(TranslationUnit unit, CppStatement.Type type) {
+        SyntaxElement expression = null;
+        // first two strings inside are # and the type, skip these
+        if (unit.size() > 2) {
+            expression = makeCode(unit, 2, unit.size() - 1);
+        }
+        
+        CppStatement statement = new CppStatement(getPc(), type, expression);
+        statement.setSourceFile(sourceFile);
+        statement.setCondition(getEffectiveCondition());
+        return statement;
     }
 
     private CaseStatement convertCaseStatement(TranslationUnit unit, int condEndIndex, CaseType type) {
