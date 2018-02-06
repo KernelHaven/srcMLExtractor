@@ -14,6 +14,7 @@ import net.ssehub.kernel_haven.util.logic.Formula;
 import net.ssehub.kernel_haven.util.logic.parser.ExpressionFormatException;
 import net.ssehub.kernel_haven.util.logic.parser.Parser;
 import net.ssehub.kernel_haven.util.logic.parser.VariableCache;
+import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
  * Computes the effective conditions for all {@link PreprocessorBlock}s, i.e., consideration of negated conditions of
@@ -28,7 +29,7 @@ public class PreprocessorConditionComputationRule implements ITransformationRule
      * This parser (and its cache) are used for the whole file and are reseted by parsing a new file as long this
      * class won't become static.
      */
-    private Parser<Formula> parser = new Parser<>(new SrcMlConditionGrammar(new VariableCache()));
+    private Parser<@NonNull Formula> parser = new Parser<>(new SrcMlConditionGrammar(new VariableCache()));
 
     @Override
     public void transform(ITranslationUnit node) {
@@ -54,14 +55,14 @@ public class PreprocessorConditionComputationRule implements ITransformationRule
                     }
                 }
                 StringBuffer effectiveCondition = new StringBuffer("!");
-                effectiveCondition.append(start.getCondition());
+                effectiveCondition.append('(').append(start.getCondition()).append(')');
                 for (PreprocessorElse preprocessorBlock : previous) {
                     effectiveCondition.append(" && !");
-                    effectiveCondition.append(preprocessorBlock.getCondition());
+                    effectiveCondition.append('(').append(preprocessorBlock.getCondition()).append(')');
                 }
-                if (!elseStatement.getType().equals(Type.ELSE.name())) {
-                    effectiveCondition.append(" && !");
-                    effectiveCondition.append(elseStatement.getCondition());
+                if (elseStatement.getType().equals(Type.ELSEIF.name())) {
+                    effectiveCondition.append(" && ");
+                    effectiveCondition.append('(').append(elseStatement.getCondition()).append(')');
                 }
                 
                 // Parse and set the computed condition
@@ -81,11 +82,7 @@ public class PreprocessorConditionComputationRule implements ITransformationRule
     private void parseAndSetCondition(PreprocessorBlock block, String condition) {
         try {
             Formula parsedCondition = parser.parse(condition);
-            if (null != parsedCondition) {
-                block.setEffectiveCondition(parsedCondition);
-            } else {
-                Logger.get().logError("Could not parse effective expression: " + condition);
-            }
+            block.setEffectiveCondition(parsedCondition);
         } catch (ExpressionFormatException exc) {
             Logger.get().logException("Could not parse effective expression: " + condition, exc);
         }

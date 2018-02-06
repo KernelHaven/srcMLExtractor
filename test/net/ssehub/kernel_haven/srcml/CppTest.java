@@ -199,13 +199,12 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         
         assertEquals("Got unexpected number of elements", 3, elements.size());
 
-
         CppBlock ifElem = assertIf("A", "A", new Variable("A"), 1, Type.IF, elements.get(0));
         CppBlock elifElem = assertIf("!A && B", "!A && B",
                 new Conjunction(new Negation(new Variable("A")), new Variable("B")), 1, Type.ELSEIF, elements.get(1));
         CppBlock elseElem = assertIf("!A && !B", "!A && !B",
                 new Conjunction(new Negation(new Variable("A")), new Negation(new Variable("B"))), 1,
-                Type.ELSE, elements.get(1));
+                Type.ELSE, elements.get(2));
         
         assertElement(SingleStatement.class, "A", "A", ifElem.getNestedElement(0));
         assertElement(SingleStatement.class, "!A && B", "!A && B", elifElem.getNestedElement(0));
@@ -270,9 +269,9 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         
         assertElement(SingleStatement.class, "1", "1", elements.get(0));
         CppBlock ifElem = assertIf("A && B", "A && B", aAndB, 1, Type.IF, elements.get(1));
-        CppBlock elifElem = assertIf("!(A && B) && !C", "!(A && B) && !C", notAAndBAndNotC, 1, Type.ELSEIF, elements.get(1));
-        CppBlock elseElem = assertIf("!(A && B) && !!C", "!(A && B) && !!C", notAAndBAndNotNotC, 1, Type.ELSE, elements.get(1));
-        assertElement(SingleStatement.class, "1", "1", elements.get(2));
+        CppBlock elifElem = assertIf("!(A && B) && !C", "!(A && B) && !C", notAAndBAndNotC, 1, Type.ELSEIF, elements.get(2));
+        CppBlock elseElem = assertIf("!(A && B) && !!C", "!(A && B) && !!C", notAAndBAndNotNotC, 1, Type.ELSE, elements.get(3));
+        assertElement(SingleStatement.class, "1", "1", elements.get(4));
         
         assertElement(SingleStatement.class, "A && B", "A && B", ifElem.getNestedElement(0));
         assertElement(SingleStatement.class, "!(A && B) && !C", "!(A && B) && !C", elifElem.getNestedElement(0));
