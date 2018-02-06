@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
+import net.ssehub.kernel_haven.code_model.ast.BranchStatement;
 import net.ssehub.kernel_haven.code_model.ast.CaseStatement;
 import net.ssehub.kernel_haven.code_model.ast.CaseStatement.CaseType;
 import net.ssehub.kernel_haven.code_model.ast.Code;
@@ -12,11 +13,8 @@ import net.ssehub.kernel_haven.code_model.ast.Comment;
 import net.ssehub.kernel_haven.code_model.ast.CompoundStatement;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock.Type;
-import net.ssehub.kernel_haven.code_model.ast.ElseStatement;
-import net.ssehub.kernel_haven.code_model.ast.ElseStatement.ElseType;
 import net.ssehub.kernel_haven.code_model.ast.File;
 import net.ssehub.kernel_haven.code_model.ast.Function;
-import net.ssehub.kernel_haven.code_model.ast.IfStructure;
 import net.ssehub.kernel_haven.code_model.ast.Label;
 import net.ssehub.kernel_haven.code_model.ast.LoopStatement;
 import net.ssehub.kernel_haven.code_model.ast.LoopStatement.LoopType;
@@ -150,13 +148,28 @@ public class TranslationUnitToAstConverter {
                     lastConditionElement = (i - 1);
                 }
             }
-            IfStructure ifStatement = new IfStructure(pc, makeCode(unit, 0, lastConditionElement));
+            BranchStatement ifStatement = new BranchStatement(pc, BranchStatement.Type.IF,
+                    makeCode(unit, 0, lastConditionElement));
             ifStatement.setSourceFile(sourceFile);
             ifStatement.setCondition(getEffectiveCondition());
             for (int i = lastConditionElement + 1; i < unit.size(); i++) {
-                // TODO SE: handle else and elseif
-                ifStatement.addNestedElement(convert(unit.getNestedElement(i)));
+                SyntaxElement child = convert(unit.getNestedElement(i));
+                
+                addIfSibling(child, ifStatement);
+                
+                ifStatement.addNestedElement(child);
             }
+            
+            // add sibling references to all siblings
+            for (int i = 0; i < ifStatement.getSiblingCount(); i++) {
+                ifStatement.getSibling(i).addSibling(ifStatement);
+                for (int j = 0; j < ifStatement.getSiblingCount(); j++) {
+                    if (i != j) {
+                        ifStatement.getSibling(i).addSibling(ifStatement.getSibling(j));
+                    }
+                }
+            }
+            
             return ifStatement;
             
         case "elseif":
@@ -168,7 +181,7 @@ public class TranslationUnitToAstConverter {
             
             if (lastCodeElement >= 0) {
                 SyntaxElement condition = makeCode(unit, 0, lastCodeElement);
-                ElseStatement elifBlock = new ElseStatement(pc, condition, ElseType.ELSE_IF);
+                BranchStatement elifBlock = new BranchStatement(pc, BranchStatement.Type.ELSE_IF, condition);
                 elifBlock.setSourceFile(sourceFile);
                 elifBlock.setCondition(getEffectiveCondition());
                 for (int i = 0; i < unit.size(); i++) {
@@ -185,8 +198,7 @@ public class TranslationUnitToAstConverter {
             }
             
         case "else":
-            // TODO SE: @Adam elseif still missing
-            ElseStatement elseBlock = new ElseStatement(pc, null, ElseType.ELSE);
+            BranchStatement elseBlock = new BranchStatement(pc, BranchStatement.Type.ELSE, null);
             elseBlock.setSourceFile(sourceFile);
             elseBlock.setCondition(getEffectiveCondition());
             for (int i = 0; i < unit.size(); i++) {
@@ -362,6 +374,24 @@ public class TranslationUnitToAstConverter {
         popFormula();
         
         return translatedBlock;
+    }
+    
+    /**
+     * Adds the given element as a sibling to ifStatement, if its a {@link BranchStatement}. If element is a
+     * {@link CppBlock}, then search for {@link BranchStatement}s inside of it.
+     * 
+     * @param element The element that may be added as a sibling to ifStatement.
+     * @param ifStatement The ifStatement that element may be a sibling of.
+     */
+    private void addIfSibling(SyntaxElement element, BranchStatement ifStatement) {
+        if (element instanceof BranchStatement) {
+            ifStatement.addSibling((BranchStatement) element);
+            
+        } else if (element instanceof CppBlock) {
+            for (int i = 0; i < element.getNestedElementCount(); i++) {
+                addIfSibling(element.getNestedElement(i), ifStatement);
+            }
+        }
     }
     
     private SyntaxElement makeCode(ITranslationUnit unit, int start, int end) {
