@@ -12,16 +12,17 @@ import net.ssehub.kernel_haven.code_model.ast.CodeList;
 import net.ssehub.kernel_haven.code_model.ast.Comment;
 import net.ssehub.kernel_haven.code_model.ast.CompoundStatement;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock;
-import net.ssehub.kernel_haven.code_model.ast.CppStatement;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock.Type;
+import net.ssehub.kernel_haven.code_model.ast.CppStatement;
 import net.ssehub.kernel_haven.code_model.ast.File;
 import net.ssehub.kernel_haven.code_model.ast.Function;
+import net.ssehub.kernel_haven.code_model.ast.ICode;
+import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
 import net.ssehub.kernel_haven.code_model.ast.Label;
 import net.ssehub.kernel_haven.code_model.ast.LoopStatement;
 import net.ssehub.kernel_haven.code_model.ast.LoopStatement.LoopType;
 import net.ssehub.kernel_haven.code_model.ast.SingleStatement;
 import net.ssehub.kernel_haven.code_model.ast.SwitchStatement;
-import net.ssehub.kernel_haven.code_model.ast.SyntaxElement;
 import net.ssehub.kernel_haven.code_model.ast.TypeDefinition;
 import net.ssehub.kernel_haven.code_model.ast.TypeDefinition.TypeDefType;
 import net.ssehub.kernel_haven.util.Logger;
@@ -31,7 +32,7 @@ import net.ssehub.kernel_haven.util.logic.True;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
- * Translates the {@link ITranslationUnit}-structure into a {@link SyntaxElement} (AST). This is the final parsing step.
+ * Translates the {@link ITranslationUnit}-structure into a {@link ISyntaxElement} (AST). This is the final parsing step.
  * @author Adam
  * @author El-Sharkawy
  *
@@ -83,11 +84,11 @@ public class TranslationUnitToAstConverter {
     }
     
     /**
-     * Translates the {@link ITranslationUnit}-structure into a {@link SyntaxElement} (AST).
+     * Translates the {@link ITranslationUnit}-structure into a {@link ISyntaxElement} (AST).
      * @param element The root element representing the complete file.
      * @return The translated AST still representing the complete file.
      */
-    public SyntaxElement convert(ITranslationUnit element) {
+    public ISyntaxElement convert(ITranslationUnit element) {
         
         if (element instanceof TranslationUnit) {
             return convertTranslationUnit((TranslationUnit) element);
@@ -100,7 +101,7 @@ public class TranslationUnitToAstConverter {
         throw new IllegalArgumentException("Illegal element " + element.getClass().getName());
     }
     
-    private SyntaxElement convertTranslationUnit(TranslationUnit unit) {
+    private ISyntaxElement convertTranslationUnit(TranslationUnit unit) {
         Formula pc = getPc();
         
         switch (unit.getType()) {
@@ -155,7 +156,7 @@ public class TranslationUnitToAstConverter {
             ifStatement.setCondition(getEffectiveCondition());
             ifStatement.addSibling(ifStatement);
             for (int i = lastConditionElement + 1; i < unit.size(); i++) {
-                SyntaxElement child = convert(unit.getNestedElement(i));
+                ISyntaxElement child = convert(unit.getNestedElement(i));
                 
                 addIfSibling(child, ifStatement);
                 
@@ -180,7 +181,7 @@ public class TranslationUnitToAstConverter {
             }
             
             if (lastCodeElement >= 0) {
-                SyntaxElement condition = makeCode(unit, 0, lastCodeElement);
+                ICode condition = makeCode(unit, 0, lastCodeElement);
                 BranchStatement elifBlock = new BranchStatement(pc, BranchStatement.Type.ELSE_IF, condition);
                 elifBlock.setSourceFile(sourceFile);
                 elifBlock.setCondition(getEffectiveCondition());
@@ -331,7 +332,7 @@ public class TranslationUnitToAstConverter {
     }
     
     private CppStatement convertCppStatement(TranslationUnit unit, CppStatement.Type type) {
-        SyntaxElement expression = null;
+        ICode expression = null;
         // first two strings inside are # and the type, skip these
         if (unit.size() > 2) {
             expression = makeCode(unit, 2, unit.size() - 1);
@@ -365,7 +366,7 @@ public class TranslationUnitToAstConverter {
         return isInline;
     }
 
-    private SyntaxElement createTypeDef(TranslationUnit unit, Formula pc, TypeDefType type, int blockIndex, int declStartIndex, int declEndIndex) {
+    private TypeDefinition createTypeDef(TranslationUnit unit, Formula pc, TypeDefType type, int blockIndex, int declStartIndex, int declEndIndex) {
         /*
          * blockIndex and declEndIndex are computed from the end, expecting as last element a semicolon, which is only
          * optional. This will fix the indices.
@@ -388,7 +389,7 @@ public class TranslationUnitToAstConverter {
 
     private LoopStatement createLoop(TranslationUnit unit, LoopType type, int blockIndex, int condStartIndex, int condEndIndex) {
         
-        SyntaxElement condition = makeCode(unit, condStartIndex, condEndIndex);
+        ICode condition = makeCode(unit, condStartIndex, condEndIndex);
         LoopStatement loop = new LoopStatement(getPc(),  condition, type);
         loop.setSourceFile(sourceFile);
         loop.setCondition(getEffectiveCondition());
@@ -396,7 +397,7 @@ public class TranslationUnitToAstConverter {
         return loop;
     }
     
-    private SyntaxElement convertPreprocessorBlock(PreprocessorBlock cppBlock) {
+    private CppBlock convertPreprocessorBlock(PreprocessorBlock cppBlock) {
         Formula condition = cppBlock.getEffectiveCondition();
         pushFormula(condition);
         Type type = Type.valueOf(cppBlock.getType());
@@ -420,7 +421,7 @@ public class TranslationUnitToAstConverter {
      * @param element The element that may be added as a sibling to ifStatement.
      * @param ifStatement The ifStatement that element may be a sibling of.
      */
-    private void addIfSibling(SyntaxElement element, BranchStatement ifStatement) {
+    private void addIfSibling(ISyntaxElement element, BranchStatement ifStatement) {
         if (element instanceof BranchStatement) {
             ifStatement.addSibling((BranchStatement) element);
             
@@ -431,10 +432,10 @@ public class TranslationUnitToAstConverter {
         }
     }
     
-    private SyntaxElement makeCode(ITranslationUnit unit, int start, int end) {
+    private ICode makeCode(ITranslationUnit unit, int start, int end) {
         
         StringBuilder code = new StringBuilder();
-        List<SyntaxElement> result = new LinkedList<>();
+        List<ICode> result = new LinkedList<>();
         
         for (int i = start; i <= end; i++) {
             ITranslationUnit child = unit.getNestedElement(i);
@@ -460,7 +461,7 @@ public class TranslationUnitToAstConverter {
                 CppBlock cppif = new CppBlock(getPc(), condition, type);
                 cppif.setSourceFile(sourceFile);
                 cppif.setCondition(getEffectiveCondition());
-                SyntaxElement nested = makeCode(child, 0, child.size() - 1);
+                ICode nested = makeCode(child, 0, child.size() - 1);
                 if (nested instanceof CodeList) {
                     for (int j = 0; j < nested.getNestedElementCount(); j++) {
                         cppif.addNestedElement(nested.getNestedElement(j));
@@ -496,7 +497,7 @@ public class TranslationUnitToAstConverter {
             CodeList list = new CodeList(getPc());
             list.setSourceFile(sourceFile);
             list.setCondition(getEffectiveCondition());
-            for (SyntaxElement r : result) {
+            for (ICode r : result) {
                 list.addNestedElement(r);
             }
             return list;

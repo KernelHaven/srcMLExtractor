@@ -17,7 +17,7 @@ import org.junit.Test;
 import net.ssehub.kernel_haven.SetUpException;
 import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.code_model.SourceFile;
-import net.ssehub.kernel_haven.code_model.ast.SyntaxElement;
+import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
 import net.ssehub.kernel_haven.test_utils.TestConfiguration;
 import net.ssehub.kernel_haven.util.ExtractorException;
 import net.ssehub.kernel_haven.util.Logger;
@@ -71,7 +71,7 @@ public class NewConverterCTest {
     @Test
     public void returnStatement() {
         SourceFile ast = loadFile("Statement_SingleReturn.c");
-        List<SyntaxElement> elements = getElements(ast);
+        List<ISyntaxElement> elements = getElements(ast);
         
         assertEquals("Got unexpected number of elements", 1, elements.size());
 //        SyntaxElement statement = elements.get(0);
@@ -83,20 +83,20 @@ public class NewConverterCTest {
      * @param file A file, which was translated with {@link SrcMLExtractor}.
      * @return The top level elements.
      */
-    private List<SyntaxElement> getElements(SourceFile file) {
-        List<SyntaxElement> result = new ArrayList<>();
+    private List<ISyntaxElement> getElements(SourceFile file) {
+        List<ISyntaxElement> result = new ArrayList<>();
         Assert.assertEquals("The SourceFile has more than only one translation unit: "
             + file.getPath().getAbsolutePath(), 1, file.getTopElementCount());
         
         // Extract translation unit
         for (CodeElement element : file) {
-            if (!(element instanceof SyntaxElement)) {
+            if (!(element instanceof ISyntaxElement)) {
                 Assert.fail("SourceFile \"" + file.getPath().getAbsolutePath()
-                    + "\" contains a non SrcMlSyntaxElement: " + element);
+                    + "\" contains a non ISyntaxElement: " + element);
             }
             
             // Extract the relevant, top level elements
-            SyntaxElement translationUnit = (SyntaxElement) element;
+            ISyntaxElement translationUnit = (ISyntaxElement) element;
             for (int i = 0; i < translationUnit.getNestedElementCount(); i++) {
                 result.add(translationUnit.getNestedElement(i));                
             }

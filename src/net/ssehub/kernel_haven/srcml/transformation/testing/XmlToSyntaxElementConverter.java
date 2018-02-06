@@ -11,7 +11,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 import net.ssehub.kernel_haven.code_model.CodeElement;
-import net.ssehub.kernel_haven.code_model.ast.SyntaxElement;
+import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
 import net.ssehub.kernel_haven.srcml.model.SrcMlSyntaxElement;
 import net.ssehub.kernel_haven.srcml.transformation.testing.rules.Preprocessing;
 import net.ssehub.kernel_haven.srcml.xml.AbstractAstConverter;
@@ -24,7 +24,7 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
  *     <li>The XML output is parsed by this class to create {@link ITranslationUnit}s.</li>
  *     <li>The {@link ITranslationUnit}s are refined by the {@link Preprocessing} to be closer to the target AST structure,
  *     to simplify the final parsing.</li>
- *     <li>The {@link ITranslationUnit}s are parsed into {@link SyntaxElement} by the
+ *     <li>The {@link ITranslationUnit}s are parsed into {@link ISyntaxElement} by the
  *     {@link TranslationUnitToAstConverter}</li>
  * </ol>
  * @author El-Sharkawy
