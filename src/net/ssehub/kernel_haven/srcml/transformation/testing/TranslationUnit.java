@@ -11,8 +11,14 @@ import java.util.List;
  *
  */
 public class TranslationUnit implements ITranslationUnit {
+    
     private String type;
     private List<ITranslationUnit> nestedElements = new ArrayList<>();
+    
+    /**
+     * Special handling for type="function": the name of the function is stored in here.
+     */
+    private String functionName;
     
     /**
      * Sole constructor for this type.
@@ -34,6 +40,24 @@ public class TranslationUnit implements ITranslationUnit {
     @Override
     public String getType() {
         return type;
+    }
+    
+    /**
+     * Special handling for type="function": return the name of the function.
+     * 
+     * @return The name of the function; <code>null</code> if not set (e.g. if this is not a function).
+     */
+    public String getFunctionName() {
+        return functionName;
+    }
+    
+    /**
+     * Special handling for type="function": set the name of the function.
+     * 
+     * @param functionName The name of the function.
+     */
+    public void setFunctionName(String functionName) {
+        this.functionName = functionName;
     }
     
     @Override

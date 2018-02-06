@@ -241,7 +241,8 @@ public class TranslationUnitToAstConverter {
         }
         
         case "function": {
-            Function f = new Function(pc, makeCode(unit, 0, unit.size() - 2)); // last nested is the function block
+            Function f = new Function(pc, unit.getFunctionName(),
+                    makeCode(unit, 0, unit.size() - 2)); // last nested is the function block
             f.setSourceFile(sourceFile);
             f.setCondition(getEffectiveCondition());
             

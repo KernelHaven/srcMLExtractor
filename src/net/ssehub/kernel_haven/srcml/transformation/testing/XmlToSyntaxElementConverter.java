@@ -97,6 +97,11 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
     private Deque<TranslationUnit> elements = new ArrayDeque<TranslationUnit>();
     
     /**
+     * Whether we are currently inside the &lt;name&gt; inside a &lt;function&gt;.
+     */
+    private boolean inNameInsideFunction = false;
+    
+    /**
      * Sole constructor for this classes.
      * @param path The relative path to the source file in the source tree. Must not be <code>null</code>.
      */
@@ -112,6 +117,11 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
                 elements.peekFirst().add(newElement);
             }
             elements.addFirst(newElement);
+        }
+        
+        // special handling for <name> inside <function>
+        if (qName.equals("name") && !elements.isEmpty() && elements.peek().getType().equals("function")) {
+            inNameInsideFunction = true;
         }
     }
     
@@ -130,6 +140,12 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         if (!str.isEmpty()) {
             CodeUnit unit = new CodeUnit(str);
             elements.peekFirst().add(unit);
+        }
+        
+        // special handling for <name> inside <function>
+        if (inNameInsideFunction) {
+            inNameInsideFunction = false;
+             elements.peekFirst().setFunctionName(str);
         }
     }
     
