@@ -344,7 +344,7 @@ public class TranslationUnitToAstConverter {
     }
 
     private CaseStatement convertCaseStatement(TranslationUnit unit, int condEndIndex, CaseType type) {
-        CaseStatement caseStatement = new CaseStatement(getPc(), makeCode(unit, 0, condEndIndex), CaseType.CASE);
+        CaseStatement caseStatement = new CaseStatement(getPc(), makeCode(unit, 0, condEndIndex), type);
         caseStatement.setSourceFile(sourceFile);
         caseStatement.setCondition(getEffectiveCondition());
         for (int i = condEndIndex + 1; i < unit.size(); i++) {
