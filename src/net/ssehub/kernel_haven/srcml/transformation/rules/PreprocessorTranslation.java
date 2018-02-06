@@ -2,15 +2,17 @@ package net.ssehub.kernel_haven.srcml.transformation.rules;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.ssehub.kernel_haven.srcml.transformation.CodeUnit;
 import net.ssehub.kernel_haven.srcml.transformation.ITranslationUnit;
 import net.ssehub.kernel_haven.srcml.transformation.PreprocessorBlock;
+import net.ssehub.kernel_haven.srcml.transformation.PreprocessorBlock.Type;
 import net.ssehub.kernel_haven.srcml.transformation.PreprocessorElse;
 import net.ssehub.kernel_haven.srcml.transformation.PreprocessorEndIf;
 import net.ssehub.kernel_haven.srcml.transformation.PreprocessorIf;
 import net.ssehub.kernel_haven.srcml.transformation.TranslationUnit;
-import net.ssehub.kernel_haven.srcml.transformation.PreprocessorBlock.Type;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
@@ -21,6 +23,9 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
  *
  */
 public class PreprocessorTranslation implements ITransformationRule {
+    
+    private static final Pattern VARIABLE_PATTERN = Pattern.compile("[A-Za-z0-9_]+");
+    
     private Deque<PreprocessorIf> parents = new ArrayDeque<>();
 
     @Override
@@ -65,17 +70,13 @@ public class PreprocessorTranslation implements ITransformationRule {
     private void createElse(@NonNull ITranslationUnit parent, TranslationUnit child) {
         PreprocessorIf startingIf = parents.peekFirst();
         PreprocessorElse newUnit = null;
-        StringBuffer condition = new StringBuffer();
-        for (int i = 2; i < child.size(); i++) {
-            condition.append(((CodeUnit)child.getNestedElement(i)).getCode());
-        }
         switch (((CodeUnit)child.getNestedElement(1)).getCode()) {
         case "else":
             newUnit = new PreprocessorElse(Type.ELSE, null, startingIf);
             startingIf.addSibling(newUnit);
             break;
         case "elif":
-            newUnit = new PreprocessorElse(Type.ELSEIF, condition.toString(), startingIf);
+            newUnit = new PreprocessorElse(Type.ELSEIF, getCondition(child, true), startingIf);
             startingIf.addSibling(newUnit);
             break;
         }
@@ -93,19 +94,15 @@ public class PreprocessorTranslation implements ITransformationRule {
      */
     private void createIf(ITranslationUnit parent, TranslationUnit child) {
         PreprocessorIf newUnit = null;
-        StringBuffer condition = new StringBuffer();
-        for (int i = 2; i < child.size(); i++) {
-            condition.append(((CodeUnit)child.getNestedElement(i)).getCode());
-        }
         switch (((CodeUnit)child.getNestedElement(1)).getCode()) {
         case "ifdef":
-            newUnit = new PreprocessorIf(Type.IFDEF, "defined(" + condition.toString() + ")");
+            newUnit = new PreprocessorIf(Type.IFDEF, "defined(" + getCondition(child, false) + ")");
             break;
         case "ifndef":
-            newUnit = new PreprocessorIf(Type.IFNDEF, "!defined(" + condition.toString() + ")");
+            newUnit = new PreprocessorIf(Type.IFNDEF, "!defined(" + getCondition(child, false) + ")");
             break;
         case "if":
-            newUnit = new PreprocessorIf(Type.IF, condition.toString());
+            newUnit = new PreprocessorIf(Type.IF, getCondition(child, true));
             break;
         }
         if (null != newUnit) {
@@ -113,4 +110,42 @@ public class PreprocessorTranslation implements ITransformationRule {
             parents.addFirst(newUnit);
         }
     }
+    
+    private String getCondition(TranslationUnit unit, boolean replaceMissingdefined) {
+        String[] parts = new String[unit.size() - 2];
+        
+        for (int i = 2; i < unit.size(); i++) {
+            String codePart = ((CodeUnit) unit.getNestedElement(i)).getCode();
+            parts[i - 2] = codePart;
+        }
+        
+        if (replaceMissingdefined) {
+            for (int i = 0; i < parts.length; i++) {
+                
+                // skip fields that are "defined" followed by a "(", since these aren't variables
+                if (parts[i].equals("defined") && i + 1 < parts.length && parts[i + 1].equals("(")) {
+                    continue;
+                }
+                
+                Matcher m = VARIABLE_PATTERN.matcher(parts[i]);
+                if (m.matches()) {
+                    // we found a variable, check if there is a "defined()" call around it
+                    if (i < 2 || !parts[i - 2].equals("defined") || !parts[i - 1].equals("(")
+                            || i + 1 >= parts.length || !parts[i + 1].equals(")")) {
+                        
+                        // we found a variable without a defined() call around it; replace with false
+                        parts[i] = "0";
+                    }
+                    
+                }
+            }
+        }
+        
+        StringBuffer condition = new StringBuffer();
+        for (String s : parts) {
+            condition.append(s);
+        }
+        return condition.toString();
+    }
+    
 }
