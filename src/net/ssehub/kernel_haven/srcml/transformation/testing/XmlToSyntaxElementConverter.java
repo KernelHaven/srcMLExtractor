@@ -102,6 +102,11 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
     private boolean inNameInsideFunction = false;
     
     /**
+     * The actual nesting of qNames of the XML structure.
+     */
+    private Deque<String> xmlNesting = new ArrayDeque<>();
+    
+    /**
      * Sole constructor for this classes.
      * @param path The relative path to the source file in the source tree. Must not be <code>null</code>.
      */
@@ -120,9 +125,11 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         }
         
         // special handling for <name> inside <function>
-        if (qName.equals("name") && !elements.isEmpty() && elements.peek().getType().equals("function")) {
+        if (qName.equals("name") && !xmlNesting.isEmpty() && xmlNesting.peek().equals("function")) {
             inNameInsideFunction = true;
         }
+        
+        xmlNesting.push(qName);
     }
     
     @Override
@@ -132,6 +139,8 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
                 elements.removeFirst();
             }
         }
+        
+        xmlNesting.pop();
     }
     
     @Override
@@ -145,7 +154,7 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         // special handling for <name> inside <function>
         if (inNameInsideFunction) {
             inNameInsideFunction = false;
-             elements.peekFirst().setFunctionName(str);
+            elements.peekFirst().setFunctionName(str);
         }
     }
     
