@@ -152,6 +152,7 @@ public class TranslationUnitToAstConverter {
                     makeCode(unit, 0, lastConditionElement));
             ifStatement.setSourceFile(sourceFile);
             ifStatement.setCondition(getEffectiveCondition());
+            ifStatement.addSibling(ifStatement);
             for (int i = lastConditionElement + 1; i < unit.size(); i++) {
                 SyntaxElement child = convert(unit.getNestedElement(i));
                 
@@ -161,12 +162,10 @@ public class TranslationUnitToAstConverter {
             }
             
             // add sibling references to all siblings
-            for (int i = 0; i < ifStatement.getSiblingCount(); i++) {
+            for (int i = 1; i < ifStatement.getSiblingCount(); i++) {
                 ifStatement.getSibling(i).addSibling(ifStatement);
-                for (int j = 0; j < ifStatement.getSiblingCount(); j++) {
-                    if (i != j) {
-                        ifStatement.getSibling(i).addSibling(ifStatement.getSibling(j));
-                    }
+                for (int j = 1; j < ifStatement.getSiblingCount(); j++) {
+                    ifStatement.getSibling(i).addSibling(ifStatement.getSibling(j));
                 }
             }
             
