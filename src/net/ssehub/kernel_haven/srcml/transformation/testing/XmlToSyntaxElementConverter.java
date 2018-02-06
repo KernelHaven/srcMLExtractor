@@ -32,6 +32,8 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
  */
 public class XmlToSyntaxElementConverter extends AbstractAstConverter {
     
+    private static final boolean DEBUG_LOGGING = true;
+    
     /**
      * White list of supported XML tags, which will be processed by this converter. These are the top level elements of
      * the <a href="http://www.srcml.org/doc/c_srcML.html">srcML C and CPP grammar</a>.
@@ -106,6 +108,8 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
      */
     private Deque<String> xmlNesting = new ArrayDeque<>();
     
+    private String debugLoggingIndentation = "";
+    
     /**
      * Sole constructor for this classes.
      * @param path The relative path to the source file in the source tree. Must not be <code>null</code>.
@@ -116,6 +120,11 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
 
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+        if (DEBUG_LOGGING) {
+            System.out.println(debugLoggingIndentation + "<" + qName + ">");
+            debugLoggingIndentation += '\t';
+        }
+        
         if (SUPPORTED_ELEMENTS.contains(qName)) {
             TranslationUnit newElement = new TranslationUnit(qName);
             if (!elements.isEmpty()) {
@@ -134,6 +143,11 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
     
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
+        if (DEBUG_LOGGING) {
+            debugLoggingIndentation = debugLoggingIndentation.substring(1);
+            System.out.println(debugLoggingIndentation + "</" + qName + ">");
+        }
+        
         if (SUPPORTED_ELEMENTS.contains(qName)) {
             if (elements.size() > 1) {
                 elements.removeFirst();
@@ -147,34 +161,48 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
     public void characters(char[] ch, int start, int length) throws SAXException {
         String str = new String(ch, start, length).trim();
         if (!str.isEmpty()) {
+            if (DEBUG_LOGGING) {
+                System.out.println(debugLoggingIndentation + str);
+            }
+            
             CodeUnit unit = new CodeUnit(str);
             elements.peekFirst().add(unit);
-        }
-        
-        // special handling for <name> inside <function>
-        if (inNameInsideFunction) {
-            inNameInsideFunction = false;
-            elements.peekFirst().setFunctionName(str);
+            
+            
+            // special handling for <name> inside <function>
+            if (inNameInsideFunction) {
+                inNameInsideFunction = false;
+                elements.peekFirst().setFunctionName(str);
+            }
         }
     }
     
     @Override
     protected CodeElement getAst() {
         ITranslationUnit unit = elements.removeFirst();
-        System.out.println("1: ");
-        System.out.println(unit);
+        
+        if (DEBUG_LOGGING) {
+            System.out.println("XML -> Translation Units");
+            System.out.println("========================");
+            System.out.println(unit);
+        }
         Preprocessing converter = new Preprocessing();
         converter.convert(unit);
-        System.out.println("2: ");
-        System.out.println(unit);
-        System.out.println("3: ");
+        
+        if (DEBUG_LOGGING) {
+            System.out.println("Translation Unit Preprocessing");
+            System.out.println("==============================");
+            System.out.println(unit);
+        }
         TranslationUnitToAstConverter converter2 = new TranslationUnitToAstConverter(getFile().getPath());
         CodeElement astResult = converter2.convert(unit);
-        System.out.println(astResult);
         
-        System.out.println();
-        System.out.println();
-        System.out.println();
+        if (DEBUG_LOGGING) {
+            System.out.println("Translation Units -> AST");
+            System.out.println("========================");
+            System.out.println(astResult);
+        }
+        
         return astResult;
     }
 }
