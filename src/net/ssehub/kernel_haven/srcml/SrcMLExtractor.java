@@ -16,9 +16,8 @@ import net.ssehub.kernel_haven.code_model.AbstractCodeModelExtractor;
 import net.ssehub.kernel_haven.code_model.SourceFile;
 import net.ssehub.kernel_haven.config.Configuration;
 import net.ssehub.kernel_haven.config.DefaultSettings;
-import net.ssehub.kernel_haven.srcml.transformation.testing.XmlToSyntaxElementConverter;
+import net.ssehub.kernel_haven.srcml.transformation.XmlToSyntaxElementConverter;
 import net.ssehub.kernel_haven.srcml.xml.AbstractAstConverter;
-import net.ssehub.kernel_haven.srcml.xml.CXmlHandler;
 import net.ssehub.kernel_haven.srcml.xml.XmlToAstConverter;
 import net.ssehub.kernel_haven.util.ExtractorException;
 import net.ssehub.kernel_haven.util.FormatException;
@@ -44,8 +43,6 @@ import net.ssehub.kernel_haven.util.Util;
 public class SrcMLExtractor extends AbstractCodeModelExtractor {
     
     private static final Logger LOGGER = Logger.get();
-    
-    public static boolean USE_NEW_CONVERTER = true;
     
     private File sourceTree;
     
@@ -79,12 +76,7 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             builder.environment().put("LD_LIBRARY_PATH",
                     new File(srcExec.getParentFile().getParentFile(), "lib").getAbsolutePath());
             
-            AbstractAstConverter xmlConverter;
-            if (USE_NEW_CONVERTER) {
-                xmlConverter = new XmlToSyntaxElementConverter(target);
-            } else {
-                xmlConverter = new CXmlHandler(target);
-            }
+            AbstractAstConverter xmlConverter = new XmlToSyntaxElementConverter(target);
             
             XmlToAstConverter converter = new XmlToAstConverter(stdout, xmlConverter);
 

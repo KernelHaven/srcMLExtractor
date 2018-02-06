@@ -1,7 +1,7 @@
-package net.ssehub.kernel_haven.srcml.transformation.testing.rules;
+package net.ssehub.kernel_haven.srcml.transformation.rules;
 
-import net.ssehub.kernel_haven.srcml.transformation.testing.ITranslationUnit;
-import net.ssehub.kernel_haven.srcml.transformation.testing.TranslationUnit;
+import net.ssehub.kernel_haven.srcml.transformation.ITranslationUnit;
+import net.ssehub.kernel_haven.srcml.transformation.TranslationUnit;
 
 /**
  * Nests statements belonging to a <tt>case</tt> or a <tt>default</tt> into the unit, i.e., create a hierarchy out of

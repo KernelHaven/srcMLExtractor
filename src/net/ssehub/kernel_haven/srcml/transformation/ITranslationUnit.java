@@ -1,4 +1,4 @@
-package net.ssehub.kernel_haven.srcml.transformation.testing;
+package net.ssehub.kernel_haven.srcml.transformation;
 
 /**
  * A data structure for parsing the output of <a href="http://www.srcml.org/">srcML</a>, which is used to generate the

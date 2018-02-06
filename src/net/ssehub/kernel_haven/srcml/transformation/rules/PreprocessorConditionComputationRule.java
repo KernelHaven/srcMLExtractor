@@ -1,19 +1,19 @@
-package net.ssehub.kernel_haven.srcml.transformation.testing.rules;
+package net.ssehub.kernel_haven.srcml.transformation.rules;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import net.ssehub.kernel_haven.srcml.transformation.testing.ITranslationUnit;
-import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorBlock;
-import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorBlock.Type;
+import net.ssehub.kernel_haven.srcml.transformation.ITranslationUnit;
+import net.ssehub.kernel_haven.srcml.transformation.PreprocessorBlock;
+import net.ssehub.kernel_haven.srcml.transformation.PreprocessorElse;
+import net.ssehub.kernel_haven.srcml.transformation.PreprocessorIf;
+import net.ssehub.kernel_haven.srcml.transformation.PreprocessorBlock.Type;
 import net.ssehub.kernel_haven.srcml.xml.SrcMlConditionGrammar;
 import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.logic.Formula;
 import net.ssehub.kernel_haven.util.logic.parser.ExpressionFormatException;
 import net.ssehub.kernel_haven.util.logic.parser.Parser;
 import net.ssehub.kernel_haven.util.logic.parser.VariableCache;
-import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorElse;
-import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorIf;
 
 /**
  * Computes the effective conditions for all {@link PreprocessorBlock}s, i.e., consideration of negated conditions of

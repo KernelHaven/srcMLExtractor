@@ -13,8 +13,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    CPPTest.class,
-    NewConverterCppTest.class,
+    CppTest.class,
     })
 public class AllTests {
     public static final File TESTDATA = new File("testdata");

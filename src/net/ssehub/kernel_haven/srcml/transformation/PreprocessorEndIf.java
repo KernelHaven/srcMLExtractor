@@ -1,4 +1,4 @@
-package net.ssehub.kernel_haven.srcml.transformation.testing;
+package net.ssehub.kernel_haven.srcml.transformation;
 
 /**
  * Marker to indicate the end of a preprocessor if-elif-else structure, which is only needed as long the surrounded

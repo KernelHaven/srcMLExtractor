@@ -1,4 +1,4 @@
-package net.ssehub.kernel_haven.srcml.transformation.testing;
+package net.ssehub.kernel_haven.srcml.transformation;
 
 import java.util.ArrayList;
 import java.util.List;

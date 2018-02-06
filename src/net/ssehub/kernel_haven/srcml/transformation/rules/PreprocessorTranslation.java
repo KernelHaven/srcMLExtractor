@@ -1,16 +1,16 @@
-package net.ssehub.kernel_haven.srcml.transformation.testing.rules;
+package net.ssehub.kernel_haven.srcml.transformation.rules;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-import net.ssehub.kernel_haven.srcml.transformation.testing.CodeUnit;
-import net.ssehub.kernel_haven.srcml.transformation.testing.ITranslationUnit;
-import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorBlock;
-import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorBlock.Type;
-import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorElse;
-import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorEndIf;
-import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorIf;
-import net.ssehub.kernel_haven.srcml.transformation.testing.TranslationUnit;
+import net.ssehub.kernel_haven.srcml.transformation.CodeUnit;
+import net.ssehub.kernel_haven.srcml.transformation.ITranslationUnit;
+import net.ssehub.kernel_haven.srcml.transformation.PreprocessorBlock;
+import net.ssehub.kernel_haven.srcml.transformation.PreprocessorElse;
+import net.ssehub.kernel_haven.srcml.transformation.PreprocessorEndIf;
+import net.ssehub.kernel_haven.srcml.transformation.PreprocessorIf;
+import net.ssehub.kernel_haven.srcml.transformation.TranslationUnit;
+import net.ssehub.kernel_haven.srcml.transformation.PreprocessorBlock.Type;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
@@ -102,7 +102,7 @@ public class PreprocessorTranslation implements ITransformationRule {
             newUnit = new PreprocessorIf(Type.IFDEF, "defined(" + condition.toString() + ")");
             break;
         case "ifndef":
-            newUnit = new PreprocessorIf(Type.IFDEF, "!defined(" + condition.toString() + ")");
+            newUnit = new PreprocessorIf(Type.IFNDEF, "!defined(" + condition.toString() + ")");
             break;
         case "if":
             newUnit = new PreprocessorIf(Type.IF, condition.toString());

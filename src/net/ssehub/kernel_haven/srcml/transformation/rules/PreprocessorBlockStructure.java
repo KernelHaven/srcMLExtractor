@@ -1,4 +1,4 @@
-package net.ssehub.kernel_haven.srcml.transformation.testing.rules;
+package net.ssehub.kernel_haven.srcml.transformation.rules;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -7,11 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.ssehub.kernel_haven.srcml.transformation.testing.ITranslationUnit;
-import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorBlock;
-import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorElse;
-import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorEndIf;
-import net.ssehub.kernel_haven.srcml.transformation.testing.PreprocessorIf;
+import net.ssehub.kernel_haven.srcml.transformation.ITranslationUnit;
+import net.ssehub.kernel_haven.srcml.transformation.PreprocessorBlock;
+import net.ssehub.kernel_haven.srcml.transformation.PreprocessorElse;
+import net.ssehub.kernel_haven.srcml.transformation.PreprocessorEndIf;
+import net.ssehub.kernel_haven.srcml.transformation.PreprocessorIf;
 
 /**
  * Moves {@link ITransformationRule}s which are encapsulated by CPP statements into the CPP statement as a nested

@@ -3,14 +3,11 @@ package net.ssehub.kernel_haven.srcml;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -21,7 +18,6 @@ import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
 import net.ssehub.kernel_haven.test_utils.TestConfiguration;
 import net.ssehub.kernel_haven.util.ExtractorException;
 import net.ssehub.kernel_haven.util.Logger;
-import net.ssehub.kernel_haven.util.Util;
 
 /**
  * Tests the translation of C-statements.
@@ -40,20 +36,6 @@ public class NewConverterCTest {
         if (null == Logger.get()) {
             Logger.init();
         }
-    }
-    
-    @Before
-    public void enableNewConverter() {
-        SrcMLExtractor.USE_NEW_CONVERTER = true;
-        
-        RESOURCE_DIR.mkdir();
-    }
-    
-    @After
-    public void disableNewConverter() throws IOException {
-        SrcMLExtractor.USE_NEW_CONVERTER = false;
-        
-        Util.deleteFolder(RESOURCE_DIR);
     }
     
     @Test

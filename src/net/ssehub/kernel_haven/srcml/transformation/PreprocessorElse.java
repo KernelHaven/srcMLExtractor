@@ -1,4 +1,4 @@
-package net.ssehub.kernel_haven.srcml.transformation.testing;
+package net.ssehub.kernel_haven.srcml.transformation;
 
 import net.ssehub.kernel_haven.srcml.xml.SrcMlConditionGrammar;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;

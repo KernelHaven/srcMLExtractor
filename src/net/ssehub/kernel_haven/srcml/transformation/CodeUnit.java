@@ -1,4 +1,4 @@
-package net.ssehub.kernel_haven.srcml.transformation.testing;
+package net.ssehub.kernel_haven.srcml.transformation;
 
 /**
  * Represent unparsed code fragments, e.g., a function signature or a (partial) expression of a statement.
