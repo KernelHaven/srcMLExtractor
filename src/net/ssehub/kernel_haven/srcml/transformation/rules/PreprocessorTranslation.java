@@ -82,6 +82,7 @@ public class PreprocessorTranslation implements ITransformationRule {
             break;
         }
         if (null != newUnit) {
+            newUnit.setStartLine(child.getStartLine());
             parent.replaceNested(child, newUnit);
         }
     }

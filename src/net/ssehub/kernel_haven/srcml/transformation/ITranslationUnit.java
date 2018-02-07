@@ -66,7 +66,9 @@ public interface ITranslationUnit  {
      * Returns the start line of the element in code.
      * @return The start line of the element in code or -1 if unclear
      */
-    public int getStartLine();
+    public default int getStartLine() {
+        return -1;
+    }
     
     /**
      * Specifies the last line number of the element.
@@ -78,5 +80,7 @@ public interface ITranslationUnit  {
      * Returns the last line of the element in code.
      * @return The start line of the element in code or -1 if unclear
      */
-    public int getEndLine();
+    public default int getEndLine() {
+        return -1;
+    }
 }

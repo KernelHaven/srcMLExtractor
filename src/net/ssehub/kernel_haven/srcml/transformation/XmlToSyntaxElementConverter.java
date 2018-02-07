@@ -151,7 +151,10 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         
         if (SUPPORTED_ELEMENTS.contains(qName)) {
             if (elements.size() > 1) {
-                elements.removeFirst();
+                elements.removeFirst().setEndLine(getLineNumber());
+            } else if (elements.size() == 1) {
+                // Do not remove top-level unit (= complete file), but update end line
+                elements.peekFirst().setEndLine(getLineNumber());
             }
         }
         
@@ -168,6 +171,7 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
             
             CodeUnit unit = new CodeUnit(str);
             unit.setStartLine(getLineNumber());
+            unit.setEndLine(getLineNumber());
             elements.peekFirst().add(unit);
             
             

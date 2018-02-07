@@ -121,7 +121,6 @@ public class PreprocessorBlockStructure implements ITransformationRule {
      * @param child The child to be moved.
      */
     private void markForReordering(ITranslationUnit parent, ITranslationUnit child) {
-//        PreprocessorBlock currentblock = parentblocks.peekFirst();
         BlockParent currentblock = parentblocks.peekFirst();
         
         /*
@@ -151,15 +150,25 @@ public class PreprocessorBlockStructure implements ITransformationRule {
      * @param block The {@link PreprocessorBlock} for which the action shall be performed.
      */
     private void reorderElements(PreprocessorBlock block) {
+        int blockEndIndex = block.getEndLine();
+        
         // Move elements to CPP block
         List<NestedElement> list = getEncapsulatedElements(block);
         for (NestedElement oldNesting : list) {
             oldNesting.parent.removeNested(oldNesting.child);
             
+            // Temporarily store the end of the block (consider also the endif statement)
+            if (oldNesting.child.getEndLine() > blockEndIndex) {
+                blockEndIndex = oldNesting.child.getEndLine();
+            }
+            
             if (!(oldNesting.child instanceof PreprocessorEndIf)) {
                 block.add(oldNesting.child);
             }
         }
+        
+        // Compute/Update (for the first time) the end of the preprocessor block
+        block.setEndLine(blockEndIndex);
     }
 
 }
