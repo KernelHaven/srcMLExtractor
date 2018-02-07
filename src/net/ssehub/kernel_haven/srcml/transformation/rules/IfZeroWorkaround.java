@@ -19,12 +19,10 @@ public class IfZeroWorkaround implements ITransformationRule {
             }
         }
         
-        
         // Recursive part
         for (int i = 0; i < unit.size(); i++) {
             transform(unit.getNestedElement(i));
         }
-        
     }
 
 }

@@ -37,6 +37,8 @@ public class Preprocessing {
         rule.transform(baseUnit);
         
         // C-Code
+        rule = new TernaryOperatorStructure();
+        rule.transform(baseUnit);
         rule = new ElseIfFixture();
         rule.transform(baseUnit);
         rule = new SwitchCaseStructure();
