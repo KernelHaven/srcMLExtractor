@@ -118,7 +118,9 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             throw new CodeExtractorException(target, e);
             
         } finally {
-            LOGGER.logDebug(stderr.toString().split("\n"));
+            if (!stderr.toString().isEmpty()) {
+                LOGGER.logDebug(stderr.toString().split("\n"));
+            }
         }
     }
 
