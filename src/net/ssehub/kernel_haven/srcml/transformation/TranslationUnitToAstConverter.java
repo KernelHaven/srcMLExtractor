@@ -1,8 +1,9 @@
 package net.ssehub.kernel_haven.srcml.transformation;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
 
 import net.ssehub.kernel_haven.code_model.ast.BranchStatement;
 import net.ssehub.kernel_haven.code_model.ast.CaseStatement;
@@ -39,14 +40,23 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
  */
 public class TranslationUnitToAstConverter {
 
-    private @NonNull Stack<@NonNull Formula> cppPresenceConditions;
-    private @NonNull Stack<@NonNull Formula> cppEffectiveConditions;
+    private @NonNull Deque<@NonNull Formula> cppPresenceConditions;
+    private @NonNull Deque<@NonNull Formula> cppEffectiveConditions;
+    
+    /**
+     * Holds all switch statements while preserving nesting. This is needed to find the correct switch a
+     * {@link CaseStatement} belongs to.
+     * 
+     * @see #convertCaseStatement(TranslationUnit, int, CaseType)
+     */
+    private @NonNull Deque<@NonNull SwitchStatement> switchs;
     
     private java.io. @NonNull File sourceFile;
     
     public TranslationUnitToAstConverter(java.io. @NonNull File sourceFile) {
-        cppPresenceConditions = new Stack<>();
-        cppEffectiveConditions = new Stack<>();
+        cppPresenceConditions = new ArrayDeque<>();
+        cppEffectiveConditions = new ArrayDeque<>();
+        switchs = new ArrayDeque<>();
         this.sourceFile = sourceFile;
     }
     
@@ -283,12 +293,14 @@ public class TranslationUnitToAstConverter {
         
         case "switch":
             /*
-             * Last element is switch-BLock, before comes the condition
+             * Last element is switch-Block, before comes the condition
              */
             SwitchStatement switchStatement = new SwitchStatement(getPc(), makeCode(unit, 0, unit.size() - 2));
             switchStatement.setSourceFile(sourceFile);
             switchStatement.setCondition(getEffectiveCondition());
+            switchs.push(switchStatement);
             switchStatement.addNestedElement(convert(unit.getNestedElement(unit.size() - 1)));
+            switchs.pop();
             return switchStatement;
         
         case "case":
@@ -347,9 +359,14 @@ public class TranslationUnitToAstConverter {
     }
 
     private CaseStatement convertCaseStatement(TranslationUnit unit, int condEndIndex, CaseType type) {
-        CaseStatement caseStatement = new CaseStatement(getPc(), makeCode(unit, 0, condEndIndex), type);
+        if (switchs.isEmpty()) {
+            throw new RuntimeException("Found " + type + " outside of switch in " + sourceFile.getAbsolutePath());
+        }
+        SwitchStatement switchStmt = switchs.peek();
+        CaseStatement caseStatement = new CaseStatement(getPc(), makeCode(unit, 0, condEndIndex), type, switchStmt);
         caseStatement.setSourceFile(sourceFile);
         caseStatement.setCondition(getEffectiveCondition());
+        switchStmt.addCase(caseStatement);
         for (int i = condEndIndex + 1; i < unit.size(); i++) {
             caseStatement.addNestedElement(convert(unit.getNestedElement(i)));
         }

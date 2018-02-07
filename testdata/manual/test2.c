@@ -1,32 +1,39 @@
 
-#include <stdio.h>
+void func() {
 
-#define STRICT_MATH
-#include "math.h"
-#undef STRICT_MATH
-
-#warning Test
-#error Test
-
-#pragma
-
-#line 13
-
-#
-
-int compare(int a, int b) {
-	if (a < b) {
-		return -1;
+	int a = 3;
+	switch (a) {
+		int b;
+	case 0:
+		b = 3;
+		break;
+	
+	
+	#ifdef A
+	case 1:
+	
+		if (a < 132) {
+			case 5:
+				int b = test();
+				
+				switch (b) {
+				
+					case 123:
+					
+					default:
+					
+					break;
+				}
+				
+			break;
+		} 
+	
+	#endif
+	case 2:
+		b = 4;
+		
+	default:
+		b++;
 	}
-	else if (b < a) {
-		return 1;
-	}
-#ifdef WEIRD
-	else if (b == a -1) {
-		return 2;
-	}
-#endif
-	else {
-		return 0;
-	}
+
 }
