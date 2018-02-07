@@ -14,6 +14,7 @@ import net.ssehub.kernel_haven.util.logic.Formula;
 public abstract class PreprocessorBlock implements ITranslationUnit {
     
     private int startLine;
+    private int endLine;
     
     /**
      * Denotes the exact kind of preprocessor element.
@@ -140,5 +141,15 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
     @Override
     public int getStartLine() {
         return startLine;
+    }
+    
+    @Override
+    public void setEndLine(int rowIndex) {
+        this.endLine = rowIndex;
+    }
+    
+    @Override
+    public int getEndLine() {
+        return endLine;
     }
 }

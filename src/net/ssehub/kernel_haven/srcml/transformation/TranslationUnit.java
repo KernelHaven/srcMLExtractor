@@ -15,6 +15,7 @@ public class TranslationUnit implements ITranslationUnit {
     private String type;
     private List<ITranslationUnit> nestedElements = new ArrayList<>();
     private int startLine;
+    private int endLine;
     
     /**
      * Special handling for type="function": the name of the function is stored in here.
@@ -116,5 +117,15 @@ public class TranslationUnit implements ITranslationUnit {
     @Override
     public int getStartLine() {
         return startLine;
+    }
+    
+    @Override
+    public void setEndLine(int rowIndex) {
+        this.endLine = rowIndex;
+    }
+    
+    @Override
+    public int getEndLine() {
+        return endLine;
     }
 }

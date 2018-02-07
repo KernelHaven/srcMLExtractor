@@ -67,4 +67,16 @@ public interface ITranslationUnit  {
      * @return The start line of the element in code or -1 if unclear
      */
     public int getStartLine();
+    
+    /**
+     * Specifies the last line number of the element.
+     * @param rowIndex A 1-based index.
+     */
+    public void setEndLine(int rowIndex);
+    
+    /**
+     * Returns the last line of the element in code.
+     * @return The start line of the element in code or -1 if unclear
+     */
+    public int getEndLine();
 }

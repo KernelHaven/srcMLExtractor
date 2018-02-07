@@ -9,6 +9,7 @@ package net.ssehub.kernel_haven.srcml.transformation;
 public class PreprocessorEndIf implements ITranslationUnit {
     
     private int startLine;
+    private int endLine;
 
     @Override
     public String getType() {
@@ -49,5 +50,15 @@ public class PreprocessorEndIf implements ITranslationUnit {
     @Override
     public int getStartLine() {
         return startLine;
+    }
+    
+    @Override
+    public void setEndLine(int rowIndex) {
+        this.endLine = rowIndex;
+    }
+    
+    @Override
+    public int getEndLine() {
+        return endLine;
     }
 }

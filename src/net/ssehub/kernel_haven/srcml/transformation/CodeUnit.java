@@ -11,6 +11,7 @@ public class CodeUnit implements ITranslationUnit {
     
     private String code;
     private int startLine;
+    private int endLine;
     
     /**
      * Sole constructor for this class.
@@ -63,5 +64,15 @@ public class CodeUnit implements ITranslationUnit {
     @Override
     public int getStartLine() {
         return startLine;
+    }
+    
+    @Override
+    public void setEndLine(int rowIndex) {
+        this.endLine = rowIndex;
+    }
+    
+    @Override
+    public int getEndLine() {
+        return endLine;
     }
 }
