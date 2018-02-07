@@ -34,6 +34,7 @@ public class TranslationUnit implements ITranslationUnit {
      * Adds a nested element.
      * @param unit The nested element to add.
      */
+    @Override
     public void add(ITranslationUnit unit) {
         nestedElements.add(unit);
     }
@@ -112,4 +113,8 @@ public class TranslationUnit implements ITranslationUnit {
         this.startLine = rowIndex;
     }
 
+    @Override
+    public int getStartLine() {
+        return startLine;
+    }
 }

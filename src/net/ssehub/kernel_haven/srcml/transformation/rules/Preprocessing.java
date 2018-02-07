@@ -43,5 +43,7 @@ public class Preprocessing {
         rule.transform(baseUnit);
         rule = new SwitchCaseStructure();
         rule.transform(baseUnit);
+        
+        System.out.println(baseUnit);
     }
 }

@@ -1,6 +1,7 @@
 package net.ssehub.kernel_haven.srcml.transformation.rules;
 
 import net.ssehub.kernel_haven.srcml.transformation.ITranslationUnit;
+import net.ssehub.kernel_haven.srcml.transformation.PreprocessorBlock;
 import net.ssehub.kernel_haven.srcml.transformation.TranslationUnit;
 
 /**
@@ -34,7 +35,7 @@ public class SwitchCaseStructure implements ITransformationRule {
         for (int i = 0; i < parent.size(); i++) {
             ITranslationUnit nested = parent.getNestedElement(i);
             if ("block".equals(nested.getType())) {
-                reorderElementsInSwitchBlock(nested);
+                reorderElementsInSwitchBlock(nested, true);
             } else {
                 determineSwitchBlock(nested);
             }
@@ -46,25 +47,32 @@ public class SwitchCaseStructure implements ITransformationRule {
      * the hierarchy.
      * @param switchBlock A block which is directly nested inside a switch-statement.
      */
-    private void reorderElementsInSwitchBlock(ITranslationUnit switchBlock) {
+    private void reorderElementsInSwitchBlock(ITranslationUnit switchBlock, boolean blockEndsWithBracket) {
         // TODO SE: This won't consider if complete content of block is surrounded by one big CPP-block
         // Walk from back to front to avoid ConcurrentModification / IndexOutOfBound exceptions
         for (int i = switchBlock.size() - 1; i >= 0; i--) {
             ITranslationUnit nested = switchBlock.getNestedElement(i);
             if (isCaseStatement(nested)) {
-                TranslationUnit caseStatement = (TranslationUnit) nested;
-                int startIndex = i + 1;
-                boolean nextCaseReached = false;
-                // Very last element is closing bracket of the block, this shall be skipped
-                while (startIndex < switchBlock.size() - 1 && !nextCaseReached) {
-                    ITranslationUnit elementToMove = switchBlock.getNestedElement(startIndex);
-                    if (!isCaseStatement(elementToMove)) {
-                        caseStatement.add(elementToMove);
-                        switchBlock.removeNested(elementToMove);
-                    } else {
-                        nextCaseReached = true;
-                    }
+                if (nested instanceof TranslationUnit) {
+                    int endIndex = blockEndsWithBracket ? 1 : 0;
+                    moveNestedCases(switchBlock, nested, i + 1, endIndex);
+                } else if (nested instanceof PreprocessorBlock) {
+                    reorderElementsInSwitchBlock(nested, false);
                 }
+            }
+        }
+    }
+
+    private void moveNestedCases(ITranslationUnit switchBlock, ITranslationUnit caseStatement, int startIndex, int endOffset) {
+        boolean nextCaseReached = false;
+        // Very last element is closing bracket of the block, this shall be skipped
+        while (startIndex < switchBlock.size() - endOffset && !nextCaseReached) {
+            ITranslationUnit elementToMove = switchBlock.getNestedElement(startIndex);
+            if (!isCaseStatement(elementToMove)) {
+                caseStatement.add(elementToMove);
+                switchBlock.removeNested(elementToMove);
+            } else {
+                nextCaseReached = true;
             }
         }
     }
@@ -75,6 +83,6 @@ public class SwitchCaseStructure implements ITransformationRule {
      * @return <tt>true</tt> if this is a <tt>case</tt> or <tt>default</tt> statement, <tt>false</tt> otherwise.
      */
     private boolean isCaseStatement(ITranslationUnit unit) {
-        return "case".equals(unit.getType()) || "default".equals(unit.getType());
+        return ("case".equals(unit.getType()) || "default".equals(unit.getType()) || unit instanceof PreprocessorBlock);
     }
 }

@@ -42,7 +42,8 @@ public abstract class AbstractAstConverter extends DefaultHandler {
      * Tutorial: Output line number for SAX parser event handler in Java</a>
      */
     protected int getLineNumber() {
-        return locator.getLineNumber();
+        // Do not count XML header
+        return locator.getLineNumber() - 1;
     }
     
     /**

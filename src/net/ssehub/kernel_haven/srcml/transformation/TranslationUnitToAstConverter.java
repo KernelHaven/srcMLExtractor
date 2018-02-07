@@ -94,8 +94,6 @@ public class TranslationUnitToAstConverter {
             return convertTranslationUnit((TranslationUnit) element);
         } else if (element instanceof PreprocessorIf || element instanceof PreprocessorElse) {
             return convertPreprocessorBlock((PreprocessorBlock) element);
-//        } else if (element instanceof PreprocessorElse) {
-//            return convertPreprocessorElse((PreprocessorElse) element);
         }
         
         throw new IllegalArgumentException("Illegal element " + element.getClass().getName() + " while translating "
@@ -118,6 +116,7 @@ public class TranslationUnitToAstConverter {
             SingleStatement singleStatement = new SingleStatement(pc, makeCode(unit, 0, unit.size() - 1));
             singleStatement.setSourceFile(sourceFile);
             singleStatement.setCondition(getEffectiveCondition());
+            singleStatement.setLineStart(unit.getStartLine());
             return singleStatement;
         
         case "label":

@@ -17,6 +17,14 @@ public interface ITranslationUnit  {
     public String getType();
     
     /**
+     * Adds a nested element at the end of the list of nested elements.
+     * @param unit The nested element to add.
+     */
+    public default void add(ITranslationUnit unit) {
+        throw new UnsupportedOperationException();
+    }
+    
+    /**
      * Exchanges the old element by the new element at the same position.
      * @param oldUnit An {@link ITranslationUnit} which should be replaced by a more processed element.
      * @param newUnit The &#34;more processed/parsed&#34; element.
@@ -53,4 +61,10 @@ public interface ITranslationUnit  {
      * @param rowIndex A 1-based index.
      */
     public void setStartLine(int rowIndex);
+    
+    /**
+     * Returns the start line of the element in code.
+     * @return The start line of the element in code or -1 if unclear
+     */
+    public int getStartLine();
 }

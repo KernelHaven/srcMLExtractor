@@ -59,4 +59,9 @@ public class CodeUnit implements ITranslationUnit {
     public void setStartLine(int rowIndex) {
         this.startLine = rowIndex;
     }
+    
+    @Override
+    public int getStartLine() {
+        return startLine;
+    }
 }

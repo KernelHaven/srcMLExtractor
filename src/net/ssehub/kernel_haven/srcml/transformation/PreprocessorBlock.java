@@ -83,6 +83,7 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
      * Adds a nested element, which is enclosed by this by preprocessor block.
      * @param child The nested element to add.
      */
+    @Override
     public void add(ITranslationUnit child) {
         nestedElements.add(child);
     }
@@ -134,5 +135,10 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
     @Override
     public void setStartLine(int rowIndex) {
         this.startLine = rowIndex;
+    }
+    
+    @Override
+    public int getStartLine() {
+        return startLine;
     }
 }
