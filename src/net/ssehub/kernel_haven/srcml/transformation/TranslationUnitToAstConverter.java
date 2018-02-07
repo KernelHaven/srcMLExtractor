@@ -107,12 +107,13 @@ public class TranslationUnitToAstConverter {
         
         switch (unit.getType()) {
         
-        case "decl_stmt": // falls through
-        case "expr_stmt": // falls through
-        case "continue":  // falls through
-        case "break":     // falls through
-        case "goto":      // falls through 
-        case "return":    // falls through 
+        case "function_decl":   // falls through
+        case "decl_stmt":       // falls through
+        case "expr_stmt":       // falls through
+        case "continue":        // falls through
+        case "break":           // falls through
+        case "goto":            // falls through 
+        case "return":          // falls through 
         case "empty_stmt": 
             SingleStatement singleStatement = new SingleStatement(pc, makeCode(unit, 0, unit.size() - 1));
             singleStatement.setSourceFile(sourceFile);
@@ -329,7 +330,8 @@ public class TranslationUnitToAstConverter {
             return convertCppStatement(unit, CppStatement.Type.EMPTY);
         }
 
-        throw new RuntimeException("Unexpected unit type: " + unit.getType());
+        throw new RuntimeException("Unexpected unit type: " + unit.getType() + " while parsing file "
+            + sourceFile.getAbsolutePath());
     }
     
     private CppStatement convertCppStatement(TranslationUnit unit, CppStatement.Type type) {

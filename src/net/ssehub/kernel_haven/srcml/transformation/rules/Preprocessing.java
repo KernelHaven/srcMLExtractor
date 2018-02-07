@@ -37,7 +37,7 @@ public class Preprocessing {
         rule.transform(baseUnit);
         
         // C-Code
-        rule = new TernaryOperatorStructure();
+        rule = new SingleStatementStructures();
         rule.transform(baseUnit);
         rule = new ElseIfFixture();
         rule.transform(baseUnit);
