@@ -37,6 +37,7 @@ import net.ssehub.kernel_haven.util.Util;
  * <ul>
  *   <li>Windows 64 Bit</li>
  *   <li>Linux 64 Bit</li>
+ *   <li>macOS: El Capitan (not tested)</li>
  * </ul>
  * @author El-Sharkawy
  *
