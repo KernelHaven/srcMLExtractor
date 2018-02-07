@@ -34,7 +34,7 @@ import net.ssehub.kernel_haven.util.logic.Formula;
  */
 public class AbstractSrcMLExtractorTest {
     
-private static final File RESOURCE_DIR = new File(AllTests.TESTDATA, "tmpRes");
+    private static final File RESOURCE_DIR = new File(AllTests.TESTDATA, "tmpRes");
     
     /**
      * Initializes the logger.

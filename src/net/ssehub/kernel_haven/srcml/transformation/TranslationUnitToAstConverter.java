@@ -98,7 +98,8 @@ public class TranslationUnitToAstConverter {
 //            return convertPreprocessorElse((PreprocessorElse) element);
         }
         
-        throw new IllegalArgumentException("Illegal element " + element.getClass().getName());
+        throw new IllegalArgumentException("Illegal element " + element.getClass().getName() + " while translating "
+            + sourceFile.getAbsolutePath());
     }
     
     private ISyntaxElement convertTranslationUnit(TranslationUnit unit) {
