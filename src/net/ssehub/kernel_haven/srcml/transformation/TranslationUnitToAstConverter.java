@@ -475,7 +475,7 @@ public class TranslationUnitToAstConverter {
                 popFormula();
             } else {
                 throw new RuntimeException("makeCode() Expected "
-                    + CodeUnit.class.getSimpleName() + "CodeUnit or " + PreprocessorBlock.class.getSimpleName()
+                    + CodeUnit.class.getSimpleName() + " or " + PreprocessorBlock.class.getSimpleName()
                     + ", got " + unit.getClass().getSimpleName() + " while parsing file: "
                     + sourceFile.getAbsolutePath());
                 // ignore
