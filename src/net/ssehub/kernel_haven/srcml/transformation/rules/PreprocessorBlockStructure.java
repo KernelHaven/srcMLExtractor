@@ -150,7 +150,7 @@ public class PreprocessorBlockStructure implements ITransformationRule {
      * @param block The {@link PreprocessorBlock} for which the action shall be performed.
      */
     private void reorderElements(PreprocessorBlock block) {
-        int blockEndIndex = block.getEndLine();
+        int blockEndIndex = null != block ? block.getEndLine() : -1;
         
         // Move elements to CPP block
         List<NestedElement> list = getEncapsulatedElements(block);
@@ -168,7 +168,9 @@ public class PreprocessorBlockStructure implements ITransformationRule {
         }
         
         // Compute/Update (for the first time) the end of the preprocessor block
-        block.setEndLine(blockEndIndex);
+        if (null != block) {
+            block.setEndLine(blockEndIndex);
+        }
     }
 
 }
