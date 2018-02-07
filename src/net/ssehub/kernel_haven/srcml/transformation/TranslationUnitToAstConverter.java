@@ -400,7 +400,55 @@ public class TranslationUnitToAstConverter {
         typeDef.setSourceFile(sourceFile);
         typeDef.setCondition(getEffectiveCondition());
         if (-1 != blockIndex) {
-            typeDef.addNestedElement(convert(unit.getNestedElement(blockIndex)));
+            ITranslationUnit block = unit.getNestedElement(blockIndex);
+            if (type == TypeDefType.ENUM) {
+                // don't parse the <block> of enums as a statement
+                ICode blockCode = makeCode(block, 0, block.size() - 1);
+                
+                // join blockCode with previous declaration
+                ICode decl = typeDef.getDeclaration();
+                if (decl instanceof Code && blockCode instanceof Code) {
+                    Code newDecl = new Code(decl.getPresenceCondition(), ((Code) decl).getText() + ' '
+                            + ((Code) blockCode).getText());
+                    newDecl.setCondition(decl.getCondition());
+                    newDecl.setSourceFile(sourceFile);
+                    
+                    decl = newDecl;
+                } else {
+                    CodeList newDecl = new CodeList(decl.getPresenceCondition());
+                    newDecl.setCondition(decl.getCondition());
+                    newDecl.setSourceFile(sourceFile);
+                    
+                    if (decl instanceof CodeList) {
+                        CodeList list = (CodeList) decl;
+                        for (int i = 0; i < list.getNestedElementCount(); i++) {
+                            newDecl.addNestedElement(list.getNestedElement(i));
+                        }
+                    } else {
+                        newDecl.addNestedElement(decl);
+                    }
+                    
+                    if (blockCode instanceof CodeList) {
+                        CodeList list = (CodeList) blockCode;
+                        for (int i = 0; i < list.getNestedElementCount(); i++) {
+                            newDecl.addNestedElement(list.getNestedElement(i));
+                        }
+                    } else {
+                        newDecl.addNestedElement(blockCode);
+                    }
+                    
+                    decl = newDecl;
+                }
+                
+                
+                // create new TypeDefinition with new declaration
+                typeDef = new TypeDefinition(pc, decl, type);
+                typeDef.setSourceFile(sourceFile);
+                typeDef.setCondition(getEffectiveCondition());
+                
+            } else {
+                typeDef.addNestedElement(convert(block));
+            }
         }
         return typeDef;
     }
