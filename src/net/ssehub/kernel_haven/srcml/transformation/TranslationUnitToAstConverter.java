@@ -441,7 +441,6 @@ public class TranslationUnitToAstConverter {
         
         for (int i = start; i <= end; i++) {
             ITranslationUnit child = unit.getNestedElement(i);
-//            System.out.println(child.getType());
             
             if (child instanceof CodeUnit) {
                 if (code.length() != 0) {
