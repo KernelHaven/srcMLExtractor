@@ -36,6 +36,7 @@ import net.ssehub.kernel_haven.util.Util;
  * This extractor supports the following platforms:
  * <ul>
  *   <li>Windows 64 Bit</li>
+ *   <li>Linux 64 Bit</li>
  * </ul>
  * @author El-Sharkawy
  *
@@ -72,7 +73,7 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             
 //            builder.directory(srcExec.getParentFile());
             // set LD_LIBRARY_PATH to ../lib
-            // only needed for linux, but does no harm on windows.
+            // only needed for Linux and Mac, but does no harm on Windows.
             builder.environment().put("LD_LIBRARY_PATH",
                     new File(srcExec.getParentFile().getParentFile(), "lib").getAbsolutePath());
             
