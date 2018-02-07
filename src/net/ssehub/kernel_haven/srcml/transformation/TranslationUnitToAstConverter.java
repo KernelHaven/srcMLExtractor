@@ -307,9 +307,21 @@ public class TranslationUnitToAstConverter {
         
         case "case":
             /*
-             * 3 Elements belong to the condition, afterwards come nested statements
+             * 3-4 Elements belong to the condition, afterwards come nested statements
              */
-            return convertCaseStatement(unit, 2, CaseType.CASE);
+            int lastElementIndex = 2;
+            boolean colonFound = false;
+            
+            // Search the colon
+            while (unit.size() > lastElementIndex && !colonFound) {
+                ITranslationUnit nested = unit.getNestedElement(lastElementIndex);
+                if (nested instanceof CodeUnit && !":".equals(((CodeUnit)nested).getCode())) {
+                    lastElementIndex++;
+                } else {
+                    colonFound = true;                    
+                }
+            }
+            return convertCaseStatement(unit, lastElementIndex, CaseType.CASE);
         
         case "default":
             /*
@@ -513,6 +525,10 @@ public class TranslationUnitToAstConverter {
                     code.append(' ');
                 }
                 code.append(((CodeUnit) child).getCode());
+            } else if ("comment".equals(child.getType())) {
+                // TODO SE: @Adam check if Comment may also implement ICode interface, would be much nicer
+                ICode comment = makeCode(child, 0, child.size() -1);
+                result.add(comment);
             } else if (child instanceof PreprocessorBlock) {
                 if (code.length() > 0) {
                     Code codeElement = new Code(getPc(), code.toString());
