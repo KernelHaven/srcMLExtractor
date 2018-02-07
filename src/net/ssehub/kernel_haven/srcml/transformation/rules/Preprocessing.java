@@ -33,6 +33,8 @@ public class Preprocessing {
         rule.transform(baseUnit);
         rule = new PreprocessorConditionComputationRule();
         rule.transform(baseUnit);
+        rule = new IfZeroWorkaround();
+        rule.transform(baseUnit);
         
         // C-Code
         rule = new ElseIfFixture();

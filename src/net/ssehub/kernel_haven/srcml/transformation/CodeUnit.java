@@ -10,6 +10,7 @@ package net.ssehub.kernel_haven.srcml.transformation;
 public class CodeUnit implements ITranslationUnit {
     
     private String code;
+    private int startLine;
     
     /**
      * Sole constructor for this class.
@@ -52,5 +53,10 @@ public class CodeUnit implements ITranslationUnit {
     public ITranslationUnit getNestedElement(int index) {
         throw new IndexOutOfBoundsException(CodeUnit.class.getSimpleName() + " has no nested elements, "
             + "requested was: " + index);
+    }
+
+    @Override
+    public void setStartLine(int rowIndex) {
+        this.startLine = rowIndex;
     }
 }

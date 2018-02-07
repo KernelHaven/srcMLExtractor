@@ -126,6 +126,7 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         
         if (SUPPORTED_ELEMENTS.contains(qName)) {
             TranslationUnit newElement = new TranslationUnit(qName);
+            newElement.setStartLine(getLineNumber());
             if (!elements.isEmpty()) {
                 elements.peekFirst().add(newElement);
             }
@@ -165,6 +166,7 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
             }
             
             CodeUnit unit = new CodeUnit(str);
+            unit.setStartLine(getLineNumber());
             elements.peekFirst().add(unit);
             
             

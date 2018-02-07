@@ -47,4 +47,10 @@ public interface ITranslationUnit  {
      * @see #size()
      */
     public ITranslationUnit getNestedElement(int index);
+    
+    /**
+     * Specifies the line number where the element starts.
+     * @param rowIndex A 1-based index.
+     */
+    public void setStartLine(int rowIndex);
 }

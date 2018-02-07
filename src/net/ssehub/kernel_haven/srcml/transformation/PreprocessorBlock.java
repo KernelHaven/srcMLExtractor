@@ -13,6 +13,8 @@ import net.ssehub.kernel_haven.util.logic.Formula;
  */
 public abstract class PreprocessorBlock implements ITranslationUnit {
     
+    private int startLine;
+    
     /**
      * Denotes the exact kind of preprocessor element.
      * @author El-Sharkawy
@@ -127,5 +129,10 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
     @Override
     public ITranslationUnit getNestedElement(int index) {
         return nestedElements.get(index);
+    }
+    
+    @Override
+    public void setStartLine(int rowIndex) {
+        this.startLine = rowIndex;
     }
 }

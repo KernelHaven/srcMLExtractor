@@ -2,6 +2,7 @@ package net.ssehub.kernel_haven.srcml.xml;
 
 import java.io.File;
 
+import org.xml.sax.Locator;
 import org.xml.sax.helpers.DefaultHandler;
 
 import net.ssehub.kernel_haven.code_model.CodeElement;
@@ -18,6 +19,7 @@ public abstract class AbstractAstConverter extends DefaultHandler {
     
     private SourceFile file;
     
+    private Locator locator;
     /**
      * Sole constructor for sub classes.
      * @param path The relative path to the source file in the source tree. Must
@@ -25,6 +27,22 @@ public abstract class AbstractAstConverter extends DefaultHandler {
      */
     protected AbstractAstConverter(@NonNull File path) {
         this.file = new SourceFile(path);
+    }
+    
+    @Override
+    public void setDocumentLocator(Locator locator) {
+      this.locator = locator;
+    }
+    
+    /**
+     * Returns the currently parsed line number of the XML document.
+     * @return The current line number within the document.
+     * @see <a 
+     * href="http://www.java2s.com/Tutorials/Java/XML/SAX/Output_line_number_for_SAX_parser_event_handler_in_Java.htm">
+     * Tutorial: Output line number for SAX parser event handler in Java</a>
+     */
+    protected int getLineNumber() {
+        return locator.getLineNumber();
     }
     
     /**

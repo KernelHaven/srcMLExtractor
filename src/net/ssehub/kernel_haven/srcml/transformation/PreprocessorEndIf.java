@@ -7,6 +7,8 @@ package net.ssehub.kernel_haven.srcml.transformation;
  *
  */
 public class PreprocessorEndIf implements ITranslationUnit {
+    
+    private int startLine;
 
     @Override
     public String getType() {
@@ -37,5 +39,10 @@ public class PreprocessorEndIf implements ITranslationUnit {
     public ITranslationUnit getNestedElement(int index) {
         throw new IndexOutOfBoundsException(PreprocessorEndIf.class.getSimpleName() + " has no nested elements, "
             + "requested was: " + index);
+    }
+    
+    @Override
+    public void setStartLine(int rowIndex) {
+        this.startLine = rowIndex;
     }
 }

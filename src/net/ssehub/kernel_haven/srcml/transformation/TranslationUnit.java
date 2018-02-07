@@ -14,6 +14,7 @@ public class TranslationUnit implements ITranslationUnit {
     
     private String type;
     private List<ITranslationUnit> nestedElements = new ArrayList<>();
+    private int startLine;
     
     /**
      * Special handling for type="function": the name of the function is stored in here.
@@ -104,6 +105,11 @@ public class TranslationUnit implements ITranslationUnit {
     @Override
     public ITranslationUnit getNestedElement(int index) {
         return nestedElements.get(index);
+    }
+
+    @Override
+    public void setStartLine(int rowIndex) {
+        this.startLine = rowIndex;
     }
 
 }
