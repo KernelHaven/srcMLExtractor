@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.ssehub.kernel_haven.srcml.transformation.ITranslationUnit;
 import net.ssehub.kernel_haven.srcml.transformation.TranslationUnit;
+import net.ssehub.kernel_haven.util.FormatException;
 
 /**
  * Some operators are parsed to multiple elements, which will be fixed by this rule:
@@ -19,7 +20,7 @@ import net.ssehub.kernel_haven.srcml.transformation.TranslationUnit;
 public class SingleStatementStructures implements ITransformationRule {
 
     @Override
-    public void transform(ITranslationUnit unit) {
+    public void transform(ITranslationUnit unit) throws FormatException {
         int index;
         if (unit instanceof TranslationUnit && (index = nestedStatementPosition(unit)) != -1) {
             

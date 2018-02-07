@@ -26,6 +26,7 @@ import net.ssehub.kernel_haven.code_model.ast.SingleStatement;
 import net.ssehub.kernel_haven.code_model.ast.SwitchStatement;
 import net.ssehub.kernel_haven.code_model.ast.TypeDefinition;
 import net.ssehub.kernel_haven.code_model.ast.TypeDefinition.TypeDefType;
+import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.logic.Conjunction;
 import net.ssehub.kernel_haven.util.logic.Formula;
@@ -98,7 +99,7 @@ public class TranslationUnitToAstConverter {
      * @param element The root element representing the complete file.
      * @return The translated AST still representing the complete file.
      */
-    public ISyntaxElement convert(ITranslationUnit element) {
+    public ISyntaxElement convert(ITranslationUnit element) throws FormatException {
         
         if (element instanceof TranslationUnit) {
             return convertTranslationUnit((TranslationUnit) element);
@@ -106,11 +107,10 @@ public class TranslationUnitToAstConverter {
             return convertPreprocessorBlock((PreprocessorBlock) element);
         }
         
-        throw new IllegalArgumentException("Illegal element " + element.getClass().getName() + " while translating "
-            + sourceFile.getAbsolutePath());
+        throw ExceptionUtil.makeException("Illegal element " + element.getClass().getName(), element);
     }
     
-    private ISyntaxElement convertTranslationUnit(TranslationUnit unit) {
+    private ISyntaxElement convertTranslationUnit(TranslationUnit unit) throws FormatException {
         Formula pc = getPc();
         
         switch (unit.getType()) {
@@ -341,11 +341,10 @@ public class TranslationUnitToAstConverter {
             return convertCppStatement(unit, CppStatement.Type.EMPTY);
         }
 
-        throw new RuntimeException("Unexpected unit type: " + unit.getType() + " while parsing file "
-            + sourceFile.getAbsolutePath());
+        throw ExceptionUtil.makeException("Unexpected unit type: " + unit.getType(), unit);
     }
     
-    private CppStatement convertCppStatement(TranslationUnit unit, CppStatement.Type type) {
+    private CppStatement convertCppStatement(TranslationUnit unit, CppStatement.Type type) throws FormatException {
         ICode expression = null;
         // first two strings inside are # and the type, skip these
         if (unit.size() > 2) {
@@ -358,9 +357,9 @@ public class TranslationUnitToAstConverter {
         return statement;
     }
 
-    private CaseStatement convertCaseStatement(TranslationUnit unit, int condEndIndex, CaseType type) {
+    private CaseStatement convertCaseStatement(TranslationUnit unit, int condEndIndex, CaseType type) throws FormatException {
         if (switchs.isEmpty()) {
-            throw new RuntimeException("Found " + type + " outside of switch in " + sourceFile.getAbsolutePath());
+            throw ExceptionUtil.makeException("Found " + type + " outside of switch ", unit);
         }
         SwitchStatement switchStmt = switchs.peek();
         CaseStatement caseStatement = new CaseStatement(getPc(), makeCode(unit, 0, condEndIndex), type, switchStmt);
@@ -373,7 +372,7 @@ public class TranslationUnitToAstConverter {
         return caseStatement;
     }
 
-    private boolean isInline(TranslationUnit unit) {
+    private boolean isInline(TranslationUnit unit) throws FormatException {
         boolean isInline = false;
         if (unit.size() > 0) {
             ITranslationUnit lastElement = unit.getNestedElement(unit.size() - 1);
@@ -385,7 +384,7 @@ public class TranslationUnitToAstConverter {
         return isInline;
     }
 
-    private TypeDefinition createTypeDef(TranslationUnit unit, Formula pc, TypeDefType type, int blockIndex, int declStartIndex, int declEndIndex) {
+    private TypeDefinition createTypeDef(TranslationUnit unit, Formula pc, TypeDefType type, int blockIndex, int declStartIndex, int declEndIndex) throws FormatException {
         /*
          * blockIndex and declEndIndex are computed from the end, expecting as last element a semicolon, which is only
          * optional. This will fix the indices.
@@ -406,7 +405,7 @@ public class TranslationUnitToAstConverter {
         return typeDef;
     }
 
-    private LoopStatement createLoop(TranslationUnit unit, LoopType type, int blockIndex, int condStartIndex, int condEndIndex) {
+    private LoopStatement createLoop(TranslationUnit unit, LoopType type, int blockIndex, int condStartIndex, int condEndIndex) throws FormatException {
         
         ICode condition = makeCode(unit, condStartIndex, condEndIndex);
         LoopStatement loop = new LoopStatement(getPc(),  condition, type);
@@ -416,7 +415,7 @@ public class TranslationUnitToAstConverter {
         return loop;
     }
     
-    private CppBlock convertPreprocessorBlock(PreprocessorBlock cppBlock) {
+    private CppBlock convertPreprocessorBlock(PreprocessorBlock cppBlock) throws FormatException {
         Formula condition = cppBlock.getEffectiveCondition();
         pushFormula(condition);
         Type type = Type.valueOf(cppBlock.getType());
@@ -440,7 +439,7 @@ public class TranslationUnitToAstConverter {
      * @param element The element that may be added as a sibling to ifStatement.
      * @param ifStatement The ifStatement that element may be a sibling of.
      */
-    private void addIfSibling(ISyntaxElement element, BranchStatement ifStatement) {
+    private void addIfSibling(ISyntaxElement element, BranchStatement ifStatement) throws FormatException {
         if (element instanceof BranchStatement) {
             ifStatement.addSibling((BranchStatement) element);
             
@@ -451,7 +450,7 @@ public class TranslationUnitToAstConverter {
         }
     }
     
-    private ICode makeCode(ITranslationUnit unit, int start, int end) {
+    private ICode makeCode(ITranslationUnit unit, int start, int end) throws FormatException {
         
         StringBuilder code = new StringBuilder();
         List<ICode> result = new LinkedList<>();
@@ -491,11 +490,9 @@ public class TranslationUnitToAstConverter {
                 result.add(cppif);
                 popFormula();
             } else {
-                throw new RuntimeException("makeCode() Expected "
-                    + CodeUnit.class.getSimpleName() + " or " + PreprocessorBlock.class.getSimpleName()
-                    + ", got " + unit.getClass().getSimpleName() + " while parsing file: "
-                    + sourceFile.getAbsolutePath());
-                // ignore
+                throw ExceptionUtil.makeException("makeCode() Expected "
+                        + CodeUnit.class.getSimpleName() + " or " + PreprocessorBlock.class.getSimpleName()
+                        + ", got " + unit.getClass().getSimpleName(), unit);
             }
         }
         
@@ -507,7 +504,7 @@ public class TranslationUnitToAstConverter {
         }
         
         if (result.size() == 0) {
-            throw new RuntimeException("makeCode() Found no elements to make code");
+            throw ExceptionUtil.makeException("makeCode() Found no elements to make code", unit);
             
         } else if (result.size() == 1) {
             return result.get(0);

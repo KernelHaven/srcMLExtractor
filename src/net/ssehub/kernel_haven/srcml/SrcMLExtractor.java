@@ -19,6 +19,7 @@ import net.ssehub.kernel_haven.config.DefaultSettings;
 import net.ssehub.kernel_haven.srcml.transformation.XmlToSyntaxElementConverter;
 import net.ssehub.kernel_haven.srcml.xml.AbstractAstConverter;
 import net.ssehub.kernel_haven.srcml.xml.XmlToAstConverter;
+import net.ssehub.kernel_haven.util.CodeExtractorException;
 import net.ssehub.kernel_haven.util.ExtractorException;
 import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.Logger;
@@ -65,10 +66,11 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
                     + absoulteTarget.getAbsolutePath());
         }
         
+        ByteArrayOutputStream stderr = new ByteArrayOutputStream();
+        
         try {
             PipedOutputStream out = new PipedOutputStream();
             PipedInputStream stdout = new PipedInputStream(out);
-            ByteArrayOutputStream stderr = new ByteArrayOutputStream();
             
             ProcessBuilder builder = new ProcessBuilder(srcExec.getAbsolutePath(), absoulteTarget.getAbsolutePath());
             
@@ -109,12 +111,14 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             
             SourceFile resultFile = converter.parseToAst();
             
-            LOGGER.logDebug(stderr.toString().split("\n"));
             
             return resultFile;
             
         } catch (IOException | UncheckedIOException | ParserConfigurationException | SAXException | FormatException e) {
-            throw new ExtractorException(e);
+            throw new CodeExtractorException(target, e);
+            
+        } finally {
+            LOGGER.logDebug(stderr.toString().split("\n"));
         }
     }
 

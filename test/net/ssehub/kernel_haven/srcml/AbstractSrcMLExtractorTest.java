@@ -105,8 +105,11 @@ public class AbstractSrcMLExtractorTest {
             SrcMLExtractor extractor = new SrcMLExtractor();
             extractor.init(config);
             result = extractor.runOnFile(new File(file));
-        } catch (SetUpException | ExtractorException exc) {
+        } catch (SetUpException exc) {
             Assert.fail("Failed to initialize SrcMLExtractor: " + exc.getMessage());
+        } catch (ExtractorException exc) {
+            exc.printStackTrace(System.out);
+            Assert.fail("Extractor failed to run on file " + file + ": " + exc.toString());
         }
         
         Assert.assertNotNull("Test file wasn't translated: " + file, result);

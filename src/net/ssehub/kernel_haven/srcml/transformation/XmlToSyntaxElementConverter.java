@@ -14,6 +14,7 @@ import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
 import net.ssehub.kernel_haven.srcml.transformation.rules.Preprocessing;
 import net.ssehub.kernel_haven.srcml.xml.AbstractAstConverter;
+import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
@@ -179,25 +180,24 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
     }
     
     @Override
-    protected CodeElement getAst() {
+    protected CodeElement getAst() throws FormatException {
         ITranslationUnit unit = elements.removeFirst();
-        
         if (DEBUG_LOGGING) {
             System.out.println("XML -> Translation Units");
             System.out.println("========================");
             System.out.println(unit);
         }
+        
         Preprocessing converter = new Preprocessing();
         converter.convert(unit);
-        
         if (DEBUG_LOGGING) {
             System.out.println("Translation Unit Preprocessing");
             System.out.println("==============================");
             System.out.println(unit);
         }
+        
         TranslationUnitToAstConverter converter2 = new TranslationUnitToAstConverter(getFile().getPath());
         CodeElement astResult = converter2.convert(unit);
-        
         if (DEBUG_LOGGING) {
             System.out.println("Translation Units -> AST");
             System.out.println("========================");

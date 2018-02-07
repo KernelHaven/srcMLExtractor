@@ -4,6 +4,7 @@ import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
 import net.ssehub.kernel_haven.srcml.transformation.ITranslationUnit;
 import net.ssehub.kernel_haven.srcml.transformation.PreprocessorBlock;
 import net.ssehub.kernel_haven.srcml.transformation.PreprocessorEndIf;
+import net.ssehub.kernel_haven.util.FormatException;
 
 /**
  * Restructures the {@link ITranslationUnit}s to be more close to the target {@link ISyntaxElement}-structure and to
@@ -25,7 +26,7 @@ public class Preprocessing {
      * Restructures the {@link ITranslationUnit}s.
      * @param baseUnit The root element of the AST, which represents to complete parsed file.
      */
-    public void convert(ITranslationUnit baseUnit) {
+    public void convert(ITranslationUnit baseUnit) throws FormatException {
         // Preprocessor statements
         ITransformationRule rule = new PreprocessorTranslation();
         rule.transform(baseUnit);

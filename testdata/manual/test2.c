@@ -1,5 +1,5 @@
 
-void func() {
+/*void funcSwitch() {
 
 	int a = 3;
 	switch (a) {
@@ -36,4 +36,10 @@ void func() {
 		b++;
 	}
 
+}*/
+
+typdef signed int s_int_32;
+
+void funcTypeDef() {
+	typedef unsigned int u_int_32;
 }

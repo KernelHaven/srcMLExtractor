@@ -12,6 +12,7 @@ import net.ssehub.kernel_haven.srcml.transformation.PreprocessorBlock;
 import net.ssehub.kernel_haven.srcml.transformation.PreprocessorElse;
 import net.ssehub.kernel_haven.srcml.transformation.PreprocessorEndIf;
 import net.ssehub.kernel_haven.srcml.transformation.PreprocessorIf;
+import net.ssehub.kernel_haven.util.FormatException;
 
 /**
  * Moves {@link ITransformationRule}s which are encapsulated by CPP statements into the CPP statement as a nested
@@ -45,7 +46,7 @@ public class PreprocessorBlockStructure implements ITransformationRule {
     private Deque<BlockParent> parentblocks = new ArrayDeque<>();
 
     @Override
-    public void transform(ITranslationUnit base) {
+    public void transform(ITranslationUnit base) throws FormatException {
         // Identify elements but do not change elements to avoid concurrent modification exceptions
         for (int i = 0; i < base.size(); i++) {
             identifyStructure(base, base.getNestedElement(i));

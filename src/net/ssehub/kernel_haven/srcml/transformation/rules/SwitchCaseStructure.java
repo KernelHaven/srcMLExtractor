@@ -3,6 +3,7 @@ package net.ssehub.kernel_haven.srcml.transformation.rules;
 import net.ssehub.kernel_haven.srcml.transformation.ITranslationUnit;
 import net.ssehub.kernel_haven.srcml.transformation.PreprocessorBlock;
 import net.ssehub.kernel_haven.srcml.transformation.TranslationUnit;
+import net.ssehub.kernel_haven.util.FormatException;
 
 /**
  * Nests statements belonging to a <tt>case</tt> or a <tt>default</tt> into the unit, i.e., create a hierarchy out of
@@ -13,7 +14,7 @@ import net.ssehub.kernel_haven.srcml.transformation.TranslationUnit;
 public class SwitchCaseStructure implements ITransformationRule {
 
     @Override
-    public void transform(ITranslationUnit unit) {
+    public void transform(ITranslationUnit unit) throws FormatException {
         // Check if this element is a switch statement, if yes restructure nested elements
         if ("switch".equals(unit.getType())) {
             determineSwitchBlock(unit);

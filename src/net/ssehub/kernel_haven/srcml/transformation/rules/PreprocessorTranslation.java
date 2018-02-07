@@ -13,6 +13,7 @@ import net.ssehub.kernel_haven.srcml.transformation.PreprocessorElse;
 import net.ssehub.kernel_haven.srcml.transformation.PreprocessorEndIf;
 import net.ssehub.kernel_haven.srcml.transformation.PreprocessorIf;
 import net.ssehub.kernel_haven.srcml.transformation.TranslationUnit;
+import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
@@ -29,7 +30,7 @@ public class PreprocessorTranslation implements ITransformationRule {
     private Deque<PreprocessorIf> parents = new ArrayDeque<>();
 
     @Override
-    public void transform(ITranslationUnit base) {
+    public void transform(ITranslationUnit base) throws FormatException {
         for (int i = 0; i < base.size(); i++) {
             replaceCPPs(base, base.getNestedElement(i));
         }

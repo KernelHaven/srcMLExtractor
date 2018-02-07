@@ -3,13 +3,14 @@ package net.ssehub.kernel_haven.srcml.transformation.rules;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.ssehub.kernel_haven.srcml.transformation.ExceptionUtil;
 import net.ssehub.kernel_haven.srcml.transformation.ITranslationUnit;
 import net.ssehub.kernel_haven.srcml.transformation.PreprocessorBlock;
+import net.ssehub.kernel_haven.srcml.transformation.PreprocessorBlock.Type;
 import net.ssehub.kernel_haven.srcml.transformation.PreprocessorElse;
 import net.ssehub.kernel_haven.srcml.transformation.PreprocessorIf;
-import net.ssehub.kernel_haven.srcml.transformation.PreprocessorBlock.Type;
 import net.ssehub.kernel_haven.srcml.xml.SrcMlConditionGrammar;
-import net.ssehub.kernel_haven.util.Logger;
+import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.logic.Formula;
 import net.ssehub.kernel_haven.util.logic.parser.ExpressionFormatException;
 import net.ssehub.kernel_haven.util.logic.parser.Parser;
@@ -32,7 +33,7 @@ public class PreprocessorConditionComputationRule implements ITransformationRule
     private Parser<@NonNull Formula> parser = new Parser<>(new SrcMlConditionGrammar(new VariableCache()));
 
     @Override
-    public void transform(ITranslationUnit node) {
+    public void transform(ITranslationUnit node) throws FormatException {
         for (int j = 0; j < node.size(); j++) {
             ITranslationUnit nested = node.getNestedElement(j);
             
@@ -79,12 +80,12 @@ public class PreprocessorConditionComputationRule implements ITransformationRule
      * @param block The block to which the condition belongs to.
      * @param condition The unparsed condition in a form that the {@link SrcMlConditionGrammar} can handle it.
      */
-    private void parseAndSetCondition(PreprocessorBlock block, String condition) {
+    private void parseAndSetCondition(PreprocessorBlock block, String condition) throws FormatException {
         try {
             Formula parsedCondition = parser.parse(condition);
             block.setEffectiveCondition(parsedCondition);
         } catch (ExpressionFormatException exc) {
-            Logger.get().logException("Could not parse effective expression: " + condition, exc);
+            throw ExceptionUtil.makeException("Could not parse effective expression: " + condition, block);
         }
     }
 }

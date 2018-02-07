@@ -7,6 +7,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.code_model.SourceFile;
+import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
@@ -58,7 +59,7 @@ public abstract class AbstractAstConverter extends DefaultHandler {
      * Returns the parsed AST.
      * @return The {@link SourceFile} representing the parsed file.
      */
-    public SourceFile getResult() {
+    public SourceFile getResult() throws FormatException {
         file.addElement(getAst());
         return file;
     }
@@ -68,5 +69,5 @@ public abstract class AbstractAstConverter extends DefaultHandler {
      * 
      * @return The AST node that is the result of the conversion.
      */
-    protected abstract CodeElement getAst();
+    protected abstract CodeElement getAst() throws FormatException;
 }
