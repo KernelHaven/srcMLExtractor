@@ -336,10 +336,12 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         assertEquals("Got unexpected number of elements", 3, elements.size());
 
         assertElement(SingleStatement.class, "1", "1", elements.get(0));
-        CppBlock ifElem = assertIf("0", "0", False.INSTANCE, 1, Type.IF, elements.get(1));
+        // TODO SE: Due to current workaround of if 0 elements, this element does not have any nested elements
+//        CppBlock ifElem = assertIf("0", "0", False.INSTANCE, 1, Type.IF, elements.get(1));
+        assertIf("0", "0", False.INSTANCE, 0, Type.IF, elements.get(1));
         assertElement(SingleStatement.class, "1", "1", elements.get(2));
         
-        assertElement(SingleStatement.class, "0", "0", ifElem.getNestedElement(0));
+//        assertElement(SingleStatement.class, "0", "0", ifElem.getNestedElement(0));
     }
     
     @Override
