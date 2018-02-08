@@ -34,7 +34,7 @@ public class RobustnessTests extends AbstractSrcMLExtractorTest {
         
         for (File file : testFiles) {
             Path relativePath = basesPath.relativize(file.toPath());
-//            if (relativePath.toString().contains("fault1")) {
+//            if (relativePath.toString().contains("p4")) {
             SourceFile parsed = loadFile(relativePath.toString());
             Assert.assertNotNull("Could not parse " + relativePath.toString(), parsed);
 //            }

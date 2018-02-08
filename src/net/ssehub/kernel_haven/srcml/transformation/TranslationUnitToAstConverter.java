@@ -239,7 +239,20 @@ public class TranslationUnitToAstConverter {
              * 2nd last nested is the struct block (definition of attributes).
              * Last is a semicolon, which is no longer needed -> will be removed
              */
-            return createTypeDef(unit, pc, TypeDefType.STRUCT, unit.size() - 2, 0, unit.size() - 3);
+            {
+                int expectedBlockPos = unit.size() - 2;
+                int blockIndex = expectedBlockPos;
+                while (blockIndex >= 0 && unit.getNestedElement(blockIndex) instanceof CodeUnit) {
+                    blockIndex--;
+                }
+                if (blockIndex == 0) {
+                    blockIndex = -1;
+                }
+                int startIndex = (blockIndex == expectedBlockPos) ? 0 : blockIndex + 1;
+                int endIndex = (blockIndex == expectedBlockPos) ? unit.size() - 3 : unit.size() - 1;
+//                return createTypeDef(unit, pc, TypeDefType.STRUCT, unit.size() - 2, 0, unit.size() - 3);
+                return createTypeDef(unit, pc, TypeDefType.STRUCT, blockIndex, startIndex, endIndex);
+            }
         case "typedef":
             /*
              * * A typedef maybe has a block-statement at the second definition, if it combines the definition of a
