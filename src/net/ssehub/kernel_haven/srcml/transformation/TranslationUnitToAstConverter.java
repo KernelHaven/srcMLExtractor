@@ -127,6 +127,7 @@ public class TranslationUnitToAstConverter {
             singleStatement.setSourceFile(sourceFile);
             singleStatement.setCondition(getEffectiveCondition());
             singleStatement.setLineStart(unit.getStartLine());
+            singleStatement.setLineEnd(unit.getEndLine());
             return singleStatement;
         
         case "label":
@@ -271,6 +272,9 @@ public class TranslationUnitToAstConverter {
                     makeCode(unit, 0, unit.size() - 2)); // last nested is the function block
             f.setSourceFile(sourceFile);
             f.setCondition(getEffectiveCondition());
+            
+            f.setLineStart(unit.getStartLine());
+            f.setLineEnd(unit.getEndLine());
             
             f.addNestedElement(convert(unit.getNestedElement(unit.size() - 1)));
             
