@@ -531,9 +531,9 @@ public class TranslationUnitToAstConverter {
                 }
                 code.append(((CodeUnit) child).getCode());
             } else if ("comment".equals(child.getType())) {
-                // TODO SE: @Adam check if Comment may also implement ICode interface, would be much nicer
-                ICode comment = makeCode(child, 0, child.size() -1);
+                Comment comment = (Comment) convert(child);
                 result.add(comment);
+                
             } else if (child instanceof PreprocessorBlock) {
                 if (code.length() > 0) {
                     Code codeElement = new Code(getPc(), code.toString());
