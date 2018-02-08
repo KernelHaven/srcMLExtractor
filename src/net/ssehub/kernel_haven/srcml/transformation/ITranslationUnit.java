@@ -1,5 +1,7 @@
 package net.ssehub.kernel_haven.srcml.transformation;
 
+import net.ssehub.kernel_haven.util.null_checks.NonNull;
+
 /**
  * A data structure for parsing the output of <a href="http://www.srcml.org/">srcML</a>, which is used to generate the
  * AST. A translation unit may be a single token or already a complex structure, which can be directly mapped to an
@@ -14,13 +16,13 @@ public interface ITranslationUnit  {
      * <a href="http://www.srcml.org/doc/c_srcML.html">srcML-Tag</a> if this was not further processed.
      * @return A type denoting which kind of AST element is represented by the {@link ITranslationUnit}.
      */
-    public String getType();
+    public @NonNull String getType();
     
     /**
      * Adds a nested element at the end of the list of nested elements.
      * @param unit The nested element to add.
      */
-    public default void add(ITranslationUnit unit) {
+    public default void add(@NonNull ITranslationUnit unit) {
         throw new UnsupportedOperationException();
     }
     
@@ -29,7 +31,7 @@ public interface ITranslationUnit  {
      * @param oldUnit An {@link ITranslationUnit} which should be replaced by a more processed element.
      * @param newUnit The &#34;more processed/parsed&#34; element.
      */
-    public void replaceNested(ITranslationUnit oldUnit, ITranslationUnit newUnit);
+    public void replaceNested(@NonNull ITranslationUnit oldUnit, @NonNull ITranslationUnit newUnit);
     
     /**
      * Removes a nested element. In most cases not needed, probably you want to use the
@@ -37,7 +39,7 @@ public interface ITranslationUnit  {
      * possible, the index-based access is much faster!
      * @param oldUnit A {@link ITranslationUnit} which is no longer needed (be careful with this function).
      */
-    public void removeNested(ITranslationUnit oldUnit);
+    public void removeNested(@NonNull ITranslationUnit oldUnit);
    
     /**
      * Removes a nested element. In most cases not needed, probably you want to use the
@@ -62,7 +64,7 @@ public interface ITranslationUnit  {
      *         (<tt>index &lt; 0 || index &gt;= size()</tt>)
      * @see #size()
      */
-    public ITranslationUnit getNestedElement(int index);
+    public @NonNull ITranslationUnit getNestedElement(int index);
     
     /**
      * Specifies the line number where the element starts.

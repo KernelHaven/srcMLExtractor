@@ -1,10 +1,14 @@
 package net.ssehub.kernel_haven.srcml.transformation;
 
+import static net.ssehub.kernel_haven.util.null_checks.NullHelpers.notNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import net.ssehub.kernel_haven.srcml.xml.SrcMlConditionGrammar;
 import net.ssehub.kernel_haven.util.logic.Formula;
+import net.ssehub.kernel_haven.util.null_checks.NonNull;
+import net.ssehub.kernel_haven.util.null_checks.Nullable;
 
 /**
  * Abstract super class for preprocessor if and else blocks.
@@ -25,21 +29,21 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
         IF, IFDEF, IFNDEF, ELSEIF, ELSE;
     }
     
-    private Type type;
+    private @NonNull Type type;
     
     /**
      * Unparsed condition as found in code.
      * <tt>#elif B -> B</tt>
      */
-    private String condition;
+    private @Nullable String condition;
     
     /**
      * Parsed condition, considering previous if's and elif's, will also compute the condition for an else, but
      * won't consider the enclosing conditions.
      * <tt>elif B -> !A && B</tt>
      */
-    private Formula parsedCondition;
-    private List<ITranslationUnit> nestedElements = new ArrayList<>();
+    private @Nullable Formula parsedCondition;
+    private @NonNull List<@NonNull ITranslationUnit> nestedElements = new ArrayList<>();
     
     /**
      * Sole constructor for sub classes.
@@ -47,7 +51,7 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
      * @param condition The condition of the if, should be in form that the {@link SrcMlConditionGrammar} can handle it,
      *     may be <tt>null</tt> in case of an <tt>&#35;else</tt>-statement.
      */
-    public PreprocessorBlock(Type type, String condition) {
+    public PreprocessorBlock(@NonNull Type type, @Nullable String condition) {
         this.type = type;
         this.condition = condition;
     }
@@ -56,7 +60,7 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
      * Returns the condition as retrieved from the parser, will be <tt>null</tt> for an else statement.
      * @return The condition.
      */
-    public String getCondition() {
+    public @Nullable String getCondition() {
         return condition;
     }
     
@@ -66,7 +70,7 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
      * <tt>elif B -> !A && B</tt>
      * @return The effective condition not considering surrounding blocks.
      */
-    public Formula getEffectiveCondition() {
+    public @Nullable Formula getEffectiveCondition() {
         return parsedCondition;
     }
 
@@ -76,7 +80,7 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
      * @param effectiveCondition The effective condition considering previous elements (not the presence condition, also
      *     considering surrounding blocks!).
      */
-    public void setEffectiveCondition(Formula parsedCondition) {
+    public void setEffectiveCondition(@NonNull Formula parsedCondition) {
         this.parsedCondition = parsedCondition;
     }
 
@@ -85,16 +89,17 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
      * @param child The nested element to add.
      */
     @Override
-    public void add(ITranslationUnit child) {
+    public void add(@NonNull ITranslationUnit child) {
         nestedElements.add(child);
     }
     
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         StringBuffer result = new StringBuffer();
         result.append("#");
         result.append(type.name());
-        if (null != parsedCondition.toString()) {
+        Formula parsedCondition = this.parsedCondition;
+        if (null != parsedCondition) {
             result.append(" ");
             result.append(parsedCondition.toString());
         }
@@ -102,16 +107,16 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
             result.append("\n    ");
             result.append(elem.toString().replace("\n", "\n    "));
         }
-        return result.toString();
+        return notNull(result.toString());
     }
 
     @Override
-    public String getType() {
-        return type.toString();
+    public @NonNull String getType() {
+        return notNull(type.toString());
     }
     
     @Override
-    public void replaceNested(ITranslationUnit oldUnit, ITranslationUnit newUnit) {
+    public void replaceNested(@NonNull ITranslationUnit oldUnit, @NonNull ITranslationUnit newUnit) {
         int index = nestedElements.indexOf(oldUnit);
         if (index != -1) {
             nestedElements.set(index, newUnit);
@@ -119,7 +124,7 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
     }
     
     @Override
-    public void removeNested(ITranslationUnit oldUnit) {
+    public void removeNested(@NonNull ITranslationUnit oldUnit) {
         nestedElements.remove(oldUnit);
     }
     
@@ -134,8 +139,8 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
     }
 
     @Override
-    public ITranslationUnit getNestedElement(int index) {
-        return nestedElements.get(index);
+    public @NonNull ITranslationUnit getNestedElement(int index) {
+        return notNull(nestedElements.get(index));
     }
     
     @Override

@@ -26,6 +26,7 @@ import net.ssehub.kernel_haven.util.ExtractorException;
 import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.Util;
 import net.ssehub.kernel_haven.util.logic.Formula;
+import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
  * Abstract tests to test the {@link SrcMLExtractor}.
@@ -34,7 +35,7 @@ import net.ssehub.kernel_haven.util.logic.Formula;
  */
 public class AbstractSrcMLExtractorTest {
     
-    private static final File RESOURCE_DIR = new File(AllTests.TESTDATA, "tmpRes");
+    private static final @NonNull File RESOURCE_DIR = new File(AllTests.TESTDATA, "tmpRes");
     
     /**
      * Initializes the logger.
@@ -124,7 +125,7 @@ public class AbstractSrcMLExtractorTest {
      *     conditions.
      * @param element The element to test.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "null", "unchecked" })
     protected <T extends ISyntaxElement> T assertElement(Class<T> type, String condition, String presenceCondition,
             CodeElement element) {
         

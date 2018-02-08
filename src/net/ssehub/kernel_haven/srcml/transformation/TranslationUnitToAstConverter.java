@@ -1,5 +1,7 @@
 package net.ssehub.kernel_haven.srcml.transformation;
 
+import static net.ssehub.kernel_haven.util.null_checks.NullHelpers.notNull;
+
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -27,7 +29,6 @@ import net.ssehub.kernel_haven.code_model.ast.SwitchStatement;
 import net.ssehub.kernel_haven.code_model.ast.TypeDefinition;
 import net.ssehub.kernel_haven.code_model.ast.TypeDefinition.TypeDefType;
 import net.ssehub.kernel_haven.util.FormatException;
-import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.logic.Conjunction;
 import net.ssehub.kernel_haven.util.logic.Formula;
 import net.ssehub.kernel_haven.util.logic.True;
@@ -41,6 +42,8 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
  */
 public class TranslationUnitToAstConverter {
 
+//    private static final Logger LOGGER = Logger.get();
+    
     private @NonNull Deque<@NonNull Formula> cppPresenceConditions;
     private @NonNull Deque<@NonNull Formula> cppEffectiveConditions;
     
@@ -66,12 +69,12 @@ public class TranslationUnitToAstConverter {
      * any elements from the stack.
      * @return The current presence condition (may be {@link True#INSTANCE} in case of no presence condition).
      */
-    private Formula getPc() {
-        return cppPresenceConditions.isEmpty() ? True.INSTANCE : cppPresenceConditions.peek();
+    private @NonNull Formula getPc() {
+        return cppPresenceConditions.isEmpty() ? True.INSTANCE : notNull(cppPresenceConditions.peek());
     }
     
-    private Formula getEffectiveCondition() {
-        return cppEffectiveConditions.isEmpty() ? True.INSTANCE : cppEffectiveConditions.peek();
+    private @NonNull Formula getEffectiveCondition() {
+        return cppEffectiveConditions.isEmpty() ? True.INSTANCE : notNull(cppEffectiveConditions.peek());
     }
     
     /**
@@ -99,7 +102,7 @@ public class TranslationUnitToAstConverter {
      * @param element The root element representing the complete file.
      * @return The translated AST still representing the complete file.
      */
-    public ISyntaxElement convert(ITranslationUnit element) throws FormatException {
+    public @NonNull ISyntaxElement convert(@NonNull ITranslationUnit element) throws FormatException {
         
         if (element instanceof TranslationUnit) {
             return convertTranslationUnit((TranslationUnit) element);
@@ -110,7 +113,7 @@ public class TranslationUnitToAstConverter {
         throw ExceptionUtil.makeException("Illegal element " + element.getClass().getName(), element);
     }
     
-    private ISyntaxElement convertTranslationUnit(TranslationUnit unit) throws FormatException {
+    private @NonNull ISyntaxElement convertTranslationUnit(@NonNull TranslationUnit unit) throws FormatException {
         Formula pc = getPc();
         
         switch (unit.getType()) {
@@ -210,7 +213,7 @@ public class TranslationUnitToAstConverter {
                 }
                 return elifBlock;
             } else {
-                Logger.get().logError("Unexpected structure of elseif-statement: " + unit.toString());
+                throw ExceptionUtil.makeException("Unexpected structure of elseif-statement: " + unit.toString(), unit);
             }
             
         case "else":
@@ -252,7 +255,7 @@ public class TranslationUnitToAstConverter {
         }
         
         case "function": {
-            Function f = new Function(pc, unit.getFunctionName(),
+            Function f = new Function(pc, notNull(unit.getFunctionName()), // notNull, since this is a function
                     makeCode(unit, 0, unit.size() - 2)); // last nested is the function block
             f.setSourceFile(sourceFile);
             f.setCondition(getEffectiveCondition());
@@ -346,7 +349,8 @@ public class TranslationUnitToAstConverter {
         throw ExceptionUtil.makeException("Unexpected unit type: " + unit.getType(), unit);
     }
     
-    private CppStatement convertCppStatement(TranslationUnit unit, CppStatement.Type type) throws FormatException {
+    private @NonNull CppStatement convertCppStatement(@NonNull TranslationUnit unit, CppStatement. @NonNull Type type)
+            throws FormatException {
         ICode expression = null;
         // first two strings inside are # and the type, skip these
         if (unit.size() > 2) {
@@ -359,11 +363,13 @@ public class TranslationUnitToAstConverter {
         return statement;
     }
 
-    private CaseStatement convertCaseStatement(TranslationUnit unit, int condEndIndex, CaseType type) throws FormatException {
+    private @NonNull CaseStatement convertCaseStatement(@NonNull TranslationUnit unit, int condEndIndex,
+            @NonNull CaseType type) throws FormatException {
+        
         if (switchs.isEmpty()) {
             throw ExceptionUtil.makeException("Found " + type + " outside of switch ", unit);
         }
-        SwitchStatement switchStmt = switchs.peek();
+        SwitchStatement switchStmt = notNull(switchs.peek());
         CaseStatement caseStatement = new CaseStatement(getPc(), makeCode(unit, 0, condEndIndex), type, switchStmt);
         caseStatement.setSourceFile(sourceFile);
         caseStatement.setCondition(getEffectiveCondition());
@@ -374,7 +380,8 @@ public class TranslationUnitToAstConverter {
         return caseStatement;
     }
 
-    private TypeDefinition createTypeDef(TranslationUnit unit, Formula pc, TypeDefType type) throws FormatException {
+    private @NonNull TypeDefinition createTypeDef(@NonNull TranslationUnit unit, @NonNull Formula pc,
+            @NonNull TypeDefType type) throws FormatException {
         /*
          * Find last <block> element
          * (<block> refers to anything that isn't code, e.g. also <struct>)
@@ -456,7 +463,8 @@ public class TranslationUnitToAstConverter {
         return typeDef;
     }
 
-    private LoopStatement createLoop(TranslationUnit unit, LoopType type, int blockIndex, int condStartIndex, int condEndIndex) throws FormatException {
+    private @NonNull LoopStatement createLoop(@NonNull TranslationUnit unit, @NonNull LoopType type, int blockIndex,
+            int condStartIndex, int condEndIndex) throws FormatException {
         
         ICode condition = makeCode(unit, condStartIndex, condEndIndex);
         LoopStatement loop = new LoopStatement(getPc(),  condition, type);
@@ -466,8 +474,8 @@ public class TranslationUnitToAstConverter {
         return loop;
     }
     
-    private CppBlock convertPreprocessorBlock(PreprocessorBlock cppBlock) throws FormatException {
-        Formula condition = cppBlock.getEffectiveCondition();
+    private @NonNull CppBlock convertPreprocessorBlock(@NonNull PreprocessorBlock cppBlock) throws FormatException {
+        Formula condition = notNull(cppBlock.getEffectiveCondition()); // all CPP blocks have effective conditions now
         pushFormula(condition);
         Type type = Type.valueOf(cppBlock.getType());
         CppBlock translatedBlock = new CppBlock(getPc(), condition, type);
@@ -501,10 +509,10 @@ public class TranslationUnitToAstConverter {
         }
     }
     
-    private ICode makeCode(ITranslationUnit unit, int start, int end) throws FormatException {
+    private @NonNull ICode makeCode(@NonNull ITranslationUnit unit, int start, int end) throws FormatException {
         
         StringBuilder code = new StringBuilder();
-        List<ICode> result = new LinkedList<>();
+        List<@NonNull ICode> result = new LinkedList<>();
         
         for (int i = start; i <= end; i++) {
             ITranslationUnit child = unit.getNestedElement(i);
@@ -520,14 +528,15 @@ public class TranslationUnitToAstConverter {
                 
             } else if (child instanceof PreprocessorBlock) {
                 if (code.length() > 0) {
-                    Code codeElement = new Code(getPc(), code.toString());
+                    Code codeElement = new Code(getPc(), notNull(code.toString()));
                     codeElement.setSourceFile(sourceFile);
                     codeElement.setCondition(getEffectiveCondition());
                     result.add(codeElement);
                     code = new StringBuilder();
                 }
                 
-                Formula condition = ((PreprocessorBlock) child).getEffectiveCondition();
+                // all CPP blocks have effective conditions now
+                Formula condition = notNull(((PreprocessorBlock) child).getEffectiveCondition());
                 pushFormula(condition);
                 Type type = Type.valueOf(((PreprocessorBlock) child).getType());
                 CppBlock cppif = new CppBlock(getPc(), condition, type);
@@ -552,7 +561,7 @@ public class TranslationUnitToAstConverter {
         }
         
         if (code.length() > 0) {
-            Code codeElement = new Code(getPc(), code.toString());
+            Code codeElement = new Code(getPc(), notNull(code.toString()));
             codeElement.setSourceFile(sourceFile);
             codeElement.setCondition(getEffectiveCondition());
             result.add(codeElement);
@@ -562,7 +571,7 @@ public class TranslationUnitToAstConverter {
             throw ExceptionUtil.makeException("makeCode() Found no elements to make code", unit);
             
         } else if (result.size() == 1) {
-            return result.get(0);
+            return notNull(result.get(0));
             
         } else {
             CodeList list = new CodeList(getPc());

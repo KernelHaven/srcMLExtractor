@@ -7,6 +7,7 @@ import net.ssehub.kernel_haven.config.Configuration;
 import net.ssehub.kernel_haven.util.PreparationTool;
 import net.ssehub.kernel_haven.util.Util;
 import net.ssehub.kernel_haven.util.Util.OSType;
+import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
  * Prepares the srcML binary and checks if an update is required.
@@ -15,7 +16,7 @@ import net.ssehub.kernel_haven.util.Util.OSType;
  */
 class Preparation extends PreparationTool {
 
-    private File exec;
+    private @NonNull File exec;
 
     /**
      * Creates a preparation wrapper for the srcML binary. 
@@ -24,7 +25,7 @@ class Preparation extends PreparationTool {
      * 
      * @throws SetUpException If the current OS is not supported or the executable cannot be found.
      */
-    public Preparation(Configuration config) throws SetUpException {
+    public Preparation(@NonNull Configuration config) throws SetUpException {
         File resourceFolder = Util.getExtractorResourceDir(config, SrcMLExtractor.class);
         resourceFolder = new File(resourceFolder, "srcML");
 
@@ -61,7 +62,7 @@ class Preparation extends PreparationTool {
      * 
      * @throws SetUpException If preparation fails.
      */
-    public File prepareExec() throws SetUpException {
+    public @NonNull File prepareExec() throws SetUpException {
         super.prepare();
         return exec;
     }

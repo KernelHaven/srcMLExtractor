@@ -4,6 +4,7 @@ import net.ssehub.kernel_haven.srcml.transformation.ExceptionUtil;
 import net.ssehub.kernel_haven.srcml.transformation.ITranslationUnit;
 import net.ssehub.kernel_haven.srcml.transformation.TranslationUnit;
 import net.ssehub.kernel_haven.util.FormatException;
+import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
  * Else-If Statement hold a nested if statement. This rule will pull up all the nested statements and eleminate the
@@ -14,7 +15,7 @@ import net.ssehub.kernel_haven.util.FormatException;
 public class ElseIfFixture implements ITransformationRule {
 
     @Override
-    public void transform(ITranslationUnit unit) throws FormatException {
+    public void transform(@NonNull ITranslationUnit unit) throws FormatException {
         // Check if this element is an elseif block, if yes restructure nested elements
         if ("elseif".equals(unit.getType())) {
             fixElseIfBlock(unit);
@@ -26,7 +27,7 @@ public class ElseIfFixture implements ITransformationRule {
         }
     }
 
-    private void fixElseIfBlock(ITranslationUnit elseIfBlock) throws FormatException {
+    private void fixElseIfBlock(@NonNull ITranslationUnit elseIfBlock) throws FormatException {
         if (elseIfBlock.size() == 2 && elseIfBlock.getNestedElement(1) instanceof TranslationUnit
             && "if".equals(elseIfBlock.getNestedElement(1).getType()) && elseIfBlock instanceof TranslationUnit) {
             

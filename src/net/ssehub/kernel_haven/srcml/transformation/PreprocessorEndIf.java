@@ -1,5 +1,7 @@
 package net.ssehub.kernel_haven.srcml.transformation;
 
+import net.ssehub.kernel_haven.util.null_checks.NonNull;
+
 /**
  * Marker to indicate the end of a preprocessor if-elif-else structure, which is only needed as long the surrounded
  * elements are not nested inside the {@link PreprocessorBlock}s (flat structure vs hierarchy).
@@ -12,17 +14,17 @@ public class PreprocessorEndIf implements ITranslationUnit {
     private int endLine;
 
     @Override
-    public String getType() {
+    public @NonNull String getType() {
         return "ENDIF";
     }
 
     @Override
-    public void replaceNested(ITranslationUnit oldUnit, ITranslationUnit newUnit) {
+    public void replaceNested(@NonNull ITranslationUnit oldUnit, @NonNull ITranslationUnit newUnit) {
         //
     }
 
     @Override
-    public void removeNested(ITranslationUnit oldUnit) {
+    public void removeNested(@NonNull ITranslationUnit oldUnit) {
         //
     }
     
@@ -32,7 +34,7 @@ public class PreprocessorEndIf implements ITranslationUnit {
     }
     
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         return "#" + getType();
     }
 
@@ -42,7 +44,7 @@ public class PreprocessorEndIf implements ITranslationUnit {
     }
 
     @Override
-    public ITranslationUnit getNestedElement(int index) {
+    public @NonNull ITranslationUnit getNestedElement(int index) {
         throw new IndexOutOfBoundsException(PreprocessorEndIf.class.getSimpleName() + " has no nested elements, "
             + "requested was: " + index);
     }

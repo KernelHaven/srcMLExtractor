@@ -1,7 +1,12 @@
 package net.ssehub.kernel_haven.srcml.transformation;
 
+import static net.ssehub.kernel_haven.util.null_checks.NullHelpers.notNull;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import net.ssehub.kernel_haven.util.null_checks.NonNull;
+import net.ssehub.kernel_haven.util.null_checks.Nullable;
 
 /**
  * Basic {@link ITranslationUnit}, which does not require any special treatment.<br/>
@@ -12,22 +17,22 @@ import java.util.List;
  */
 public class TranslationUnit implements ITranslationUnit {
     
-    private String type;
-    private List<ITranslationUnit> nestedElements = new ArrayList<>();
+    private @NonNull String type;
+    private @NonNull List<@NonNull ITranslationUnit> nestedElements = new ArrayList<>();
     private int startLine;
     private int endLine;
     
     /**
      * Special handling for type="function": the name of the function is stored in here.
      */
-    private String functionName;
+    private @Nullable String functionName;
     
     /**
      * Sole constructor for this type.
      * @param type Denotes what kind of element is represented by this {@link TranslationUnit}, should be one of the
      *     top elements from the <a href="http://www.srcml.org/doc/c_srcML.html">srcML XML snytax</a>.
      */
-    public TranslationUnit(String type) {
+    public TranslationUnit(@NonNull String type) {
         this.type = type;
     }
     
@@ -36,12 +41,12 @@ public class TranslationUnit implements ITranslationUnit {
      * @param unit The nested element to add.
      */
     @Override
-    public void add(ITranslationUnit unit) {
+    public void add(@NonNull ITranslationUnit unit) {
         nestedElements.add(unit);
     }
     
     @Override
-    public String getType() {
+    public @NonNull String getType() {
         return type;
     }
     
@@ -50,7 +55,7 @@ public class TranslationUnit implements ITranslationUnit {
      * 
      * @return The name of the function; <code>null</code> if not set (e.g. if this is not a function).
      */
-    public String getFunctionName() {
+    public @Nullable String getFunctionName() {
         return functionName;
     }
     
@@ -59,12 +64,12 @@ public class TranslationUnit implements ITranslationUnit {
      * 
      * @param functionName The name of the function.
      */
-    public void setFunctionName(String functionName) {
+    public void setFunctionName(@NonNull String functionName) {
         this.functionName = functionName;
     }
     
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         StringBuffer result = new StringBuffer();
         result.append(type.toUpperCase());
         result.append(":");
@@ -83,11 +88,11 @@ public class TranslationUnit implements ITranslationUnit {
                 result.append(elem.toString().replace("\n", "\n    "));
             }
         }
-        return result.toString();
+        return notNull(result.toString());
     }
 
     @Override
-    public void replaceNested(ITranslationUnit oldUnit, ITranslationUnit newUnit) {
+    public void replaceNested(@NonNull ITranslationUnit oldUnit, @NonNull ITranslationUnit newUnit) {
         int index = nestedElements.indexOf(oldUnit);
         if (index != -1) {
             nestedElements.set(index, newUnit);
@@ -95,7 +100,7 @@ public class TranslationUnit implements ITranslationUnit {
     }
     
     @Override
-    public void removeNested(ITranslationUnit oldUnit) {
+    public void removeNested(@NonNull ITranslationUnit oldUnit) {
         nestedElements.remove(oldUnit);
     }
     
@@ -110,8 +115,8 @@ public class TranslationUnit implements ITranslationUnit {
     }
 
     @Override
-    public ITranslationUnit getNestedElement(int index) {
-        return nestedElements.get(index);
+    public @NonNull ITranslationUnit getNestedElement(int index) {
+        return notNull(nestedElements.get(index));
     }
 
     @Override

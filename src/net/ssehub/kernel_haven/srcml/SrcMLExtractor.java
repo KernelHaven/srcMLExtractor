@@ -24,6 +24,7 @@ import net.ssehub.kernel_haven.util.ExtractorException;
 import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.Util;
+import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
  * An extractor which uses <a href="http://www.srcml.org/">srcML</a> to create an AST, still containing variability
@@ -52,14 +53,14 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
     private File srcExec;
 
     @Override
-    protected void init(Configuration config) throws SetUpException {
+    protected void init(@NonNull Configuration config) throws SetUpException {
         Preparation preparator = new Preparation(config);
         srcExec = preparator.prepareExec();
         sourceTree = config.getValue(DefaultSettings.SOURCE_TREE);
     }
 
     @Override
-    protected SourceFile runOnFile(File target) throws ExtractorException {
+    protected @NonNull SourceFile runOnFile(@NonNull File target) throws ExtractorException {
         File absoulteTarget = new File(sourceTree, target.getPath());
         if (!absoulteTarget.exists()) {
             throw new ExtractorException("srcML could not parse specified file, which does not exist: "
@@ -125,8 +126,8 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
     }
 
     @Override
-    protected String getName() {
-        return this.getClass().getSimpleName();
+    protected @NonNull String getName() {
+        return "SrcMLExtractor";
     }
 
 }

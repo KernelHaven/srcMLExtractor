@@ -1,9 +1,12 @@
 package net.ssehub.kernel_haven.srcml.transformation;
 
+import static net.ssehub.kernel_haven.util.null_checks.NullHelpers.notNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import net.ssehub.kernel_haven.srcml.xml.SrcMlConditionGrammar;
+import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
  * Represents the starting elements of an preprocessor if, it represents one of
@@ -14,7 +17,7 @@ import net.ssehub.kernel_haven.srcml.xml.SrcMlConditionGrammar;
  */
 public class PreprocessorIf extends PreprocessorBlock {
     
-    private List<PreprocessorElse> siblings = new ArrayList<>();
+    private @NonNull List<@NonNull PreprocessorElse> siblings = new ArrayList<>();
     
     /**
      * Sole constructor for this class.
@@ -22,7 +25,7 @@ public class PreprocessorIf extends PreprocessorBlock {
      *     or {@link Type#IFNDEF})
      * @param condition The condition of the if, should be in form that the {@link SrcMlConditionGrammar} can handle it.
      */
-    public PreprocessorIf(Type type, String condition) {
+    public PreprocessorIf(@NonNull Type type, @NonNull String condition) {
         super(type, condition);
     }
     
@@ -30,7 +33,7 @@ public class PreprocessorIf extends PreprocessorBlock {
      * Adds an associated {@link PreprocessorElse}-block. These block must be inserted in the correct order!
      * @param sibling An associated {@link PreprocessorElse}-block
      */
-    public void addSibling(PreprocessorElse sibling) {
+    public void addSibling(@NonNull PreprocessorElse sibling) {
         siblings.add(sibling);
     }
     
@@ -50,7 +53,7 @@ public class PreprocessorIf extends PreprocessorBlock {
      *         (<tt>index &lt; 0 || index &gt;= getNumberOfElseBlocks()</tt>)
      * @see #getNumberOfElseBlocks()
      */
-    public PreprocessorElse getElseBlock(int index) {
-        return siblings.get(index);
+    public @NonNull PreprocessorElse getElseBlock(int index) {
+        return notNull(siblings.get(index));
     }
 }

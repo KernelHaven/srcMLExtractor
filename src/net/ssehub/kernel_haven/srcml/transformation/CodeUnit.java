@@ -1,5 +1,9 @@
 package net.ssehub.kernel_haven.srcml.transformation;
 
+import static net.ssehub.kernel_haven.util.null_checks.NullHelpers.notNull;
+
+import net.ssehub.kernel_haven.util.null_checks.NonNull;
+
 /**
  * Represent unparsed code fragments, e.g., a function signature or a (partial) expression of a statement.
  * These are the texts between the XML tags in <a href="http://www.srcml.org/doc/c_srcML.html">srcML</a> and will be
@@ -9,7 +13,7 @@ package net.ssehub.kernel_haven.srcml.transformation;
  */
 public class CodeUnit implements ITranslationUnit {
     
-    private String code;
+    private @NonNull String code;
     private int startLine;
     private int endLine;
     
@@ -17,26 +21,26 @@ public class CodeUnit implements ITranslationUnit {
      * Sole constructor for this class.
      * @param code A single char sequence/token, which is not intended to be parsed in a later step.
      */
-    public CodeUnit(String code) {
+    public CodeUnit(@NonNull String code) {
         this.code = code;
     }
     
-    public String getCode() {
+    public @NonNull String getCode() {
         return code;
     }
 
     @Override
-    public String getType() {
-        return this.getClass().getSimpleName();
+    public @NonNull String getType() {
+        return notNull(this.getClass().getSimpleName());
     }
 
     @Override
-    public void replaceNested(ITranslationUnit oldUnit, ITranslationUnit newUnit) {
+    public void replaceNested(@NonNull ITranslationUnit oldUnit, @NonNull ITranslationUnit newUnit) {
         //
     }
 
     @Override
-    public void removeNested(ITranslationUnit oldUnit) {
+    public void removeNested(@NonNull ITranslationUnit oldUnit) {
         //
     }
     
@@ -46,7 +50,7 @@ public class CodeUnit implements ITranslationUnit {
     }
     
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         return code;
     }
 
@@ -56,7 +60,7 @@ public class CodeUnit implements ITranslationUnit {
     }
 
     @Override
-    public ITranslationUnit getNestedElement(int index) {
+    public @NonNull ITranslationUnit getNestedElement(int index) {
         throw new IndexOutOfBoundsException(CodeUnit.class.getSimpleName() + " has no nested elements, "
             + "requested was: " + index);
     }

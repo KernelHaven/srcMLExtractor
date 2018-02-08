@@ -1,5 +1,7 @@
 package net.ssehub.kernel_haven.srcml.xml;
 
+import static net.ssehub.kernel_haven.util.null_checks.NullHelpers.notNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -12,6 +14,7 @@ import org.xml.sax.SAXException;
 
 import net.ssehub.kernel_haven.code_model.SourceFile;
 import net.ssehub.kernel_haven.util.FormatException;
+import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
  * Converts the XML output of <a href="http://www.srcml.org/">srcML</a> into an AST.
@@ -21,9 +24,9 @@ import net.ssehub.kernel_haven.util.FormatException;
  *
  */
 public class XmlToAstConverter {
-    private AbstractAstConverter converter;
-    private SAXParser saxParser;
-    private InputSource in;
+    private @NonNull AbstractAstConverter converter;
+    private @NonNull SAXParser saxParser;
+    private @NonNull InputSource in;
     
     /**
      * Constructor to convert a String containing the whole parser output into an AST.
@@ -33,12 +36,12 @@ public class XmlToAstConverter {
      *     (should not occur). 
      * @throws SAXException If a SAX error occurs (should not occur).
      */
-    public XmlToAstConverter(InputStream xml, AbstractAstConverter converter) throws ParserConfigurationException,
-        SAXException {
+    public XmlToAstConverter(@NonNull InputStream xml, @NonNull AbstractAstConverter converter)
+            throws ParserConfigurationException, SAXException {
         
         this.converter = converter;
         SAXParserFactory factory = SAXParserFactory.newInstance();
-        this.saxParser = factory.newSAXParser();
+        this.saxParser = notNull(factory.newSAXParser());
         this.in = new InputSource(xml);
     }
     
@@ -47,7 +50,7 @@ public class XmlToAstConverter {
      * @return An AST representing the parsed file.
      * @throws FormatException If the input could not be parsed due to an invalid input.
      */
-    public SourceFile parseToAst() throws FormatException {
+    public @NonNull SourceFile parseToAst() throws FormatException {
         try {
             saxParser.parse(in, converter);
         } catch (SAXException | IOException e) {

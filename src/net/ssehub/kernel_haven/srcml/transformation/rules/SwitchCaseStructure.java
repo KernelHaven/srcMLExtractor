@@ -4,6 +4,7 @@ import net.ssehub.kernel_haven.srcml.transformation.ITranslationUnit;
 import net.ssehub.kernel_haven.srcml.transformation.PreprocessorBlock;
 import net.ssehub.kernel_haven.srcml.transformation.TranslationUnit;
 import net.ssehub.kernel_haven.util.FormatException;
+import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
  * Nests statements belonging to a <tt>case</tt> or a <tt>default</tt> into the unit, i.e., create a hierarchy out of
@@ -14,7 +15,7 @@ import net.ssehub.kernel_haven.util.FormatException;
 public class SwitchCaseStructure implements ITransformationRule {
 
     @Override
-    public void transform(ITranslationUnit unit) throws FormatException {
+    public void transform(@NonNull ITranslationUnit unit) throws FormatException {
         // Check if this element is a switch statement, if yes restructure nested elements
         if ("switch".equals(unit.getType())) {
             determineSwitchBlock(unit);
@@ -31,7 +32,7 @@ public class SwitchCaseStructure implements ITransformationRule {
      * also in recursively nested blocks. Will also consider CPP-blocks.
      * @param parent
      */
-    private void determineSwitchBlock(ITranslationUnit parent) {
+    private void determineSwitchBlock(@NonNull ITranslationUnit parent) {
         // Determine recursively first layer of block-statements (probably there is more than 1 due to CPP).
         for (int i = 0; i < parent.size(); i++) {
             ITranslationUnit nested = parent.getNestedElement(i);
@@ -48,7 +49,7 @@ public class SwitchCaseStructure implements ITransformationRule {
      * the hierarchy.
      * @param switchBlock A block which is directly nested inside a switch-statement.
      */
-    private void reorderElementsInSwitchBlock(ITranslationUnit switchBlock, boolean blockEndsWithBracket) {
+    private void reorderElementsInSwitchBlock(@NonNull ITranslationUnit switchBlock, boolean blockEndsWithBracket) {
         // TODO SE: This won't consider if complete content of block is surrounded by one big CPP-block
         // Walk from back to front to avoid ConcurrentModification / IndexOutOfBound exceptions
         for (int i = switchBlock.size() - 1; i >= 0; i--) {
@@ -64,7 +65,9 @@ public class SwitchCaseStructure implements ITransformationRule {
         }
     }
 
-    private void moveNestedCases(ITranslationUnit switchBlock, ITranslationUnit caseStatement, int startIndex, int endOffset) {
+    private void moveNestedCases(@NonNull ITranslationUnit switchBlock, @NonNull ITranslationUnit caseStatement,
+            int startIndex, int endOffset) {
+        
         boolean nextCaseReached = false;
         // Very last element is closing bracket of the block, this shall be skipped
         while (startIndex < switchBlock.size() - endOffset && !nextCaseReached) {
@@ -83,7 +86,7 @@ public class SwitchCaseStructure implements ITransformationRule {
      * @param unit The element to check.
      * @return <tt>true</tt> if this is a <tt>case</tt> or <tt>default</tt> statement, <tt>false</tt> otherwise.
      */
-    private boolean isCaseStatement(ITranslationUnit unit) {
+    private boolean isCaseStatement(@NonNull ITranslationUnit unit) {
         return ("case".equals(unit.getType()) || "default".equals(unit.getType()) || unit instanceof PreprocessorBlock);
     }
 }

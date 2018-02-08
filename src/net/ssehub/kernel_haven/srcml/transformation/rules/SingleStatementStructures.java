@@ -6,6 +6,7 @@ import java.util.List;
 import net.ssehub.kernel_haven.srcml.transformation.ITranslationUnit;
 import net.ssehub.kernel_haven.srcml.transformation.TranslationUnit;
 import net.ssehub.kernel_haven.util.FormatException;
+import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
  * Some operators are parsed to multiple elements, which will be fixed by this rule:
@@ -20,7 +21,7 @@ import net.ssehub.kernel_haven.util.FormatException;
 public class SingleStatementStructures implements ITransformationRule {
 
     @Override
-    public void transform(ITranslationUnit unit) throws FormatException {
+    public void transform(@NonNull ITranslationUnit unit) throws FormatException {
         int index;
         if (unit instanceof TranslationUnit && (index = nestedStatementPosition(unit)) != -1) {
             
@@ -49,9 +50,9 @@ public class SingleStatementStructures implements ITransformationRule {
      * @param unit The single statement (parent) to fix
      * @param index The index of the nested statement
      */
-    private void fixTranslationUnit(TranslationUnit unit, int index) {
+    private void fixTranslationUnit(@NonNull TranslationUnit unit, int index) {
         ITranslationUnit nestedStructure = unit.getNestedElement(index);
-        List<ITranslationUnit> newElements = new ArrayList<>();
+        List<@NonNull ITranslationUnit> newElements = new ArrayList<>();
         
         // Move elements from nested statement to expression
         for (int i = 0; i < nestedStructure.size(); i++) {
@@ -83,7 +84,7 @@ public class SingleStatementStructures implements ITransformationRule {
      * @param statement The statement to check.
      * @return The index of a nested statement or -1 if there isn't a nested statement.
      */
-    private int nestedStatementPosition(ITranslationUnit statement) {
+    private int nestedStatementPosition(@NonNull ITranslationUnit statement) {
         int index = -1;
         
         for (int i = statement.size() - 1; i >= 0 && index == -1; i--) {

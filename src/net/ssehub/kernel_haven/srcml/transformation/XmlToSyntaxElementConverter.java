@@ -1,5 +1,7 @@
 package net.ssehub.kernel_haven.srcml.transformation;
 
+import static net.ssehub.kernel_haven.util.null_checks.NullHelpers.notNull;
+
 import java.io.File;
 import java.util.ArrayDeque;
 import java.util.Collections;
@@ -96,7 +98,7 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         SUPPORTED_ELEMENTS = Collections.unmodifiableSet(tmpSet);
     }
     
-    private Deque<TranslationUnit> elements = new ArrayDeque<TranslationUnit>();
+    private @NonNull Deque<@NonNull TranslationUnit> elements = new ArrayDeque<>();
     
     /**
      * Whether we are currently inside the &lt;name&gt; inside a &lt;function&gt;.
@@ -106,9 +108,9 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
     /**
      * The actual nesting of qNames of the XML structure.
      */
-    private Deque<String> xmlNesting = new ArrayDeque<>();
+    private @NonNull Deque<@NonNull String> xmlNesting = new ArrayDeque<>();
     
-    private String debugLoggingIndentation = "";
+    private @NonNull String debugLoggingIndentation = "";
     
     /**
      * Sole constructor for this classes.
@@ -126,16 +128,16 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         }
         
         if (SUPPORTED_ELEMENTS.contains(qName)) {
-            TranslationUnit newElement = new TranslationUnit(qName);
+            TranslationUnit newElement = new TranslationUnit(notNull(qName));
             newElement.setStartLine(getLineNumber());
             if (!elements.isEmpty()) {
-                elements.peekFirst().add(newElement);
+                notNull(elements.peekFirst()).add(newElement);
             }
             elements.addFirst(newElement);
         }
         
         // special handling for <name> inside <function>
-        if (qName.equals("name") && !xmlNesting.isEmpty() && xmlNesting.peek().equals("function")) {
+        if (qName.equals("name") && !xmlNesting.isEmpty() && notNull(xmlNesting.peek()).equals("function")) {
             inNameInsideFunction = true;
         }
         
@@ -145,16 +147,16 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         if (DEBUG_LOGGING) {
-            debugLoggingIndentation = debugLoggingIndentation.substring(1);
+            debugLoggingIndentation = notNull(debugLoggingIndentation.substring(1));
             System.out.println(debugLoggingIndentation + "</" + qName + ">");
         }
         
         if (SUPPORTED_ELEMENTS.contains(qName)) {
             if (elements.size() > 1) {
-                elements.removeFirst().setEndLine(getLineNumber());
+                notNull(elements.removeFirst()).setEndLine(getLineNumber());
             } else if (elements.size() == 1) {
                 // Do not remove top-level unit (= complete file), but update end line
-                elements.peekFirst().setEndLine(getLineNumber());
+                notNull(elements.peekFirst()).setEndLine(getLineNumber());
             }
         }
         
@@ -172,20 +174,20 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
             CodeUnit unit = new CodeUnit(str);
             unit.setStartLine(getLineNumber());
             unit.setEndLine(getLineNumber());
-            elements.peekFirst().add(unit);
+            notNull(elements.peekFirst()).add(unit);
             
             
             // special handling for <name> inside <function>
             if (inNameInsideFunction) {
                 inNameInsideFunction = false;
-                elements.peekFirst().setFunctionName(str);
+                notNull(elements.peekFirst()).setFunctionName(str);
             }
         }
     }
     
     @Override
-    protected CodeElement getAst() throws FormatException {
-        ITranslationUnit unit = elements.removeFirst();
+    protected @NonNull CodeElement getAst() throws FormatException {
+        ITranslationUnit unit = notNull(elements.removeFirst());
         if (DEBUG_LOGGING) {
             System.out.println("XML -> Translation Units");
             System.out.println("========================");
