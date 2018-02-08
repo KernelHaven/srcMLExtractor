@@ -1,7 +1,9 @@
 package net.ssehub.kernel_haven.srcml.transformation.rules;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,7 +55,10 @@ public class PreprocessorTranslation implements ITransformationRule {
             } else if (oldUnit.getType().startsWith("cpp:endif")) {
                 // endif
                 parents.removeFirst();
-                parent.replaceNested(oldUnit, new PreprocessorEndIf());
+                PreprocessorEndIf endIf = new PreprocessorEndIf();
+                endIf.setStartLine(oldUnit.getStartLine());
+                endIf.setEndLine(oldUnit.getEndLine());
+                parent.replaceNested(oldUnit, endIf);
             }
         }
         
@@ -115,29 +120,42 @@ public class PreprocessorTranslation implements ITransformationRule {
     }
     
     private String getCondition(TranslationUnit unit, boolean replaceMissingdefined) {
-        String[] parts = new String[unit.size() - 2];
+        List<String> parts = new ArrayList<>(unit.size() - 2);
         
         for (int i = 2; i < unit.size(); i++) {
-            String codePart = ((CodeUnit) unit.getNestedElement(i)).getCode();
-            parts[i - 2] = codePart;
+            ITranslationUnit conditionPart = unit.getNestedElement(i);
+            
+            // Here, we skip comments
+            if (conditionPart instanceof CodeUnit) {
+                String codePart = ((CodeUnit) conditionPart).getCode();
+                
+                // Further, we skip continuations
+                // Unfortunately treats srcML the slash already as part of the next line -> check with previous element
+                boolean isContinuation = "\\".equals(codePart) && i > 2
+                    && unit.getNestedElement(i - 1).getStartLine() < conditionPart.getStartLine();
+                
+                if (!isContinuation) {
+                    parts.add(codePart);
+                }
+            }
         }
         
         if (replaceMissingdefined) {
-            for (int i = 0; i < parts.length; i++) {
+            for (int i = 0; i < parts.size(); i++) {
                 
                 // skip fields that are "defined" followed by a "(", since these aren't variables
-                if (parts[i].equals("defined") && i + 1 < parts.length && parts[i + 1].equals("(")) {
+                if (parts.get(i).equals("defined") && i + 1 < parts.size() && parts.get(i + 1).equals("(")) {
                     continue;
                 }
                 
-                Matcher m = VARIABLE_PATTERN.matcher(parts[i]);
+                Matcher m = VARIABLE_PATTERN.matcher(parts.get(i));
                 if (m.matches()) {
                     // we found a variable, check if there is a "defined()" call around it
-                    if (i < 2 || !parts[i - 2].equals("defined") || !parts[i - 1].equals("(")
-                            || i + 1 >= parts.length || !parts[i + 1].equals(")")) {
+                    if (i < 2 || !parts.get(i - 2).equals("defined") || !parts.get(i - 1).equals("(")
+                            || i + 1 >= parts.size() || !parts.get(i + 1).equals(")")) {
                         
                         // we found a variable without a defined() call around it; replace with false
-                        parts[i] = "0";
+                        parts.set(i, "0");
                     }
                     
                 }
