@@ -41,6 +41,11 @@ public class CodeUnit implements ITranslationUnit {
     }
     
     @Override
+    public void removeNested(int index) {
+        //
+    }
+    
+    @Override
     public String toString() {
         return code;
     }

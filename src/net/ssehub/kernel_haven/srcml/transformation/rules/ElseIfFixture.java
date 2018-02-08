@@ -32,7 +32,7 @@ public class ElseIfFixture implements ITransformationRule {
             
             TranslationUnit elseifUnit = (TranslationUnit) elseIfBlock;
             ITranslationUnit nestedIf = elseIfBlock.getNestedElement(1);
-            elseIfBlock.removeNested(nestedIf);
+            elseIfBlock.removeNested(1);
             for (int i = 0; i < nestedIf.size(); i++) {
                 elseifUnit.add(nestedIf.getNestedElement(i));
             }

@@ -15,8 +15,7 @@ public class IfZeroWorkaround implements ITransformationRule {
     public void transform(ITranslationUnit unit) throws FormatException {
         if (unit instanceof PreprocessorIf && ((PreprocessorIf)unit).getCondition().equals("0")) {
             for (int i = unit.size() - 1; i >= 0; i--) {
-                ITranslationUnit nestedElement = unit.getNestedElement(i);
-                unit.removeNested(nestedElement);
+                unit.removeNested(i);
             }
         }
         

@@ -71,7 +71,7 @@ public class SwitchCaseStructure implements ITransformationRule {
             ITranslationUnit elementToMove = switchBlock.getNestedElement(startIndex);
             if (!isCaseStatement(elementToMove)) {
                 caseStatement.add(elementToMove);
-                switchBlock.removeNested(elementToMove);
+                switchBlock.removeNested(startIndex);
             } else {
                 nextCaseReached = true;
             }

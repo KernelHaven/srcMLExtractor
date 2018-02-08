@@ -33,10 +33,18 @@ public interface ITranslationUnit  {
     
     /**
      * Removes a nested element. In most cases not needed, probably you want to use the
-     * {@link #replaceNested(ITranslationUnit, ITranslationUnit)} method.
+     * {@link #replaceNested(ITranslationUnit, ITranslationUnit)} method. Please use {@link #removeNested(int)} if
+     * possible, the index-based access is much faster!
      * @param oldUnit A {@link ITranslationUnit} which is no longer needed (be careful with this function).
      */
     public void removeNested(ITranslationUnit oldUnit);
+   
+    /**
+     * Removes a nested element. In most cases not needed, probably you want to use the
+     * {@link #replaceNested(ITranslationUnit, ITranslationUnit)} method.
+     * @param index The index of the element to remove (be careful with this function).
+     */
+    public void removeNested(int index);
     
     /**
      * Returns the number of nested elements.

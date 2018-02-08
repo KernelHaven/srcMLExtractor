@@ -98,6 +98,11 @@ public class TranslationUnit implements ITranslationUnit {
     public void removeNested(ITranslationUnit oldUnit) {
         nestedElements.remove(oldUnit);
     }
+    
+    @Override
+    public void removeNested(int index) {
+        nestedElements.remove(index);
+    }
 
     @Override
     public int size() {

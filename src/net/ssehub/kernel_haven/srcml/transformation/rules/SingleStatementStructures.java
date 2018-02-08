@@ -50,12 +50,12 @@ public class SingleStatementStructures implements ITransformationRule {
      * @param index The index of the nested statement
      */
     private void fixTranslationUnit(TranslationUnit unit, int index) {
-        ITranslationUnit nestedElse = unit.getNestedElement(index);
+        ITranslationUnit nestedStructure = unit.getNestedElement(index);
         List<ITranslationUnit> newElements = new ArrayList<>();
         
         // Move elements from nested statement to expression
-        for (int i = 0; i < nestedElse.size(); i++) {
-            newElements.add(nestedElse.getNestedElement(i));
+        for (int i = 0; i < nestedStructure.size(); i++) {
+            newElements.add(nestedStructure.getNestedElement(i));
         }
         
         // Move last elements
@@ -66,9 +66,10 @@ public class SingleStatementStructures implements ITransformationRule {
         // Remove touched elements
         boolean allElementsRemoved = false;
         while(!allElementsRemoved) {
-            ITranslationUnit lastElement = unit.getNestedElement(unit.size() - 1);
-            unit.removeNested(lastElement);
-            allElementsRemoved = lastElement == nestedElse;
+            int removalIndex = unit.size() - 1;
+            ITranslationUnit lastElement = unit.getNestedElement(removalIndex);
+            unit.removeNested(removalIndex);
+            allElementsRemoved = lastElement == nestedStructure;
         }
         
         // Add gathered elements to the end of the unit
