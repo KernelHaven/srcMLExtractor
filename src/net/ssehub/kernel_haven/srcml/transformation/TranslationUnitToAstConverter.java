@@ -188,8 +188,9 @@ public class TranslationUnitToAstConverter {
         case "elseif":
             // Determine last code element
             int lastCodeElement = -1;
-            while (unit.size() >= lastCodeElement &&
-                !(unit.getNestedElement((lastCodeElement + 1)) instanceof TranslationUnit)) {
+            while (unit.size() > (lastCodeElement + 1) &&
+                !(unit.getNestedElement((lastCodeElement + 1)) instanceof TranslationUnit) &&
+                !(unit.getNestedElement((lastCodeElement + 1)) instanceof PreprocessorBlock)) {
                 
                 lastCodeElement++;
             }
