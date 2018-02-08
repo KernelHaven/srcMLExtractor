@@ -229,46 +229,16 @@ public class TranslationUnitToAstConverter {
             return elseBlock;
         
         case "enum":
-            /*
-             * 2nd last nested is the enum block (definition of literals).
-             * Last is a semicolon, which is no longer needed -> will be removed
-             */
-            return createTypeDef(unit, pc, TypeDefType.ENUM, unit.size() - 2, 0, unit.size() - 3);
+            return createTypeDef(unit, pc, TypeDefType.ENUM);
+            
         case "struct":
-            /*
-             * 2nd last nested is the struct block (definition of attributes).
-             * Last is a semicolon, which is no longer needed -> will be removed
-             */
-            {
-                int expectedBlockPos = unit.size() - 2;
-                int blockIndex = expectedBlockPos;
-                while (blockIndex >= 0 && unit.getNestedElement(blockIndex) instanceof CodeUnit) {
-                    blockIndex--;
-                }
-                if (blockIndex == 0) {
-                    blockIndex = -1;
-                }
-                int startIndex = (blockIndex == expectedBlockPos) ? 0 : blockIndex + 1;
-                int endIndex = (blockIndex == expectedBlockPos) ? unit.size() - 3 : unit.size() - 1;
-//                return createTypeDef(unit, pc, TypeDefType.STRUCT, unit.size() - 2, 0, unit.size() - 3);
-                return createTypeDef(unit, pc, TypeDefType.STRUCT, blockIndex, startIndex, endIndex);
-            }
+            return createTypeDef(unit, pc, TypeDefType.STRUCT);
+            
         case "typedef":
-            /*
-             * * A typedef maybe has a block-statement at the second definition, if it combines the definition of a
-             *   struct with an alias/typedef of the new struct. Thus, we need to check if we also need to parse the
-             *   second nested element.
-             * * Last is a semicolon, which is no longer needed -> will be removed
-             */
-            int blockIndex = (unit.size() >= 2 && !(unit.getNestedElement(1) instanceof CodeUnit)) ? 1 : -1;
-            int startIndex = (blockIndex != -1) ? blockIndex + 1: 0;
-            return createTypeDef(unit, pc, TypeDefType.TYPEDEF, blockIndex, startIndex, unit.size() - 2);
+            return createTypeDef(unit, pc, TypeDefType.TYPEDEF);
+            
         case "union":
-            /*
-             * 2nd last nested is the union block (definition of attributes).
-             * Last is a semicolon, which is no longer needed -> will be removed
-             */
-            return createTypeDef(unit, pc, TypeDefType.UNION, unit.size() - 2, 0, unit.size() - 3);
+            return createTypeDef(unit, pc, TypeDefType.UNION);
             
         case "unit": {
             File file = new File(pc);
@@ -404,84 +374,85 @@ public class TranslationUnitToAstConverter {
         return caseStatement;
     }
 
-    private boolean isInline(TranslationUnit unit) throws FormatException {
-        boolean isInline = false;
-        if (unit.size() > 0) {
-            ITranslationUnit lastElement = unit.getNestedElement(unit.size() - 1);
-            if (!(lastElement instanceof CodeUnit && ";".equals(((CodeUnit) lastElement).getCode()))) {
-                isInline = true;
-            }
-        }
-        
-        return isInline;
-    }
-
-    private TypeDefinition createTypeDef(TranslationUnit unit, Formula pc, TypeDefType type, int blockIndex, int declStartIndex, int declEndIndex) throws FormatException {
+    private TypeDefinition createTypeDef(TranslationUnit unit, Formula pc, TypeDefType type) throws FormatException {
         /*
-         * blockIndex and declEndIndex are computed from the end, expecting as last element a semicolon, which is only
-         * optional. This will fix the indices.
+         * Find last <block> element
+         * (<block> refers to anything that isn't code, e.g. also <struct>)
          */
-        if (isInline(unit)) {
-            if (-1 != blockIndex) {
-                blockIndex++;
+        int blockIndex = -1;
+        for (int i = unit.size() - 1; i >= 0; i--) {
+            if (!(unit.getNestedElement(i) instanceof CodeUnit)) {
+                blockIndex = i;
+                break;
             }
-            declEndIndex++;
         }
         
-        TypeDefinition typeDef = new TypeDefinition(pc, makeCode(unit, declStartIndex, declEndIndex), type);
-        typeDef.setSourceFile(sourceFile);
-        typeDef.setCondition(getEffectiveCondition());
-        if (-1 != blockIndex) {
+        // heuristic: everything up to the <block> is relevant
+        // TODO: this heuristic does not work for e.g.   typedef struct { int a; } MY_STRUCT;
+        int endIndex;
+        if (blockIndex == -1) {
+            endIndex = unit.size() - 1;
+        } else {
+            endIndex = blockIndex - 1;
+        }
+        
+        ICode code = makeCode(unit, 0, endIndex);
+        ISyntaxElement nested = null;
+        
+        if (blockIndex != -1) {
             ITranslationUnit block = unit.getNestedElement(blockIndex);
+            
             if (type == TypeDefType.ENUM) {
                 // don't parse the <block> of enums as a statement
                 ICode blockCode = makeCode(block, 0, block.size() - 1);
                 
                 // join blockCode with previous declaration
-                ICode decl = typeDef.getDeclaration();
-                if (decl instanceof Code && blockCode instanceof Code) {
-                    Code newDecl = new Code(decl.getPresenceCondition(), ((Code) decl).getText() + ' '
+                if (code instanceof Code && blockCode instanceof Code) {
+                    Code newCode = new Code(code.getPresenceCondition(), ((Code) code).getText() + ' '
                             + ((Code) blockCode).getText());
-                    newDecl.setCondition(decl.getCondition());
-                    newDecl.setSourceFile(sourceFile);
+                    newCode.setCondition(code.getCondition());
+                    newCode.setSourceFile(sourceFile);
                     
-                    decl = newDecl;
+                    code = newCode;
                 } else {
-                    CodeList newDecl = new CodeList(decl.getPresenceCondition());
-                    newDecl.setCondition(decl.getCondition());
-                    newDecl.setSourceFile(sourceFile);
+                    CodeList newCode = new CodeList(code.getPresenceCondition());
+                    newCode.setCondition(code.getCondition());
+                    newCode.setSourceFile(sourceFile);
                     
-                    if (decl instanceof CodeList) {
-                        CodeList list = (CodeList) decl;
+                    if (code instanceof CodeList) {
+                        CodeList list = (CodeList) code;
                         for (int i = 0; i < list.getNestedElementCount(); i++) {
-                            newDecl.addNestedElement(list.getNestedElement(i));
+                            newCode.addNestedElement(list.getNestedElement(i));
                         }
                     } else {
-                        newDecl.addNestedElement(decl);
+                        newCode.addNestedElement(code);
                     }
                     
                     if (blockCode instanceof CodeList) {
                         CodeList list = (CodeList) blockCode;
                         for (int i = 0; i < list.getNestedElementCount(); i++) {
-                            newDecl.addNestedElement(list.getNestedElement(i));
+                            newCode.addNestedElement(list.getNestedElement(i));
                         }
                     } else {
-                        newDecl.addNestedElement(blockCode);
+                        newCode.addNestedElement(blockCode);
                     }
                     
-                    decl = newDecl;
+                    code = newCode;
                 }
                 
-                
-                // create new TypeDefinition with new declaration
-                typeDef = new TypeDefinition(pc, decl, type);
-                typeDef.setSourceFile(sourceFile);
-                typeDef.setCondition(getEffectiveCondition());
-                
             } else {
-                typeDef.addNestedElement(convert(block));
+                // add the <block> as a parsed statement to everything else
+                nested = convert(block);
             }
         }
+        
+        TypeDefinition typeDef = new TypeDefinition(pc, code, type);
+        typeDef.setSourceFile(sourceFile);
+        typeDef.setCondition(getEffectiveCondition());
+        if (nested != null) {
+            typeDef.addNestedElement(nested);
+        }
+        
         return typeDef;
     }
 
