@@ -85,9 +85,9 @@ public class PreprocessorBlockStructure implements ITransformationRule {
             markForReordering(parent, child);
             // Create block, but don't do anything
             PreprocessorIf currentBlock = (PreprocessorIf) child;
-           BlockParent block = new BlockParent();
-           block.parent = parent;
-           block.child = currentBlock;
+            BlockParent block = new BlockParent();
+            block.parent = parent;
+            block.child = currentBlock;
             getEncapsulatedElements(currentBlock);
             parentblocks.addFirst(block);
         } else if (child instanceof PreprocessorElse) {
@@ -96,9 +96,9 @@ public class PreprocessorBlockStructure implements ITransformationRule {
             markForReordering(parent, child);
             PreprocessorBlock currentBlock = (PreprocessorBlock) child;
             getEncapsulatedElements(currentBlock);
-           BlockParent block = new BlockParent();
-           block.parent = parent;
-           block.child = currentBlock;
+            BlockParent block = new BlockParent();
+            block.parent = parent;
+            block.child = currentBlock;
             parentblocks.addFirst(block);
         } else if (child instanceof PreprocessorEndIf) {
             // Stop collection
@@ -127,6 +127,7 @@ public class PreprocessorBlockStructure implements ITransformationRule {
          * Mark elements for reordering if their exist a target CPP block
          * Mark PreprocessorEndIfs for removal in any case
          */
+        boolean processed = false;
         if (null != currentblock && null != currentblock.parent) {
             boolean isNested = (parent != currentblock.child);
             boolean isNotSubNested = (currentblock.parent == parent);
@@ -135,8 +136,11 @@ public class PreprocessorBlockStructure implements ITransformationRule {
                 element.parent = parent;
                 element.child = child;
                 getEncapsulatedElements(currentblock.child).add(element);
+                processed = true;
             }
-        } else if (child instanceof PreprocessorEndIf) {
+        } 
+        
+        if (!processed && child instanceof PreprocessorEndIf) {
             NestedElement element = new NestedElement();
             element.parent = parent;
             element.child = child;
