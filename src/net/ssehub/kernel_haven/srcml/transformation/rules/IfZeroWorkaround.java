@@ -14,7 +14,6 @@ public class IfZeroWorkaround implements ITransformationRule {
 
     @Override
     public void transform(@NonNull ITranslationUnit unit) throws FormatException {
-        // getCondition() can't be null, since this is an if
         if (unit instanceof PreprocessorBlock) {
             String condition = ((PreprocessorBlock) unit).getCondition();
         
