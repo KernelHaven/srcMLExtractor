@@ -394,8 +394,7 @@ public class TranslationUnitToAstConverter {
             }
         }
         
-        // heuristic: everything up to the <block> is relevant
-        // TODO: this heuristic does not work for e.g.   typedef struct { int a; } MY_STRUCT;
+        // parse everything up to the <block> into a Code
         int endIndex;
         if (blockIndex == -1) {
             endIndex = unit.size() - 1;
@@ -404,6 +403,15 @@ public class TranslationUnitToAstConverter {
         }
         
         ICode code = makeCode(unit, 0, endIndex);
+        
+        // if there is something to the right of the <block> append it to the code
+        // endIndex + 1 is the <block>, endIndex + 2 may be further code to parse
+        if (endIndex + 2 < unit.size()) {
+            code = joinCodes(code, makeCode(unit, endIndex + 2, unit.size() - 1));
+            
+            // TODO: now we don't know where in the code the <block> would be located at...
+        }
+        
         ISyntaxElement nested = null;
         
         if (blockIndex != -1) {
@@ -414,38 +422,7 @@ public class TranslationUnitToAstConverter {
                 ICode blockCode = makeCode(block, 0, block.size() - 1);
                 
                 // join blockCode with previous declaration
-                if (code instanceof Code && blockCode instanceof Code) {
-                    Code newCode = new Code(code.getPresenceCondition(), ((Code) code).getText() + ' '
-                            + ((Code) blockCode).getText());
-                    newCode.setCondition(code.getCondition());
-                    newCode.setSourceFile(sourceFile);
-                    
-                    code = newCode;
-                } else {
-                    CodeList newCode = new CodeList(code.getPresenceCondition());
-                    newCode.setCondition(code.getCondition());
-                    newCode.setSourceFile(sourceFile);
-                    
-                    if (code instanceof CodeList) {
-                        CodeList list = (CodeList) code;
-                        for (int i = 0; i < list.getNestedElementCount(); i++) {
-                            newCode.addNestedElement(list.getNestedElement(i));
-                        }
-                    } else {
-                        newCode.addNestedElement(code);
-                    }
-                    
-                    if (blockCode instanceof CodeList) {
-                        CodeList list = (CodeList) blockCode;
-                        for (int i = 0; i < list.getNestedElementCount(); i++) {
-                            newCode.addNestedElement(list.getNestedElement(i));
-                        }
-                    } else {
-                        newCode.addNestedElement(blockCode);
-                    }
-                    
-                    code = newCode;
-                }
+                code = joinCodes(code, blockCode);
                 
             } else {
                 // add the <block> as a parsed statement to everything else
@@ -583,6 +560,52 @@ public class TranslationUnitToAstConverter {
             return list;
         }
         
+    }
+    
+    /**
+     * Joins the two unparsed {@link ICode} objects together into one. If both are instances of {@link Code} then
+     * a new {@link Code} with <code>code1.text + code2.text</code> is returned. Else, a {@link CodeList} with the
+     * proper children is returned.
+     * 
+     * @param code1 The left side.
+     * @param code2 The right side.
+     * 
+     * @return The joined code. The presence condition and condition are taken from code1.
+     */
+    private @NonNull ICode joinCodes(@NonNull ICode code1, @NonNull ICode code2) {
+        ICode result;
+        
+        if (code1 instanceof Code && code2 instanceof Code) {
+            result = new Code(code1.getPresenceCondition(), ((Code) code1).getText() + ' '
+                    + ((Code) code2).getText());
+            result.setCondition(code1.getCondition());
+            result.setSourceFile(sourceFile);
+            
+        } else {
+            result = new CodeList(code1.getPresenceCondition());
+            result.setCondition(code1.getCondition());
+            result.setSourceFile(sourceFile);
+            
+            if (code1 instanceof CodeList) {
+                CodeList list = (CodeList) code1;
+                for (int i = 0; i < list.getNestedElementCount(); i++) {
+                    result.addNestedElement(list.getNestedElement(i));
+                }
+            } else {
+                result.addNestedElement(code1);
+            }
+            
+            if (code2 instanceof CodeList) {
+                CodeList list = (CodeList) code2;
+                for (int i = 0; i < list.getNestedElementCount(); i++) {
+                    result.addNestedElement(list.getNestedElement(i));
+                }
+            } else {
+                result.addNestedElement(code2);
+            }
+        }
+        
+        return result;
     }
     
 }
