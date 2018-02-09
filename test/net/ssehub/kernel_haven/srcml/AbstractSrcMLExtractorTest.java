@@ -9,9 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 
 import net.ssehub.kernel_haven.SetUpException;
@@ -47,13 +46,13 @@ public class AbstractSrcMLExtractorTest {
         }
     }
     
-    @Before
-    public void setup() {
+    @BeforeClass
+    public static void setup() {
         RESOURCE_DIR.mkdir();
     }
     
-    @After
-    public void teardown() throws IOException {
+    @AfterClass
+    public static void teardown() throws IOException {
         Util.deleteFolder(RESOURCE_DIR);
     }
     
