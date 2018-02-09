@@ -158,20 +158,21 @@ public class TranslationUnitToAstConverter {
             // 2nd is block everything after is condition, we skip last element (a semicolon)
             return createLoop(unit, LoopType.DO_WHILE, 1, 3, unit.size() - 2);
         
-        case "if":
-            // (Multiple) statements come after last condition element (CodeUnit)
-            int lastConditionElement = -1;
-            for (int i = 0; i < unit.size() && lastConditionElement == -1; i++) {
-                if (!(unit.getNestedElement(i) instanceof CodeUnit)) {
-                    lastConditionElement = (i - 1);
-                }
+        case "if": {
+            // Determine last code element
+            int lastCodeElement = 0;
+            while (unit.size() > (lastCodeElement + 1) &&
+                !(unit.getNestedElement((lastCodeElement + 1)) instanceof TranslationUnit)) {
+                
+                lastCodeElement++;
             }
+            
             BranchStatement ifStatement = new BranchStatement(pc, BranchStatement.Type.IF,
-                    makeCode(unit, 0, lastConditionElement));
+                    makeCode(unit, 0, lastCodeElement));
             ifStatement.setSourceFile(sourceFile);
             ifStatement.setCondition(getEffectiveCondition());
             ifStatement.addSibling(ifStatement);
-            for (int i = lastConditionElement + 1; i < unit.size(); i++) {
+            for (int i = lastCodeElement + 1; i < unit.size(); i++) {
                 ISyntaxElement child = convert(unit.getNestedElement(i));
                 
                 addIfSibling(child, ifStatement);
@@ -188,13 +189,13 @@ public class TranslationUnitToAstConverter {
             }
             
             return ifStatement;
+        }
             
-        case "elseif":
+        case "elseif": {
             // Determine last code element
-            int lastCodeElement = -1;
+            int lastCodeElement = 0;
             while (unit.size() > (lastCodeElement + 1) &&
-                !(unit.getNestedElement((lastCodeElement + 1)) instanceof TranslationUnit) &&
-                !(unit.getNestedElement((lastCodeElement + 1)) instanceof PreprocessorBlock)) {
+                !(unit.getNestedElement((lastCodeElement + 1)) instanceof TranslationUnit)) {
                 
                 lastCodeElement++;
             }
@@ -216,7 +217,8 @@ public class TranslationUnitToAstConverter {
             } else {
                 throw ExceptionUtil.makeException("Unexpected structure of elseif-statement: " + unit.toString(), unit);
             }
-            
+        }
+        
         case "else":
             BranchStatement elseBlock = new BranchStatement(pc, BranchStatement.Type.ELSE, null);
             elseBlock.setSourceFile(sourceFile);

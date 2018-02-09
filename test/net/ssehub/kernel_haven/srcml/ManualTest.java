@@ -21,6 +21,7 @@ public class ManualTest extends AbstractSrcMLExtractorTest {
 //        SourceFile ast = loadFile("test.c");
 //        SourceFile ast = loadFile("FunctionWithIfdefHeader.c");
         SourceFile ast = loadFile("test2.c");
+//        SourceFile ast = loadFile("../real/Linux4.15/pci_stub.c");
         System.out.println(ast.getElement(0));
     }
     
