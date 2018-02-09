@@ -160,11 +160,14 @@ public class TranslationUnitToAstConverter {
         
         case "if": {
             // Determine last code element
-            int lastCodeElement = 0;
-            while (unit.size() > (lastCodeElement + 1) &&
+            int lastCodeElement = -1;
+            while (unit.size() - 1 > (lastCodeElement + 1) &&
                 !(unit.getNestedElement((lastCodeElement + 1)) instanceof TranslationUnit)) {
                 
                 lastCodeElement++;
+            }
+            if (lastCodeElement < 0) {
+                throw ExceptionUtil.makeException("Unexpected structure of if-statement: " + unit.toString(), unit);
             }
             
             BranchStatement ifStatement = new BranchStatement(pc, BranchStatement.Type.IF,
@@ -193,30 +196,30 @@ public class TranslationUnitToAstConverter {
             
         case "elseif": {
             // Determine last code element
-            int lastCodeElement = 0;
-            while (unit.size() > (lastCodeElement + 1) &&
+            int lastCodeElement = -1;
+            while (unit.size() - 1 > (lastCodeElement + 2) &&
                 !(unit.getNestedElement((lastCodeElement + 1)) instanceof TranslationUnit)) {
                 
                 lastCodeElement++;
             }
             
-            if (lastCodeElement >= 0) {
-                ICode condition = makeCode(unit, 0, lastCodeElement);
-                BranchStatement elifBlock = new BranchStatement(pc, BranchStatement.Type.ELSE_IF, condition);
-                elifBlock.setSourceFile(sourceFile);
-                elifBlock.setCondition(getEffectiveCondition());
-                for (int i = 0; i < unit.size(); i++) {
-                    ITranslationUnit child = unit.getNestedElement(i);
-                    if (child instanceof CodeUnit) {
-                        // ignore { and }
-                    } else {
-                        elifBlock.addNestedElement(convert(child));
-                    }
-                }
-                return elifBlock;
-            } else {
+            if (lastCodeElement < 0) {
                 throw ExceptionUtil.makeException("Unexpected structure of elseif-statement: " + unit.toString(), unit);
             }
+            
+            ICode condition = makeCode(unit, 0, lastCodeElement);
+            BranchStatement elifBlock = new BranchStatement(pc, BranchStatement.Type.ELSE_IF, condition);
+            elifBlock.setSourceFile(sourceFile);
+            elifBlock.setCondition(getEffectiveCondition());
+            for (int i = 0; i < unit.size(); i++) {
+                ITranslationUnit child = unit.getNestedElement(i);
+                if (child instanceof CodeUnit) {
+                    // ignore { and }
+                } else {
+                    elifBlock.addNestedElement(convert(child));
+                }
+            }
+            return elifBlock;
         }
         
         case "else":
