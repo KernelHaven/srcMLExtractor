@@ -64,6 +64,10 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
         return condition;
     }
     
+    public void setCondition(@Nullable String condition) {
+        this.condition = condition;
+    }
+    
     /**
      * Returns the parsed effective condition, considering previous if's and elif's, will also compute the condition
      * for an else, but won't consider the enclosing conditions.

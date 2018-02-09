@@ -28,22 +28,33 @@ public class Preprocessing {
      * @param baseUnit The root element of the AST, which represents to complete parsed file.
      */
     public void convert(@NonNull ITranslationUnit baseUnit) throws FormatException {
-        // Preprocessor statements
-        ITransformationRule rule = new PreprocessorTranslation();
-        rule.transform(baseUnit);
-        rule = new PreprocessorBlockStructure();
-        rule.transform(baseUnit);
-        rule = new PreprocessorConditionComputationRule();
-        rule.transform(baseUnit);
-        rule = new IfZeroWorkaround();
-        rule.transform(baseUnit);
+        /*
+         *  Preprocessor statements
+         */
         
-        // C-Code
-        rule = new SingleStatementStructures();
-        rule.transform(baseUnit);
-        rule = new ElseIfFixture();
-        rule.transform(baseUnit);
-        rule = new SwitchCaseStructure();
-        rule.transform(baseUnit);
+        // Convert <cpp:{if, else, elif, else, endif}> to PreprocessorBlocks
+        // set their condition as the CodeUnit texts separated by ' ', e.g. "defined ( A ) & & defined ( B )"
+        new PreprocessorTranslation().transform(baseUnit);
+        
+        // Add nested elements between PreprocessorBlocks as their childreen; remove PreprocessorEndifs
+        new PreprocessorBlockStructure().transform(baseUnit);
+        
+        // Remove childreen for every PreprocessorBlocks that have condition "0"
+        new IfZeroWorkaround().transform(baseUnit);
+        
+        // Replace all variables in PreprocessorBlock conditions that have no surrounding "defined()" with "0"
+        // Removes the spaces between the elements, e.g. "defined ( A ) & & defined ( B )" -> "defined(A)&&defined(B)"
+        new MissingDefined().transform(baseUnit);
+        
+        // Parse the conditions of PreprocessorBlocks
+        new PreprocessorConditionComputationRule().transform(baseUnit);
+        
+        /*
+         *  C-Code
+         */
+        
+        new SingleStatementStructures().transform(baseUnit);
+        new ElseIfFixture().transform(baseUnit);
+        new SwitchCaseStructure().transform(baseUnit);
     }
 }

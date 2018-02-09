@@ -34,7 +34,7 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
  */
 public class XmlToSyntaxElementConverter extends AbstractAstConverter {
     
-    private static final boolean DEBUG_LOGGING = false;
+    private static final boolean DEBUG_LOGGING = true;
     
     /**
      * White list of supported XML tags, which will be processed by this converter. These are the top level elements of

@@ -3,11 +3,7 @@ package net.ssehub.kernel_haven.srcml.transformation.rules;
 import static net.ssehub.kernel_haven.util.null_checks.NullHelpers.notNull;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import net.ssehub.kernel_haven.srcml.transformation.CodeUnit;
 import net.ssehub.kernel_haven.srcml.transformation.ITranslationUnit;
@@ -28,8 +24,6 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
  *
  */
 public class PreprocessorTranslation implements ITransformationRule {
-    
-    private static final @NonNull Pattern VARIABLE_PATTERN = notNull(Pattern.compile("[A-Za-z0-9_]+"));
     
     private @NonNull Deque<@NonNull PreprocessorIf> parents = new ArrayDeque<>();
 
@@ -122,7 +116,7 @@ public class PreprocessorTranslation implements ITransformationRule {
     }
     
     private @NonNull String getCondition(@NonNull TranslationUnit unit, boolean replaceMissingdefined) {
-        List<String> parts = new ArrayList<>(unit.size() - 2);
+        StringBuffer condition = new StringBuffer();
         
         for (int i = 2; i < unit.size(); i++) {
             ITranslationUnit conditionPart = unit.getNestedElement(i);
@@ -137,37 +131,16 @@ public class PreprocessorTranslation implements ITransformationRule {
                     && unit.getNestedElement(i - 1).getStartLine() < conditionPart.getStartLine();
                 
                 if (!isContinuation) {
-                    parts.add(codePart);
+                    condition.append(codePart).append(' ');
                 }
             }
         }
         
-        if (replaceMissingdefined) {
-            for (int i = 0; i < parts.size(); i++) {
-                
-                // skip fields that are "defined" followed by a "(", since these aren't variables
-                if (parts.get(i).equals("defined") && i + 1 < parts.size() && parts.get(i + 1).equals("(")) {
-                    continue;
-                }
-                
-                Matcher m = VARIABLE_PATTERN.matcher(parts.get(i));
-                if (m.matches()) {
-                    // we found a variable, check if there is a "defined()" call around it
-                    if (i < 2 || !parts.get(i - 2).equals("defined") || !parts.get(i - 1).equals("(")
-                            || i + 1 >= parts.size() || !parts.get(i + 1).equals(")")) {
-                        
-                        // we found a variable without a defined() call around it; replace with false
-                        parts.set(i, "0");
-                    }
-                    
-                }
-            }
+        // remove trailing ' '
+        if (condition.length() > 0) {
+            condition.replace(condition.length() - 1, condition.length(), "");
         }
         
-        StringBuffer condition = new StringBuffer();
-        for (String s : parts) {
-            condition.append(s);
-        }
         return notNull(condition.toString());
     }
     

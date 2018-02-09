@@ -90,7 +90,7 @@ public class PreprocessorConditionComputationRule implements ITransformationRule
             Formula parsedCondition = parser.parse(condition);
             block.setEffectiveCondition(parsedCondition);
         } catch (ExpressionFormatException exc) {
-            throw ExceptionUtil.makeException("Could not parse effective expression: " + condition, block);
+            throw ExceptionUtil.makeException("Could not parse effective expression: " + condition, exc, block);
         }
     }
 }
