@@ -19,7 +19,6 @@ import net.ssehub.kernel_haven.code_model.ast.SingleStatement;
 public class CTest extends AbstractSrcMLExtractorTest {
     
     @Test
-    @SuppressWarnings("null")
     public void returnStatement() {
         SourceFile ast = loadFile("Statement_SingleReturn.c");
         List<ISyntaxElement> elements = getElements(ast);

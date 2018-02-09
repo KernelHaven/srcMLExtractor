@@ -126,8 +126,8 @@ public class AbstractSrcMLExtractorTest {
      * @param element The element to test.
      */
     @SuppressWarnings({ "null", "unchecked" })
-    protected <T extends ISyntaxElement> T assertElement(Class<T> type, String condition, String presenceCondition,
-            CodeElement element) {
+    protected <T extends ISyntaxElement> @NonNull T assertElement(Class<T> type, String condition,
+            String presenceCondition, CodeElement element) {
         
         // Class check
         Assert.assertTrue("Wrong syntax element type: expected " + type.getSimpleName() + "; actual: "
