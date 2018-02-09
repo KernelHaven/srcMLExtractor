@@ -125,6 +125,7 @@ public class TranslationUnitToAstConverter {
         case "break":           // falls through
         case "goto":            // falls through 
         case "return":          // falls through 
+        case "macro":          // falls through 
         case "empty_stmt": 
             SingleStatement singleStatement = new SingleStatement(pc, makeCode(unit, 0, unit.size() - 1));
             singleStatement.setSourceFile(sourceFile);

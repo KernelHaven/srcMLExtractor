@@ -59,6 +59,7 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         tmpSet.add("cpp:warning");
         tmpSet.add("cpp:line");
         tmpSet.add("cpp:empty");
+        tmpSet.add("macro"); // usage of a CPP macro
         
         // C
         tmpSet.add("unit");
