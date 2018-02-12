@@ -1,9 +1,15 @@
 package net.ssehub.kernel_haven.srcml;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.HashSet;
+import java.util.Set;
 
 import net.ssehub.kernel_haven.SetUpException;
 import net.ssehub.kernel_haven.config.Configuration;
+import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.PreparationTool;
 import net.ssehub.kernel_haven.util.Util;
 import net.ssehub.kernel_haven.util.Util.OSType;
@@ -53,6 +59,26 @@ class Preparation extends PreparationTool {
         
         init(resourceFolder, execPath, "srcML.zip");
         exec = new File(resourceFolder, execPath);
+        
+        try {
+            exec.setExecutable(true);
+        } catch (SecurityException exc) {
+            Logger.get().logDebug("Could not make \"" + exec.getAbsolutePath() + "\" executable: " + exc.getMessage());
+        }
+        
+        if (os == OSType.LINUX64 || os == OSType.MACOS64) {
+            try {
+                Set<PosixFilePermission> perms = new HashSet<>();
+                perms.addAll(Files.getPosixFilePermissions(exec.toPath()));
+                perms.add(PosixFilePermission.OWNER_EXECUTE);
+                perms.add(PosixFilePermission.GROUP_EXECUTE);
+                perms.add(PosixFilePermission.OTHERS_EXECUTE);
+                Files.setPosixFilePermissions(exec.toPath(), perms);
+            } catch (IOException exc) {
+                Logger.get().logDebug("Could set execution bit for \"" + exec.getAbsolutePath() + "\": "
+                    + exc.getMessage());
+            }
+        }
     }
 
     /**

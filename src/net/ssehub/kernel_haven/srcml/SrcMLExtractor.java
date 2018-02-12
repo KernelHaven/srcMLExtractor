@@ -76,13 +76,16 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             ProcessBuilder builder = new ProcessBuilder(srcExec.getAbsolutePath(), absoulteTarget.getAbsolutePath());
             
 //            builder.directory(srcExec.getParentFile());
-            // set LD_LIBRARY_PATH to ../lib
-            // only needed for Linux and Mac, but does no harm on Windows.
-            builder.environment().put("LD_LIBRARY_PATH",
-                    new File(srcExec.getParentFile().getParentFile(), "lib").getAbsolutePath());
+            /*
+             * LD_LIBRARY_PATH = ../lib needed on Linux/Mac
+             * DYLD_LIBRARY_PATH = ../lib needed on Mac
+             * Both settings do no harm on Windows.
+             */
+            String libFolder = new File(srcExec.getParentFile().getParentFile(), "lib").getAbsolutePath();
+            builder.environment().put("LD_LIBRARY_PATH", libFolder);
+            builder.environment().put("DYLD_LIBRARY_PATH", libFolder);
             
             AbstractAstConverter xmlConverter = new XmlToSyntaxElementConverter(target);
-            
             XmlToAstConverter converter = new XmlToAstConverter(stdout, xmlConverter);
 
             // CHECKSTYLE:OFF
