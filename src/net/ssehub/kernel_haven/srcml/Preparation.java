@@ -61,26 +61,6 @@ class Preparation extends PreparationTool {
         
         init(resourceFolder, execPath, "srcML.zip");
         exec = new File(resourceFolder, execPath);
-        
-        try {
-            exec.setExecutable(true);
-        } catch (SecurityException exc) {
-            LOGGER.logDebug("Could not make \"" + exec.getAbsolutePath() + "\" executable: " + exc.getMessage());
-        }
-        
-        if (os == OSType.LINUX64 || os == OSType.MACOS64) {
-            try {
-                Set<PosixFilePermission> perms = new HashSet<>();
-                perms.addAll(Files.getPosixFilePermissions(exec.toPath()));
-                perms.add(PosixFilePermission.OWNER_EXECUTE);
-                perms.add(PosixFilePermission.GROUP_EXECUTE);
-                perms.add(PosixFilePermission.OTHERS_EXECUTE);
-                Files.setPosixFilePermissions(exec.toPath(), perms);
-            } catch (IOException exc) {
-                LOGGER.logDebug("Could set execution bit for \"" + exec.getAbsolutePath() + "\": "
-                    + exc.getMessage());
-            }
-        }
     }
 
     /**
@@ -92,6 +72,28 @@ class Preparation extends PreparationTool {
      */
     public @NonNull File prepareExec() throws SetUpException {
         super.prepare();
+        
+        try {
+            exec.setExecutable(true);
+        } catch (SecurityException exc) {
+            LOGGER.logDebug("Could not make \"" + exec.getAbsolutePath() + "\" executable: " + exc.getMessage());
+        }
+        
+        OSType os = Util.determineOS();
+        if (os == OSType.LINUX64 || os == OSType.MACOS64) {
+            try {
+                Set<PosixFilePermission> perms = new HashSet<>();
+                perms.addAll(Files.getPosixFilePermissions(exec.toPath()));
+                perms.add(PosixFilePermission.OWNER_EXECUTE);
+                perms.add(PosixFilePermission.GROUP_EXECUTE);
+                perms.add(PosixFilePermission.OTHERS_EXECUTE);
+                Files.setPosixFilePermissions(exec.toPath(), perms);
+            } catch (IOException exc) {
+                LOGGER.logDebug("Could set execution bit for \"" + exec.getAbsolutePath() + "\": "
+                        + exc.getMessage());
+            }
+        }
+        
         return exec;
     }
 }
