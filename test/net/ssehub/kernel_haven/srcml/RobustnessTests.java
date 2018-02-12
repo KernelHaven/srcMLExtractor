@@ -27,17 +27,16 @@ public class RobustnessTests extends AbstractSrcMLExtractorTest {
     public void testAllFiles() throws IOException {
         Path basesPath = AllTests.TESTDATA.toPath();
         Path testFilesPath = new File(AllTests.TESTDATA, "real").toPath();
-        List<File> testFiles = Files.walk(testFilesPath)
+        List<Path> testFiles = Files.walk(testFilesPath)
             .filter(p -> p.toString().endsWith(".c"))
-            .map(p -> p.toFile())
             .collect(Collectors.toList());
         
-        for (File file : testFiles) {
-            Path relativePath = basesPath.relativize(file.toPath());
-//            if (relativePath.toString().contains("p4")) {
+        for (Path p : testFiles) {
+            Path relativePath = basesPath.relativize(p);
+//            if (relativePath.toString().contains("vgetcpu")) {
             SourceFile parsed = loadFile(relativePath.toString());
             Assert.assertNotNull("Could not parse " + relativePath.toString(), parsed);
-//            }
+//            } else {System.out.println("Skipped: " + p.toString());}
         }
     }
 

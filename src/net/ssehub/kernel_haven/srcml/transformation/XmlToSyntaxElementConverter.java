@@ -195,12 +195,20 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
             System.out.println(unit);
         }
         
-        Preprocessing converter = new Preprocessing();
-        converter.convert(unit);
-        if (DEBUG_LOGGING) {
-            System.out.println("Translation Unit Preprocessing");
-            System.out.println("==============================");
-            System.out.println(unit);
+        try {
+            Preprocessing converter = new Preprocessing();
+            converter.convert(unit);
+            if (DEBUG_LOGGING) {
+                System.out.println("Translation Unit Preprocessing");
+                System.out.println("==============================");
+                System.out.println(unit);
+            }
+        } catch (AssertionError err) {
+            /*
+             * Continuation followed by white line lead in parsing bugs in srcML, which result here in an unexpected
+             * structure and, thus, in AssertionErrors...
+             */
+            throw ExceptionUtil.makeException("Unexpected result produced by srcML", err, unit);
         }
         
         TranslationUnitToAstConverter converter2 = new TranslationUnitToAstConverter(getFile().getPath());
