@@ -22,6 +22,8 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
  */
 class Preparation extends PreparationTool {
 
+    private static final Logger LOGGER = Logger.get();
+    
     private @NonNull File exec;
 
     /**
@@ -63,7 +65,7 @@ class Preparation extends PreparationTool {
         try {
             exec.setExecutable(true);
         } catch (SecurityException exc) {
-            Logger.get().logDebug("Could not make \"" + exec.getAbsolutePath() + "\" executable: " + exc.getMessage());
+            LOGGER.logDebug("Could not make \"" + exec.getAbsolutePath() + "\" executable: " + exc.getMessage());
         }
         
         if (os == OSType.LINUX64 || os == OSType.MACOS64) {
@@ -75,7 +77,7 @@ class Preparation extends PreparationTool {
                 perms.add(PosixFilePermission.OTHERS_EXECUTE);
                 Files.setPosixFilePermissions(exec.toPath(), perms);
             } catch (IOException exc) {
-                Logger.get().logDebug("Could set execution bit for \"" + exec.getAbsolutePath() + "\": "
+                LOGGER.logDebug("Could set execution bit for \"" + exec.getAbsolutePath() + "\": "
                     + exc.getMessage());
             }
         }
