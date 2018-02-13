@@ -39,17 +39,24 @@ public class PreprocessorConditionComputationRule implements ITransformationRule
     
     private Formula unsupportedExpressionFormula;
     private Formula unsupportedMacroFormula;
-    private Pattern nummericOperators;
+    private Pattern numericOperators;
     
     PreprocessorConditionComputationRule() {
         try {
-            unsupportedExpressionFormula = parser.parse("defined(UNSUPPORTED_NUMMERIC_EXPRESSION_NOT_HANDLED_BY_KERNELHAVEN)");
+            unsupportedExpressionFormula
+                = parser.parse("defined(UNSUPPORTED_NUMERIC_EXPRESSION_NOT_HANDLED_BY_KERNELHAVEN)");
             unsupportedMacroFormula = parser.parse("defined(UNSUPPORTED_MACRO_EXPRESSION_NOT_HANDLED_BY_KERNELHAVEN)");
         } catch (ExpressionFormatException e) {
             Logger.get().logException("Could not parse fallback condition.", e);
         }
         
-        nummericOperators = Pattern.compile("(>|>=|<|<=|\\|\\||&&|==|&|\\|)");
+        /*
+         * Numeric operators:
+         * - Comparisons: >, >=, <, <=#
+         * - Bit operators: |, &
+         * - Mathematical operations: %
+         */
+        numericOperators = Pattern.compile("(>|>=|<|<=|==|!=|&|\\||%)");
     }
 
     @Override
@@ -109,10 +116,11 @@ public class PreprocessorConditionComputationRule implements ITransformationRule
             block.setEffectiveCondition(parsedCondition);
         } catch (ExpressionFormatException exc) {
             // Try fall back
-            Matcher matcher = nummericOperators.matcher(condition);
+            Matcher matcher = numericOperators.matcher(condition);
             if (matcher.find() && null != unsupportedExpressionFormula) {
                 block.setEffectiveCondition(unsupportedExpressionFormula);
-            } else if (condition.contains("0(0)") && null != unsupportedMacroFormula) {
+            } else if (condition.contains("0(") && null != unsupportedMacroFormula) {
+                // Handles 0(0), !0(0), 0()
                 block.setEffectiveCondition(unsupportedMacroFormula);
             } else {
                 throw ExceptionUtil.makeException("Could not parse effective expression: " + condition, exc, block);
