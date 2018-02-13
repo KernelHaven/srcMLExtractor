@@ -37,17 +37,19 @@ public class PreprocessorConditionComputationRule implements ITransformationRule
      */
     private @NonNull Parser<@NonNull Formula> parser = new Parser<>(new SrcMlConditionGrammar(new VariableCache()));
     
-    private Formula unsupportedFormula;
+    private Formula unsupportedExpressionFormula;
+    private Formula unsupportedMacroFormula;
     private Pattern nummericOperators;
     
     PreprocessorConditionComputationRule() {
         try {
-            unsupportedFormula = parser.parse("defined(UNSUPPORTED_NUMMERIC_EXPRESSION_NOT_HANDLED_BY_KERNELHAVEN)");
+            unsupportedExpressionFormula = parser.parse("defined(UNSUPPORTED_NUMMERIC_EXPRESSION_NOT_HANDLED_BY_KERNELHAVEN)");
+            unsupportedMacroFormula = parser.parse("defined(UNSUPPORTED_MACRO_EXPRESSION_NOT_HANDLED_BY_KERNELHAVEN)");
         } catch (ExpressionFormatException e) {
             Logger.get().logException("Could not parse fallback condition.", e);
         }
         
-        nummericOperators = Pattern.compile("(>|>=|<|<=|\\|\\||&&)");
+        nummericOperators = Pattern.compile("(>|>=|<|<=|\\|\\||&&|==)");
     }
 
     @Override
@@ -108,8 +110,10 @@ public class PreprocessorConditionComputationRule implements ITransformationRule
         } catch (ExpressionFormatException exc) {
             // Try fall back
             Matcher matcher = nummericOperators.matcher(condition);
-            if (matcher.find() && null != unsupportedFormula) {
-                block.setEffectiveCondition(unsupportedFormula);
+            if (matcher.find() && null != unsupportedExpressionFormula) {
+                block.setEffectiveCondition(unsupportedExpressionFormula);
+            } else if ("0(0)".equals(condition) && null != unsupportedMacroFormula) {
+                block.setEffectiveCondition(unsupportedMacroFormula);
             } else {
                 throw ExceptionUtil.makeException("Could not parse effective expression: " + condition, exc, block);
             }
