@@ -49,7 +49,7 @@ public class PreprocessorConditionComputationRule implements ITransformationRule
             Logger.get().logException("Could not parse fallback condition.", e);
         }
         
-        nummericOperators = Pattern.compile("(>|>=|<|<=|\\|\\||&&|==)");
+        nummericOperators = Pattern.compile("(>|>=|<|<=|\\|\\||&&|==|&|\\|)");
     }
 
     @Override
@@ -112,7 +112,7 @@ public class PreprocessorConditionComputationRule implements ITransformationRule
             Matcher matcher = nummericOperators.matcher(condition);
             if (matcher.find() && null != unsupportedExpressionFormula) {
                 block.setEffectiveCondition(unsupportedExpressionFormula);
-            } else if ("0(0)".equals(condition) && null != unsupportedMacroFormula) {
+            } else if (condition.contains("0(0)") && null != unsupportedMacroFormula) {
                 block.setEffectiveCondition(unsupportedMacroFormula);
             } else {
                 throw ExceptionUtil.makeException("Could not parse effective expression: " + condition, exc, block);
