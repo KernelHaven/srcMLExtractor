@@ -36,10 +36,10 @@ public class Preprocessing {
         // set their condition as the CodeUnit texts separated by ' ', e.g. "defined ( A ) & & defined ( B )"
         new PreprocessorTranslation().transform(baseUnit);
         
-        // Add nested elements between PreprocessorBlocks as their childreen; remove PreprocessorEndifs
+        // Add nested elements between PreprocessorBlocks as their children; remove PreprocessorEndifs
         new PreprocessorBlockStructure().transform(baseUnit);
         
-        // Remove childreen for every PreprocessorBlocks that have condition "0"
+        // Remove children for every PreprocessorBlocks that have condition "0"
         new IfZeroWorkaround().transform(baseUnit);
         
         // Replace all variables in PreprocessorBlock conditions that have no surrounding "defined()" with "0"

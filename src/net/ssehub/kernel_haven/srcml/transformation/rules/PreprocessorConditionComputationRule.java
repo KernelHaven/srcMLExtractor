@@ -4,6 +4,8 @@ import static net.ssehub.kernel_haven.util.null_checks.NullHelpers.notNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.ssehub.kernel_haven.srcml.transformation.ExceptionUtil;
 import net.ssehub.kernel_haven.srcml.transformation.ITranslationUnit;
@@ -13,6 +15,7 @@ import net.ssehub.kernel_haven.srcml.transformation.PreprocessorElse;
 import net.ssehub.kernel_haven.srcml.transformation.PreprocessorIf;
 import net.ssehub.kernel_haven.srcml.xml.SrcMlConditionGrammar;
 import net.ssehub.kernel_haven.util.FormatException;
+import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.logic.Formula;
 import net.ssehub.kernel_haven.util.logic.parser.ExpressionFormatException;
 import net.ssehub.kernel_haven.util.logic.parser.Parser;
@@ -33,6 +36,19 @@ public class PreprocessorConditionComputationRule implements ITransformationRule
      * class won't become static.
      */
     private @NonNull Parser<@NonNull Formula> parser = new Parser<>(new SrcMlConditionGrammar(new VariableCache()));
+    
+    private Formula unsupportedFormula;
+    private Pattern nummericOperators;
+    
+    PreprocessorConditionComputationRule() {
+        try {
+            unsupportedFormula = parser.parse("defined(UNSUPPORTED_NUMMERIC_EXPRESSION_NOT_HANDLED_BY_KERNELHAVEN)");
+        } catch (ExpressionFormatException e) {
+            Logger.get().logException("Could not parse fallback condition.", e);
+        }
+        
+        nummericOperators = Pattern.compile("(>|>=|<|<=|\\|\\||&&)");
+    }
 
     @Override
     public void transform(@NonNull ITranslationUnit node) throws FormatException {
@@ -90,7 +106,13 @@ public class PreprocessorConditionComputationRule implements ITransformationRule
             Formula parsedCondition = parser.parse(condition);
             block.setEffectiveCondition(parsedCondition);
         } catch (ExpressionFormatException exc) {
-            throw ExceptionUtil.makeException("Could not parse effective expression: " + condition, exc, block);
+            // Try fall back
+            Matcher matcher = nummericOperators.matcher(condition);
+            if (matcher.find() && null != unsupportedFormula) {
+                block.setEffectiveCondition(unsupportedFormula);
+            } else {
+                throw ExceptionUtil.makeException("Could not parse effective expression: " + condition, exc, block);
+            }
         }
     }
 }
