@@ -31,6 +31,8 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
  */
 public class PreprocessorConditionComputationRule implements ITransformationRule {
     
+    private static final Logger LOGGER = Logger.get();
+    
     /**
      * This parser (and its cache) are used for the whole file and are reseted by parsing a new file as long this
      * class won't become static.
@@ -47,7 +49,7 @@ public class PreprocessorConditionComputationRule implements ITransformationRule
                 = parser.parse("defined(UNSUPPORTED_NUMERIC_EXPRESSION_NOT_HANDLED_BY_KERNELHAVEN)");
             unsupportedMacroFormula = parser.parse("defined(UNSUPPORTED_MACRO_EXPRESSION_NOT_HANDLED_BY_KERNELHAVEN)");
         } catch (ExpressionFormatException e) {
-            Logger.get().logException("Could not parse fallback condition.", e);
+            LOGGER.logException("Could not parse fallback condition.", e);
         }
         
         /*
