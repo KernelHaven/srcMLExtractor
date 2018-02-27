@@ -119,13 +119,14 @@ public class TranslationUnitToAstConverter {
         switch (unit.getType()) {
         
         case "function_decl":   // falls through
+        case "struct_decl":     // falls through
         case "decl_stmt":       // falls through
         case "expr_stmt":       // falls through
         case "continue":        // falls through
         case "break":           // falls through
         case "goto":            // falls through 
         case "return":          // falls through 
-        case "macro":          // falls through 
+        case "macro":           // falls through 
         case "empty_stmt": 
             SingleStatement singleStatement = new SingleStatement(pc, makeCode(unit, 0, unit.size() - 1));
             singleStatement.setSourceFile(sourceFile);
