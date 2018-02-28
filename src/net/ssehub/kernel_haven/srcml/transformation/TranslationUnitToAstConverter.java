@@ -170,7 +170,7 @@ public class TranslationUnitToAstConverter {
             // Determine last code element
             int lastCodeElement = -1;
             while (unit.size() - 1 > (lastCodeElement + 1) &&
-                !(unit.getNestedElement((lastCodeElement + 1)) instanceof TranslationUnit)) {
+                    isCode(unit.getNestedElement((lastCodeElement + 1)))) {
                 
                 lastCodeElement++;
             }
@@ -206,7 +206,7 @@ public class TranslationUnitToAstConverter {
             // Determine last code element
             int lastCodeElement = -1;
             while (unit.size() - 1 > (lastCodeElement + 2) &&
-                !(unit.getNestedElement((lastCodeElement + 1)) instanceof TranslationUnit)) {
+                    isCode(unit.getNestedElement((lastCodeElement + 1)))) {
                 
                 lastCodeElement++;
             }
@@ -328,10 +328,12 @@ public class TranslationUnitToAstConverter {
             // Search the colon
             while (unit.size() > lastElementIndex && !colonFound) {
                 ITranslationUnit nested = unit.getNestedElement(lastElementIndex);
-                if (nested instanceof CodeUnit && !":".equals(((CodeUnit)nested).getCode())) {
-                    lastElementIndex++;
-                } else {
-                    colonFound = true;                    
+                if (isCode(nested)) {
+                    if (nested instanceof CodeUnit && ":".equals(((CodeUnit)nested).getCode())) {
+                        colonFound = true;
+                    } else {
+                        lastElementIndex++;
+                    }
                 }
             }
             return convertCaseStatement(unit, lastElementIndex, CaseType.CASE);
@@ -420,7 +422,8 @@ public class TranslationUnitToAstConverter {
          */
         int blockIndex = -1;
         for (int i = unit.size() - 1; i >= 0; i--) {
-            if (!(unit.getNestedElement(i) instanceof CodeUnit)) {
+            ITranslationUnit child = unit.getNestedElement(i);
+            if (!isCode(child)) {
                 blockIndex = i;
                 break;
             }
@@ -658,6 +661,10 @@ public class TranslationUnitToAstConverter {
         }
         
         return result;
+    }
+    
+    private boolean isCode(ITranslationUnit unit) {
+        return !(unit instanceof TranslationUnit) || unit.getType().equals("comment") || unit.getType().equals("macro");
     }
     
 }
