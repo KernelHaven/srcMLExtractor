@@ -127,37 +127,43 @@ public class TranslationUnitToAstConverter {
         case "goto":            // falls through 
         case "return":          // falls through 
         case "macro":           // falls through 
-        case "empty_stmt": 
+        case "empty_stmt": {
             SingleStatement singleStatement = new SingleStatement(pc, makeCode(unit, 0, unit.size() - 1));
             singleStatement.setSourceFile(sourceFile);
             singleStatement.setCondition(getEffectiveCondition());
             singleStatement.setLineStart(unit.getStartLine());
             singleStatement.setLineEnd(unit.getEndLine());
             return singleStatement;
+        }
         
-        case "label":
+        case "label": {
             Label label = new Label(pc, makeCode(unit, 0, unit.size() - 1));
             label.setSourceFile(sourceFile);
             label.setCondition(getEffectiveCondition());
             return label;
+        }
         
-        case "comment":
+        case "comment": {
             Comment comment = new Comment(pc, makeCode(unit, 0, unit.size() - 1));
             comment.setSourceFile(sourceFile);
             comment.setCondition(getEffectiveCondition());
             return comment;
+        }
         
-        case "for":
+        case "for": {
             // Last nested is the loop block, everything before is the condition
             return createLoop(unit, LoopType.FOR, unit.size() - 1, 0, unit.size() - 2);
+        }
             
-        case "while":
+        case "while": {
             // Last nested is the loop block, everything before is the condition
             return createLoop(unit, LoopType.WHILE, unit.size() - 1, 0, unit.size() - 2);
+        }
         
-        case "do":
+        case "do": {
             // 2nd is block everything after is condition, we skip last element (a semicolon)
             return createLoop(unit, LoopType.DO_WHILE, 1, 3, unit.size() - 2);
+        }
         
         case "if": {
             // Determine last code element
@@ -223,7 +229,7 @@ public class TranslationUnitToAstConverter {
             return elifBlock;
         }
         
-        case "else":
+        case "else": {
             BranchStatement elseBlock = new BranchStatement(pc, BranchStatement.Type.ELSE, null);
             elseBlock.setSourceFile(sourceFile);
             elseBlock.setCondition(getEffectiveCondition());
@@ -237,18 +243,23 @@ public class TranslationUnitToAstConverter {
             }
             
             return elseBlock;
+        }
         
-        case "enum":
+        case "enum": {
             return createTypeDef(unit, pc, TypeDefType.ENUM);
+        }
             
-        case "struct":
+        case "struct": {
             return createTypeDef(unit, pc, TypeDefType.STRUCT);
+        }
             
-        case "typedef":
+        case "typedef": {
             return createTypeDef(unit, pc, TypeDefType.TYPEDEF);
+        }
             
-        case "union":
+        case "union": {
             return createTypeDef(unit, pc, TypeDefType.UNION);
+        }
             
         case "unit": {
             File file = new File(pc);
@@ -291,7 +302,7 @@ public class TranslationUnitToAstConverter {
             return block;
         }
         
-        case "switch":
+        case "switch": {
             /*
              * Last element is switch-Block, before comes the condition
              */
@@ -302,8 +313,9 @@ public class TranslationUnitToAstConverter {
             switchStatement.addNestedElement(convert(unit.getNestedElement(unit.size() - 1)));
             switchs.pop();
             return switchStatement;
+        }
         
-        case "case":
+        case "case": {
             /*
              * 3-4 Elements belong to the condition, afterwards come nested statements
              */
@@ -320,37 +332,47 @@ public class TranslationUnitToAstConverter {
                 }
             }
             return convertCaseStatement(unit, lastElementIndex, CaseType.CASE);
+        }
         
-        case "default":
+        case "default": {
             /*
              * First Element is the condition, afterwards come nested statements
              */
             return convertCaseStatement(unit, 0, CaseType.DEFAULT);
+        }
             
             
-        case "cpp:define":
+        case "cpp:define": {
             return convertCppStatement(unit, CppStatement.Type.DEFINE);
+        }
 
-        case "cpp:undef":
+        case "cpp:undef": {
             return convertCppStatement(unit, CppStatement.Type.UNDEF);
+        }
             
-        case "cpp:include":
+        case "cpp:include": {
             return convertCppStatement(unit, CppStatement.Type.INCLUDE);
+        }
             
-        case "cpp:pragma":
+        case "cpp:pragma": {
             return convertCppStatement(unit, CppStatement.Type.PRAGMA);
+        }
             
-        case "cpp:error":
+        case "cpp:error": {
             return convertCppStatement(unit, CppStatement.Type.ERROR);
+        }
             
-        case "cpp:warning":
+        case "cpp:warning": {
             return convertCppStatement(unit, CppStatement.Type.WARNING);
+        }
             
-        case "cpp:line":
+        case "cpp:line": {
             return convertCppStatement(unit, CppStatement.Type.LINE);
+        }
             
-        case "cpp:empty":
+        case "cpp:empty": {
             return convertCppStatement(unit, CppStatement.Type.EMPTY);
+        }
         }
 
         throw ExceptionUtil.makeException("Unexpected unit type: " + unit.getType(), unit);
@@ -506,6 +528,7 @@ public class TranslationUnitToAstConverter {
                     code.append(' ');
                 }
                 code.append(((CodeUnit) child).getCode());
+                
             } else if ("comment".equals(child.getType())) {
                 Comment comment = (Comment) convert(child);
                 result.add(comment);
@@ -537,10 +560,11 @@ public class TranslationUnitToAstConverter {
                 
                 result.add(cppif);
                 popFormula();
+                
             } else {
                 throw ExceptionUtil.makeException("makeCode() Expected "
                         + CodeUnit.class.getSimpleName() + " or " + PreprocessorBlock.class.getSimpleName()
-                        + ", got " + unit.getClass().getSimpleName(), unit);
+                        + ", got " + child.getClass().getSimpleName() + " (type = " + child.getType() + ")", unit);
             }
         }
         
