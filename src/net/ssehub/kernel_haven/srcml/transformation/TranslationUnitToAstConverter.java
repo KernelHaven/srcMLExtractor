@@ -565,7 +565,9 @@ public class TranslationUnitToAstConverter {
                 result.add(cppif);
                 popFormula();
                 
-            } else if (allowTranslationUnits) { // this means we should recursively walk through non-allowed elements
+            } else if (allowTranslationUnits // this means we should recursively walk through non-allowed elements
+                    || child.getType().equals("macro" ) // sometimes srcML randomyl interprets function calls as macros...
+                    ) { 
                 // TODO: log a warning here?
                 
                 // save everything up to this point
