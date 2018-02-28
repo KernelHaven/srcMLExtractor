@@ -274,7 +274,9 @@ public class TranslationUnitToAstConverter {
         
         case "function": {
             Function f = new Function(pc, notNull(unit.getFunctionName()), // notNull, since this is a function
-                    makeCode(unit, 0, unit.size() - 2)); // last nested is the function block
+                    // last element is the block
+                    // ignore TranslationUnits, since parameters may be FUNCTION_DECL
+                    makeCodeIgnoringTranslationUnits(unit, 0, unit.size() - 2));
             f.setSourceFile(sourceFile);
             f.setCondition(getEffectiveCondition());
             
@@ -513,6 +515,54 @@ public class TranslationUnitToAstConverter {
                 addIfSibling(element.getNestedElement(i), ifStatement);
             }
         }
+    }
+    
+    private @NonNull ICode makeCodeIgnoringTranslationUnits(@NonNull ITranslationUnit unit, int start, int end)
+            throws FormatException {
+        ICode result = null;
+        
+        int tmpEnd = start;
+        while (tmpEnd <= end) {
+            
+            for (; tmpEnd <= end; tmpEnd++) {
+                ITranslationUnit child = unit.getNestedElement(tmpEnd); 
+                if (child instanceof TranslationUnit && !child.getType().equals("comment")) {
+                    break;
+                }
+            }
+            
+            if (start <= tmpEnd) {
+                // we found a bunch of ICodes in interval [start, end); parse them
+                ICode part = makeCode(unit, start, tmpEnd - 1);
+                if (result == null) {
+                    result = part;
+                } else {
+                    result = joinCodes(result, part);
+                }
+            }
+            
+            if (tmpEnd <= end) {
+                // tmpEnd is an element that we don't want; parse it recursively
+                ITranslationUnit child = unit.getNestedElement(tmpEnd);
+                ICode nested = makeCodeIgnoringTranslationUnits(child, 0, child.size() - 1);
+                
+                if (result == null) {
+                    result = nested;
+                } else {
+                    result = joinCodes(result, nested);
+                }
+                
+                tmpEnd++;
+            }
+            
+            start = tmpEnd;
+        }
+        
+        if (result == null) {
+            throw ExceptionUtil.makeException("makeCodeIgnoringTranslationUnits() Found no elements to make code", unit);
+        }
+        
+        return result;
     }
     
     private @NonNull ICode makeCode(@NonNull ITranslationUnit unit, int start, int end) throws FormatException {
