@@ -1,11 +1,4 @@
-#ifdef LONG
-	long
-#else
-	int
-#endif
-
-
-calc(
+long calc(
 #ifdef LONG
 	long
 #else

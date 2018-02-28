@@ -128,7 +128,8 @@ public class TranslationUnitToAstConverter {
         case "return":          // falls through 
         case "macro":           // falls through 
         case "empty_stmt": {
-            SingleStatement singleStatement = new SingleStatement(pc, makeCode(unit, 0, unit.size() - 1));
+            // allow translationUnits in makeCode, since e.g. decl_stmts may contain blocks
+            SingleStatement singleStatement = new SingleStatement(pc, makeCode(unit, 0, unit.size() - 1, true));
             singleStatement.setSourceFile(sourceFile);
             singleStatement.setCondition(getEffectiveCondition());
             singleStatement.setLineStart(unit.getStartLine());
@@ -137,14 +138,14 @@ public class TranslationUnitToAstConverter {
         }
         
         case "label": {
-            Label label = new Label(pc, makeCode(unit, 0, unit.size() - 1));
+            Label label = new Label(pc, makeCode(unit, 0, unit.size() - 1, false));
             label.setSourceFile(sourceFile);
             label.setCondition(getEffectiveCondition());
             return label;
         }
         
         case "comment": {
-            Comment comment = new Comment(pc, makeCode(unit, 0, unit.size() - 1));
+            Comment comment = new Comment(pc, makeCode(unit, 0, unit.size() - 1, false));
             comment.setSourceFile(sourceFile);
             comment.setCondition(getEffectiveCondition());
             return comment;
@@ -178,7 +179,7 @@ public class TranslationUnitToAstConverter {
             }
             
             BranchStatement ifStatement = new BranchStatement(pc, BranchStatement.Type.IF,
-                    makeCode(unit, 0, lastCodeElement));
+                    makeCode(unit, 0, lastCodeElement, false));
             ifStatement.setSourceFile(sourceFile);
             ifStatement.setCondition(getEffectiveCondition());
             ifStatement.addSibling(ifStatement);
@@ -214,7 +215,7 @@ public class TranslationUnitToAstConverter {
                 throw ExceptionUtil.makeException("Unexpected structure of elseif-statement: " + unit.toString(), unit);
             }
             
-            ICode condition = makeCode(unit, 0, lastCodeElement);
+            ICode condition = makeCode(unit, 0, lastCodeElement, false);
             BranchStatement elifBlock = new BranchStatement(pc, BranchStatement.Type.ELSE_IF, condition);
             elifBlock.setSourceFile(sourceFile);
             elifBlock.setCondition(getEffectiveCondition());
@@ -276,7 +277,7 @@ public class TranslationUnitToAstConverter {
             Function f = new Function(pc, notNull(unit.getFunctionName()), // notNull, since this is a function
                     // last element is the block
                     // ignore TranslationUnits, since parameters may be FUNCTION_DECL
-                    makeCodeIgnoringTranslationUnits(unit, 0, unit.size() - 2));
+                    makeCode(unit, 0, unit.size() - 2, true));
             f.setSourceFile(sourceFile);
             f.setCondition(getEffectiveCondition());
             
@@ -308,7 +309,7 @@ public class TranslationUnitToAstConverter {
             /*
              * Last element is switch-Block, before comes the condition
              */
-            SwitchStatement switchStatement = new SwitchStatement(getPc(), makeCode(unit, 0, unit.size() - 2));
+            SwitchStatement switchStatement = new SwitchStatement(getPc(), makeCode(unit, 0, unit.size() - 2, false));
             switchStatement.setSourceFile(sourceFile);
             switchStatement.setCondition(getEffectiveCondition());
             switchs.push(switchStatement);
@@ -385,7 +386,7 @@ public class TranslationUnitToAstConverter {
         ICode expression = null;
         // first two strings inside are # and the type, skip these
         if (unit.size() > 2) {
-            expression = makeCode(unit, 2, unit.size() - 1);
+            expression = makeCode(unit, 2, unit.size() - 1, false);
         }
         
         CppStatement statement = new CppStatement(getPc(), type, expression);
@@ -401,7 +402,7 @@ public class TranslationUnitToAstConverter {
             throw ExceptionUtil.makeException("Found " + type + " outside of switch ", unit);
         }
         SwitchStatement switchStmt = notNull(switchs.peek());
-        CaseStatement caseStatement = new CaseStatement(getPc(), makeCode(unit, 0, condEndIndex), type, switchStmt);
+        CaseStatement caseStatement = new CaseStatement(getPc(), makeCode(unit, 0, condEndIndex, false), type, switchStmt);
         caseStatement.setSourceFile(sourceFile);
         caseStatement.setCondition(getEffectiveCondition());
         switchStmt.addCase(caseStatement);
@@ -433,12 +434,12 @@ public class TranslationUnitToAstConverter {
             endIndex = blockIndex - 1;
         }
         
-        ICode code = makeCode(unit, 0, endIndex);
+        ICode code = makeCode(unit, 0, endIndex, false);
         
         // if there is something to the right of the <block> append it to the code
         // endIndex + 1 is the <block>, endIndex + 2 may be further code to parse
         if (endIndex + 2 < unit.size()) {
-            code = joinCodes(code, makeCode(unit, endIndex + 2, unit.size() - 1));
+            code = joinCodes(code, makeCode(unit, endIndex + 2, unit.size() - 1, false));
             
             // TODO: now we don't know where in the code the <block> would be located at...
         }
@@ -450,7 +451,7 @@ public class TranslationUnitToAstConverter {
             
             if (type == TypeDefType.ENUM) {
                 // don't parse the <block> of enums as a statement
-                ICode blockCode = makeCode(block, 0, block.size() - 1);
+                ICode blockCode = makeCode(block, 0, block.size() - 1, false);
                 
                 // join blockCode with previous declaration
                 code = joinCodes(code, blockCode);
@@ -474,7 +475,7 @@ public class TranslationUnitToAstConverter {
     private @NonNull LoopStatement createLoop(@NonNull TranslationUnit unit, @NonNull LoopType type, int blockIndex,
             int condStartIndex, int condEndIndex) throws FormatException {
         
-        ICode condition = makeCode(unit, condStartIndex, condEndIndex);
+        ICode condition = makeCode(unit, condStartIndex, condEndIndex, false);
         LoopStatement loop = new LoopStatement(getPc(),  condition, type);
         loop.setSourceFile(sourceFile);
         loop.setCondition(getEffectiveCondition());
@@ -517,55 +518,8 @@ public class TranslationUnitToAstConverter {
         }
     }
     
-    private @NonNull ICode makeCodeIgnoringTranslationUnits(@NonNull ITranslationUnit unit, int start, int end)
-            throws FormatException {
-        ICode result = null;
-        
-        int tmpEnd = start;
-        while (tmpEnd <= end) {
-            
-            for (; tmpEnd <= end; tmpEnd++) {
-                ITranslationUnit child = unit.getNestedElement(tmpEnd); 
-                if (child instanceof TranslationUnit && !child.getType().equals("comment")) {
-                    break;
-                }
-            }
-            
-            if (start <= tmpEnd) {
-                // we found a bunch of ICodes in interval [start, end); parse them
-                ICode part = makeCode(unit, start, tmpEnd - 1);
-                if (result == null) {
-                    result = part;
-                } else {
-                    result = joinCodes(result, part);
-                }
-            }
-            
-            if (tmpEnd <= end) {
-                // tmpEnd is an element that we don't want; parse it recursively
-                ITranslationUnit child = unit.getNestedElement(tmpEnd);
-                ICode nested = makeCodeIgnoringTranslationUnits(child, 0, child.size() - 1);
-                
-                if (result == null) {
-                    result = nested;
-                } else {
-                    result = joinCodes(result, nested);
-                }
-                
-                tmpEnd++;
-            }
-            
-            start = tmpEnd;
-        }
-        
-        if (result == null) {
-            throw ExceptionUtil.makeException("makeCodeIgnoringTranslationUnits() Found no elements to make code", unit);
-        }
-        
-        return result;
-    }
-    
-    private @NonNull ICode makeCode(@NonNull ITranslationUnit unit, int start, int end) throws FormatException {
+    private @NonNull ICode makeCode(@NonNull ITranslationUnit unit, int start, int end,
+            boolean allowTranslationUnits) throws FormatException {
         
         StringBuilder code = new StringBuilder();
         List<@NonNull ICode> result = new LinkedList<>();
@@ -599,7 +553,7 @@ public class TranslationUnitToAstConverter {
                 CppBlock cppif = new CppBlock(getPc(), condition, type);
                 cppif.setSourceFile(sourceFile);
                 cppif.setCondition(getEffectiveCondition());
-                ICode nested = makeCode(child, 0, child.size() - 1);
+                ICode nested = makeCode(child, 0, child.size() - 1, allowTranslationUnits);
                 if (nested instanceof CodeList) {
                     for (int j = 0; j < nested.getNestedElementCount(); j++) {
                         cppif.addNestedElement(nested.getNestedElement(j));
@@ -610,6 +564,21 @@ public class TranslationUnitToAstConverter {
                 
                 result.add(cppif);
                 popFormula();
+                
+            } else if (allowTranslationUnits) { // this means we should recursively walk through non-allowed elements
+                // TODO: log a warning here?
+                
+                // save everything up to this point
+                if (code.length() > 0) {
+                    Code codeElement = new Code(getPc(), notNull(code.toString()));
+                    codeElement.setSourceFile(sourceFile);
+                    codeElement.setCondition(getEffectiveCondition());
+                    result.add(codeElement);
+                    code = new StringBuilder();
+                }
+                
+                // recursively transform everything into code
+                result.add(makeCode(child, 0, child.size() - 1, allowTranslationUnits));
                 
             } else {
                 throw ExceptionUtil.makeException("makeCode() Expected "
@@ -632,13 +601,13 @@ public class TranslationUnitToAstConverter {
             return notNull(result.get(0));
             
         } else {
-            CodeList list = new CodeList(getPc());
-            list.setSourceFile(sourceFile);
-            list.setCondition(getEffectiveCondition());
-            for (ICode r : result) {
-                list.addNestedElement(r);
+            ICode combined = notNull(result.get(0));
+            
+            for (int i = 1; i < result.size(); i++) {
+                combined = joinCodes(combined, result.get(i));
             }
-            return list;
+            
+            return combined;
         }
         
     }
