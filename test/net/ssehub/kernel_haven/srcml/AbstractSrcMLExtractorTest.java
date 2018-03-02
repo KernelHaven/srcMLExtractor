@@ -22,7 +22,6 @@ import net.ssehub.kernel_haven.code_model.ast.CppBlock.Type;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
 import net.ssehub.kernel_haven.test_utils.TestConfiguration;
 import net.ssehub.kernel_haven.util.ExtractorException;
-import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.Util;
 import net.ssehub.kernel_haven.util.logic.Formula;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
@@ -35,16 +34,6 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
 public class AbstractSrcMLExtractorTest {
     
     private static final @NonNull File RESOURCE_DIR = new File(AllTests.TESTDATA, "tmpRes");
-    
-    /**
-     * Initializes the logger.
-     */
-    @BeforeClass
-    public static void beforeClass() {
-        if (null == Logger.get()) {
-            Logger.init();
-        }
-    }
     
     @BeforeClass
     public static void setup() {
