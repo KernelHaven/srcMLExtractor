@@ -20,7 +20,7 @@ import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
- * Translates the XML output of <a href="http://www.srcml.org">srcML</a> into {@link ISyntaxElement}. This is done
+ * Translates the XML output of <a href="https://www.srcml.org">srcML</a> into {@link ISyntaxElement}. This is done
  * in 3 steps:
  * <ol>
  *     <li>The XML output is parsed by this class to create {@link ITranslationUnit}s.</li>
@@ -38,7 +38,7 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
     
     /**
      * White list of supported XML tags, which will be processed by this converter. These are the top level elements of
-     * the <a href="http://www.srcml.org/doc/c_srcML.html">srcML C and CPP grammar</a>.
+     * the <a href="https://www.srcml.org/doc/c_srcML.html">srcML C and CPP grammar</a>.
      */
     private static final Set<String> SUPPORTED_ELEMENTS;
     

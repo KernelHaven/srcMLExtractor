@@ -6,7 +6,7 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
  * Represent unparsed code fragments, e.g., a function signature or a (partial) expression of a statement.
- * These are the texts between the XML tags in <a href="http://www.srcml.org/doc/c_srcML.html">srcML</a> and will be
+ * These are the texts between the XML tags in <a href="https://www.srcml.org/doc/c_srcML.html">srcML</a> and will be
  * gathered through by SAX's {@link org.xml.sax.ContentHandler#characters(char[], int, int)}.  
  * @author El-Sharkawy
  *

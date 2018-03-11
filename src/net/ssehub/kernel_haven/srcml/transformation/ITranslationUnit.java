@@ -3,7 +3,7 @@ package net.ssehub.kernel_haven.srcml.transformation;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
- * A data structure for parsing the output of <a href="http://www.srcml.org/">srcML</a>, which is used to generate the
+ * A data structure for parsing the output of <a href="https://www.srcml.org/">srcML</a>, which is used to generate the
  * AST. A translation unit may be a single token or already a complex structure, which can be directly mapped to an
  * AST element.
  * @author El-Sharkawy
@@ -13,7 +13,7 @@ public interface ITranslationUnit  {
     
     /**
      * Returns the type (syntax element) of the ITranslation unit, may a
-     * <a href="http://www.srcml.org/doc/c_srcML.html">srcML-Tag</a> if this was not further processed.
+     * <a href="https://www.srcml.org/doc/c_srcML.html">srcML-Tag</a> if this was not further processed.
      * @return A type denoting which kind of AST element is represented by the {@link ITranslationUnit}.
      */
     public @NonNull String getType();

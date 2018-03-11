@@ -39,7 +39,7 @@ public abstract class AbstractAstConverter extends DefaultHandler {
      * Returns the currently parsed line number of the XML document.
      * @return The current line number within the document.
      * @see <a 
-     * href="http://www.java2s.com/Tutorials/Java/XML/SAX/Output_line_number_for_SAX_parser_event_handler_in_Java.htm">
+     * href="https://www.java2s.com/Tutorials/Java/XML/SAX/Output_line_number_for_SAX_parser_event_handler_in_Java.htm">
      * Tutorial: Output line number for SAX parser event handler in Java</a>
      */
     protected int getLineNumber() {

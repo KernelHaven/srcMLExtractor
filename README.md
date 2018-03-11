@@ -1,10 +1,10 @@
 # srcMLExtractor
 
-![Build Status](http://jenkins.sse.uni-hildesheim.de/buildStatus/icon?job=KernelHaven_SrcMlExtractor)
+![Build Status](https://jenkins.sse.uni-hildesheim.de/buildStatus/icon?job=KernelHaven_SrcMlExtractor)
 
 A code-model extractor for [KernelHaven](https://github.com/KernelHaven/KernelHaven).
 
-This extractor uses [srcML](http://srcml.org/) to analyze C source code.
+This extractor uses [srcML](https://www.srcml.org/) to analyze C source code.
 
 ## Capabilities
 
@@ -26,6 +26,7 @@ In addition to KernelHaven, this plugin has the following dependencies:
 
 ## License
 
-This plugin is licensed under GPLv3. Another license would be possible with following restrictions:
+This plugin is licensed under [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html).
 
-The plugin contains [srcML](http://srcml.org/) which is under GPL-3.0. We do not link against [srcML](http://srcml.org/), so technically we are not infected by GPL. However a release under a license other than GPL-3.0 would require the removal of the contained [srcML](http://srcml.org/).
+Another license would be possible with the following restriction:
+* The plugin contains [srcML](https://www.srcml.org/) which is under GPLv3. We do not link against srcML, so technically we are not infected by GPL. However a release under a license other than GPLv3 would require the removal of the contained srcML.

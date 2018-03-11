@@ -17,8 +17,8 @@ import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
- * Converts the XML output of <a href="http://www.srcml.org/">srcML</a> into an AST.
- * See <a href="http://www.srcml.org/documentation.html">srcML - Documentation</a> for the documentation of the XML
+ * Converts the XML output of <a href="https://www.srcml.org/">srcML</a> into an AST.
+ * See <a href="https://www.srcml.org/documentation.html">srcML - Documentation</a> for the documentation of the XML
  * structure of srcML.
  * @author El-Sharkawy
  *

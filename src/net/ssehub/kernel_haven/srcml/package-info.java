@@ -1,5 +1,5 @@
 /**
- * Root package of the <a href="http://www.srcml.org/">srcML</a> bases code extractor.
+ * Root package of the <a href="https://www.srcml.org/">srcML</a> bases code extractor.
  * @author El-Sharkawy
  *
  */

@@ -30,7 +30,7 @@ public class TranslationUnit implements ITranslationUnit {
     /**
      * Sole constructor for this type.
      * @param type Denotes what kind of element is represented by this {@link TranslationUnit}, should be one of the
-     *     top elements from the <a href="http://www.srcml.org/doc/c_srcML.html">srcML XML snytax</a>.
+     *     top elements from the <a href="https://www.srcml.org/doc/c_srcML.html">srcML XML snytax</a>.
      */
     public TranslationUnit(@NonNull String type) {
         this.type = type;
