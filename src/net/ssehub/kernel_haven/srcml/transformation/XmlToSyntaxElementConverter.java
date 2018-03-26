@@ -128,6 +128,14 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
             debugLoggingIndentation += '\t';
         }
         
+        // check the language attribute of <unit>
+        if (qName.equals("unit")) {
+            String language = attributes.getValue("language");
+            if (language == null || !language.equals("C")) {
+                throw new SAXException("Invalid language: \"" + language + "\"; expected: \"C\"");
+            }
+        }
+        
         if (SUPPORTED_ELEMENTS.contains(qName)) {
             TranslationUnit newElement = new TranslationUnit(notNull(qName));
             newElement.setStartLine(getLineNumber());

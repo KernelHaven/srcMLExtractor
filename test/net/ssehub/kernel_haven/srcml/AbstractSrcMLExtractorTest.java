@@ -33,7 +33,7 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
  */
 public class AbstractSrcMLExtractorTest {
     
-    private static final @NonNull File RESOURCE_DIR = new File(AllTests.TESTDATA, "tmpRes");
+    protected static final @NonNull File RESOURCE_DIR = new File(AllTests.TESTDATA, "tmpRes");
     
     @BeforeClass
     public static void setup() {
