@@ -35,6 +35,9 @@ public class Preprocessing {
         // Convert <cpp:{if, else, elif, else, endif}> to PreprocessorBlocks
         // set their condition as the CodeUnit texts separated by ' ', e.g. "defined ( A ) & & defined ( B )"
         new PreprocessorTranslation().transform(baseUnit);
+
+        // remove 'extern "C" { ... }'
+        new RemoveExternC().transform(baseUnit);
         
         // Add nested elements between PreprocessorBlocks as their children; remove PreprocessorEndifs
         new PreprocessorBlockStructure().transform(baseUnit);

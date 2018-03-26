@@ -68,4 +68,8 @@ public class PreprocessorEndIf implements ITranslationUnit {
     public int getEndLine() {
         return endLine;
     }
+
+    @Override
+    public void insertNested(int index, @NonNull ITranslationUnit newUnit) {
+    }
 }

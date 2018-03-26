@@ -49,6 +49,15 @@ public interface ITranslationUnit  {
     public void removeNested(int index);
     
     /**
+     * Inserts a nested element at the given index. All elements to the right, including the one that was previously
+     * at the specified index, are shifted to the right.
+     * 
+     * @param index The index to insert the new unit at.
+     * @param newUnit The new unit to insert.
+     */
+    public void insertNested(int index, @NonNull ITranslationUnit newUnit);
+    
+    /**
      * Returns the number of nested elements.
      *
      * @return the number of nested elements (&ge; 0)
