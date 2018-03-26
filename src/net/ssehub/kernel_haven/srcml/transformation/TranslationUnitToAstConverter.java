@@ -167,19 +167,12 @@ public class TranslationUnitToAstConverter {
         }
         
         case "if": {
-            // Determine last code element
-            int lastCodeElement = -1;
-            while (unit.size() - 1 > (lastCodeElement + 1) &&
-                    isCode(unit.getNestedElement((lastCodeElement + 1)))) {
-                
-                lastCodeElement++;
-            }
-            if (lastCodeElement < 0) {
-                throw ExceptionUtil.makeException("Unexpected structure of if-statement: " + unit.toString(), unit);
-            }
+            // last element is always the block
+            int lastCodeElement = unit.size() - 2;
             
             BranchStatement ifStatement = new BranchStatement(pc, BranchStatement.Type.IF,
-                    makeCode(unit, 0, lastCodeElement, false));
+                    // allow translation units, since there may be ELSE statements from ternary opeartors
+                    makeCode(unit, 0, lastCodeElement, true));
             ifStatement.setSourceFile(sourceFile);
             ifStatement.setCondition(getEffectiveCondition());
             ifStatement.addSibling(ifStatement);
@@ -203,19 +196,11 @@ public class TranslationUnitToAstConverter {
         }
             
         case "elseif": {
-            // Determine last code element
-            int lastCodeElement = -1;
-            while (unit.size() - 1 > (lastCodeElement + 2) &&
-                    isCode(unit.getNestedElement((lastCodeElement + 1)))) {
-                
-                lastCodeElement++;
-            }
-            
-            if (lastCodeElement < 0) {
-                throw ExceptionUtil.makeException("Unexpected structure of elseif-statement: " + unit.toString(), unit);
-            }
-            
-            ICode condition = makeCode(unit, 0, lastCodeElement, false);
+            // last element is always the block
+            int lastCodeElement = unit.size() - 2;
+
+            // allow translation units, since there may be ELSE statements from ternary opeartors
+            ICode condition = makeCode(unit, 0, lastCodeElement, true);
             BranchStatement elifBlock = new BranchStatement(pc, BranchStatement.Type.ELSE_IF, condition);
             elifBlock.setSourceFile(sourceFile);
             elifBlock.setCondition(getEffectiveCondition());

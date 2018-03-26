@@ -1,10 +1,7 @@
-#if __cplusplus
-extern "C" {
-#endif
-
 void func() {
-}
 
-#if __cplusplus
+    if(errno__ == INTERRUPTED ?
+       false : (errno__ == EAGAIN))
+        return UA_STATUSCODE_GOOD;
+
 }
-#endif
