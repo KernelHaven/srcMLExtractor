@@ -167,8 +167,12 @@ public class TranslationUnitToAstConverter {
         }
         
         case "if": {
-            // last element is always the block
-            int lastCodeElement = unit.size() - 2;
+            // the last elements are block(s), elseif(s) and else(s)
+            // find the first code element starting from the right (this is most likely the closing paranthesis).
+            int lastCodeElement = unit.size() - 1;
+            while (lastCodeElement > 0 && !isCode(unit.getNestedElement(lastCodeElement))) {
+                lastCodeElement--;
+            }
             
             BranchStatement ifStatement = new BranchStatement(pc, BranchStatement.Type.IF,
                     // allow translation units, since there may be ELSE statements from ternary opeartors
@@ -196,9 +200,13 @@ public class TranslationUnitToAstConverter {
         }
             
         case "elseif": {
-            // last element is always the block
-            int lastCodeElement = unit.size() - 2;
-
+            // the last elements are block(s), elseif(s) and else(s)
+            // find the first code element starting from the right (this is most likely the closing paranthesis).
+            int lastCodeElement = unit.size() - 1;
+            while (lastCodeElement > 0 && !isCode(unit.getNestedElement(lastCodeElement))) {
+                lastCodeElement--;
+            }
+            
             // allow translation units, since there may be ELSE statements from ternary opeartors
             ICode condition = makeCode(unit, 0, lastCodeElement, true);
             BranchStatement elifBlock = new BranchStatement(pc, BranchStatement.Type.ELSE_IF, condition);
