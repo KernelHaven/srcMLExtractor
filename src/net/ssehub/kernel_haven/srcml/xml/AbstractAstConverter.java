@@ -21,6 +21,7 @@ public abstract class AbstractAstConverter extends DefaultHandler {
     private @NonNull SourceFile file;
     
     private Locator locator;
+    
     /**
      * Sole constructor for sub classes.
      * @param path The relative path to the source file in the source tree. Must

@@ -14,6 +14,7 @@ import org.xml.sax.SAXException;
 
 import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
+import net.ssehub.kernel_haven.srcml.SrcMLExtractor;
 import net.ssehub.kernel_haven.srcml.transformation.rules.Preprocessing;
 import net.ssehub.kernel_haven.srcml.xml.AbstractAstConverter;
 import net.ssehub.kernel_haven.util.FormatException;
@@ -101,6 +102,10 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
     
     private @NonNull HeaderHandling headerHandling;
     
+    private @NonNull File absolutePath;
+    
+    private @NonNull SrcMLExtractor extractor;
+    
     private @NonNull Deque<@NonNull TranslationUnit> elements = new ArrayDeque<>();
     
     /**
@@ -117,11 +122,17 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
     
     /**
      * Sole constructor for this classes.
+     * 
+     * @param absolutePath The absolute path to the source file. Used for finding headers.
      * @param path The relative path to the source file in the source tree. Must not be <code>null</code>.
      */
-    public XmlToSyntaxElementConverter(@NonNull File path, @NonNull HeaderHandling headerHandling) {
+    public XmlToSyntaxElementConverter(@NonNull File absolutePath, @NonNull File path,
+            @NonNull HeaderHandling headerHandling, @NonNull SrcMLExtractor extractor) {
+        
         super(path);
+        this.absolutePath = absolutePath;
         this.headerHandling = headerHandling;
+        this.extractor = extractor;
     }
 
     @Override
@@ -223,7 +234,7 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         }
         
         TranslationUnitToAstConverter converter2 = new TranslationUnitToAstConverter(getFile().getPath());
-        CodeElement astResult = converter2.convert(unit);
+        ISyntaxElement astResult = converter2.convert(unit);
         if (DEBUG_LOGGING) {
             System.out.println("Translation Units -> AST");
             System.out.println("========================");
@@ -233,6 +244,10 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         switch (headerHandling) {
         case IGNORE:
             // do nothing
+            break;
+            
+        case INCLUDE:
+            new IncludeExpander(absolutePath, extractor).expand(astResult);
             break;
         
         default:

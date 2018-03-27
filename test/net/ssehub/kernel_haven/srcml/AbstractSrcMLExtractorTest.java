@@ -20,6 +20,7 @@ import net.ssehub.kernel_haven.code_model.ast.Code;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock.Type;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
+import net.ssehub.kernel_haven.srcml.transformation.HeaderHandling;
 import net.ssehub.kernel_haven.test_utils.TestConfiguration;
 import net.ssehub.kernel_haven.util.ExtractorException;
 import net.ssehub.kernel_haven.util.Util;
@@ -79,8 +80,18 @@ public class AbstractSrcMLExtractorTest {
      * @return The parsed code model, ready for testing the result.
      */
     protected SourceFile loadFile(String file) {
+        return loadFile(file, HeaderHandling.IGNORE);
+    }
+    
+    /**
+     * Helper method which runs the {@link SrcMLExtractor} on the specified source file.
+     *  
+     * @param file The source file to parse.
+     * @return The parsed code model, ready for testing the result.
+     */
+    protected SourceFile loadFile(String file, HeaderHandling headerHandling) {
         File srcFile = new File(AllTests.TESTDATA, file);
-        Assert.assertTrue("Specified test file does not exist: " + file, srcFile.isFile());
+        Assert.assertTrue("Specified test file does not exist: " + srcFile, srcFile.isFile());
         
         SourceFile result = null;
         try {
@@ -88,6 +99,7 @@ public class AbstractSrcMLExtractorTest {
             props.setProperty("resource_dir", RESOURCE_DIR.getAbsolutePath());
             props.setProperty("source_tree", "testdata/");
             props.setProperty("code.extractor.files", file);
+            props.setProperty("code.extractor.header_handling", headerHandling.name());
             
             TestConfiguration config = new TestConfiguration(props);
             

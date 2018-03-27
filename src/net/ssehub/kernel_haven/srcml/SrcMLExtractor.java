@@ -59,10 +59,11 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             + " If declarations for the functions that are implemented in the C file are found, then their conditions"
             + " are expanded by the condition of the declaration.\n\nCurrently only quote include directives"
             + " (#include \"file.h\") relative to the source file being parsed are supported.");
+    // TODO AK: update "currently only supports" when applicable
     
     private @NonNull HeaderHandling headerHandling = HeaderHandling.IGNORE; // will be overriden in init()
     
-    private File sourceTree;
+    private @NonNull File sourceTree = new File("will be initialized"); // will be overriden in init()
     
     private File srcExec;
 
@@ -75,7 +76,7 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
         Preparation preparator = new Preparation(config);
         srcExec = preparator.prepareExec();
     }
-
+    
     @Override
     protected @NonNull SourceFile runOnFile(@NonNull File target) throws ExtractorException {
         File absoulteTarget = new File(sourceTree, target.getPath());
@@ -83,6 +84,24 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             throw new ExtractorException("srcML could not parse specified file, which does not exist: "
                     + absoulteTarget.getAbsolutePath());
         }
+        
+        return parseFile(absoulteTarget, target);
+    }
+
+    /**
+     * Parses the given source file.
+     * 
+     * @param absoulteTarget The absolute path to the file to parse.
+     * @param relativeTarget The path to the file to parse, relative to the source tree. This is used in exceptions
+     *      and as the path in the result {@link SourceFile}.
+     *      
+     * @return The parsed {@link SourceFile}.
+     * 
+     * @throws CodeExtractorException If parsing the file fails.
+     */
+    public @NonNull SourceFile parseFile(@NonNull File absoulteTarget, @NonNull File relativeTarget)
+            throws CodeExtractorException {
+        
         
         ByteArrayOutputStream stderr = new ByteArrayOutputStream();
         
@@ -102,7 +121,8 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             builder.environment().put("LD_LIBRARY_PATH", libFolder);
             builder.environment().put("DYLD_LIBRARY_PATH", libFolder);
             
-            AbstractAstConverter xmlConverter = new XmlToSyntaxElementConverter(target, headerHandling);
+            AbstractAstConverter xmlConverter = new XmlToSyntaxElementConverter(absoulteTarget, relativeTarget,
+                    headerHandling, this);
             XmlToAstConverter converter = new XmlToAstConverter(stdout, xmlConverter);
 
             // CHECKSTYLE:OFF
@@ -136,7 +156,7 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             return resultFile;
             
         } catch (IOException | UncheckedIOException | ParserConfigurationException | SAXException | FormatException e) {
-            throw new CodeExtractorException(target, e);
+            throw new CodeExtractorException(relativeTarget, e);
             
         } finally {
             if (!stderr.toString().isEmpty()) {
