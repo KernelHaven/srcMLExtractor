@@ -70,4 +70,5 @@ public abstract class AbstractAstConverter extends DefaultHandler {
      * @return The AST node that is the result of the conversion.
      */
     protected abstract @NonNull CodeElement getAst() throws FormatException;
+    
 }

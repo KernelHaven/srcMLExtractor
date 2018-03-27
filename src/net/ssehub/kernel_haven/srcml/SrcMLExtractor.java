@@ -16,6 +16,9 @@ import net.ssehub.kernel_haven.code_model.AbstractCodeModelExtractor;
 import net.ssehub.kernel_haven.code_model.SourceFile;
 import net.ssehub.kernel_haven.config.Configuration;
 import net.ssehub.kernel_haven.config.DefaultSettings;
+import net.ssehub.kernel_haven.config.EnumSetting;
+import net.ssehub.kernel_haven.config.Setting;
+import net.ssehub.kernel_haven.srcml.transformation.HeaderHandling;
 import net.ssehub.kernel_haven.srcml.transformation.XmlToSyntaxElementConverter;
 import net.ssehub.kernel_haven.srcml.xml.AbstractAstConverter;
 import net.ssehub.kernel_haven.srcml.xml.XmlToAstConverter;
@@ -48,15 +51,29 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
     
     private static final Logger LOGGER = Logger.get();
     
+    private static final @NonNull Setting<@NonNull HeaderHandling> HEADER_HANDLING_SETTING = new EnumSetting<>(
+            "code.extractor.header_handling", HeaderHandling.class, true, HeaderHandling.IGNORE,
+            "How #include directives should be handled.\n\n- IGNORE: Does nothing; leaves the #include directives as"
+            + " preprocessor statements in the AST.\n- INCLUDE: Parses the headers and includes their AST instead of the"
+            + " #include directive.\n- EXPAND_FUNCTION_CONDITION: Searches for declarations of functions in the headers."
+            + " If declarations for the functions that are implemented in the C file are found, then their conditions"
+            + " are expanded by the condition of the declaration.\n\nCurrently only quote include directives"
+            + " (#include \"file.h\") relative to the source file being parsed are supported.");
+    
+    private @NonNull HeaderHandling headerHandling = HeaderHandling.IGNORE; // will be overriden in init()
+    
     private File sourceTree;
     
     private File srcExec;
 
     @Override
     protected void init(@NonNull Configuration config) throws SetUpException {
+        sourceTree = config.getValue(DefaultSettings.SOURCE_TREE);
+        config.registerSetting(HEADER_HANDLING_SETTING);
+        headerHandling = config.getValue(HEADER_HANDLING_SETTING);
+        
         Preparation preparator = new Preparation(config);
         srcExec = preparator.prepareExec();
-        sourceTree = config.getValue(DefaultSettings.SOURCE_TREE);
     }
 
     @Override
@@ -85,7 +102,7 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             builder.environment().put("LD_LIBRARY_PATH", libFolder);
             builder.environment().put("DYLD_LIBRARY_PATH", libFolder);
             
-            AbstractAstConverter xmlConverter = new XmlToSyntaxElementConverter(target);
+            AbstractAstConverter xmlConverter = new XmlToSyntaxElementConverter(target, headerHandling);
             XmlToAstConverter converter = new XmlToAstConverter(stdout, xmlConverter);
 
             // CHECKSTYLE:OFF

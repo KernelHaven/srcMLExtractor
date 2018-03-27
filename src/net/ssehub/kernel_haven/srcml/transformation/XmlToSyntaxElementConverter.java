@@ -99,6 +99,8 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         SUPPORTED_ELEMENTS = Collections.unmodifiableSet(tmpSet);
     }
     
+    private @NonNull HeaderHandling headerHandling;
+    
     private @NonNull Deque<@NonNull TranslationUnit> elements = new ArrayDeque<>();
     
     /**
@@ -117,8 +119,9 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
      * Sole constructor for this classes.
      * @param path The relative path to the source file in the source tree. Must not be <code>null</code>.
      */
-    public XmlToSyntaxElementConverter(@NonNull File path) {
+    public XmlToSyntaxElementConverter(@NonNull File path, @NonNull HeaderHandling headerHandling) {
         super(path);
+        this.headerHandling = headerHandling;
     }
 
     @Override
@@ -225,6 +228,15 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
             System.out.println("Translation Units -> AST");
             System.out.println("========================");
             System.out.println(astResult);
+        }
+        
+        switch (headerHandling) {
+        case IGNORE:
+            // do nothing
+            break;
+        
+        default:
+            throw new FormatException("Header handling " + headerHandling + " not implemented");
         }
         
         return astResult;
