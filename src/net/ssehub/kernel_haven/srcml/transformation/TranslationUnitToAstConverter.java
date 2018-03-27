@@ -256,7 +256,7 @@ public class TranslationUnitToAstConverter {
         }
             
         case "unit": {
-            File file = new File(pc);
+            File file = new File(pc, sourceFile);
             file.setSourceFile(sourceFile);
             file.setCondition(getEffectiveCondition());
             for (int i = 0; i < unit.size(); i++) {
