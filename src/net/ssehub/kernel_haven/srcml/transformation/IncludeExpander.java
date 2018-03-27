@@ -116,6 +116,7 @@ public class IncludeExpander implements ISyntaxElementVisitor {
                     LOGGER.logDebug("Parsing include: " + include, "-> " + file);
                     
                     try {
+                        // TODO AK: use some kind of cache to prevent endless recursion
                         SourceFile header = extractor.parseFile(file, file);
                         
                         LOGGER.logDebug("Replacing #include with parsed header " + file);
