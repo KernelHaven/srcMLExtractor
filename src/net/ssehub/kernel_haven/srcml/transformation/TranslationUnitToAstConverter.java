@@ -118,24 +118,23 @@ public class TranslationUnitToAstConverter {
         
         switch (unit.getType()) {
         
-        case "function_decl":   // falls through
-        case "struct_decl":     // falls through
-        case "decl_stmt":       // falls through
-        case "expr_stmt":       // falls through
-        case "continue":        // falls through
-        case "break":           // falls through
-        case "goto":            // falls through 
-        case "return":          // falls through 
-        case "macro":           // falls through 
-        case "empty_stmt": {
-            // allow translationUnits in makeCode, since e.g. decl_stmts may contain blocks
-            SingleStatement singleStatement = new SingleStatement(pc, makeCode(unit, 0, unit.size() - 1, true));
-            singleStatement.setSourceFile(sourceFile);
-            singleStatement.setCondition(getEffectiveCondition());
-            singleStatement.setLineStart(unit.getStartLine());
-            singleStatement.setLineEnd(unit.getEndLine());
-            return singleStatement;
-        }
+        case "function_decl":
+            return createSingleStatement(unit, SingleStatement.Type.FUNCTION_DECLARATION);
+            
+        case "struct_decl": // falls through
+        case "decl_stmt":
+            return createSingleStatement(unit, SingleStatement.Type.DECLARATION);
+            
+        case "expr_stmt": // falls through
+        case "continue":  // falls through
+        case "break":     // falls through
+        case "goto":      // falls through 
+        case "return":    // falls through
+        case "empty_stmt":
+            return createSingleStatement(unit, SingleStatement.Type.INSTRUCTION);
+            
+        case "macro":
+            return createSingleStatement(unit, SingleStatement.Type.PREPROCESSOR_MACRO);
         
         case "label": {
             Label label = new Label(pc, makeCode(unit, 0, unit.size() - 1, false));
@@ -374,6 +373,16 @@ public class TranslationUnitToAstConverter {
         }
 
         throw ExceptionUtil.makeException("Unexpected unit type: " + unit.getType(), unit);
+    }
+    
+    private @NonNull SingleStatement createSingleStatement(@NonNull TranslationUnit unit, SingleStatement.@NonNull Type type) throws FormatException {
+        // allow translationUnits in makeCode, since e.g. decl_stmts may contain blocks
+        SingleStatement singleStatement = new SingleStatement(getPc(), makeCode(unit, 0, unit.size() - 1, true), type);
+        singleStatement.setSourceFile(sourceFile);
+        singleStatement.setCondition(getEffectiveCondition());
+        singleStatement.setLineStart(unit.getStartLine());
+        singleStatement.setLineEnd(unit.getEndLine());
+        return singleStatement;
     }
     
     private @NonNull CppStatement convertCppStatement(@NonNull TranslationUnit unit, CppStatement. @NonNull Type type)
