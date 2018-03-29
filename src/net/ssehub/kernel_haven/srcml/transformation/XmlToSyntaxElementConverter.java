@@ -249,6 +249,11 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         case INCLUDE:
             new IncludeExpander(absolutePath, extractor).expand(astResult);
             break;
+            
+        case EXPAND_FUNCTION_CONDITION:
+            new IncludeExpander(absolutePath, extractor).expand(astResult);
+            new FunctionConditionExpander().expand(astResult);
+            break;
         
         default:
             throw new FormatException("Header handling " + headerHandling + " not implemented");

@@ -13,8 +13,8 @@ public enum HeaderHandling {
     IGNORE,
     
     /**
-     * Searches for (quote) header files relative to the source file being parsed. Tries to find declarations of
-     * functions in the header(s) and uses their condition to expand the condition of the function implementation.
+     * Includes all headers like {@link #INCLUDE}. Tries to find declarations of functions in the headers and uses
+     * their presence condition to expand the presence condition of the function implementation.
      */
     EXPAND_FUNCTION_CONDITION,
     

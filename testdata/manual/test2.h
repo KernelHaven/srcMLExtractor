@@ -7,6 +7,12 @@ void someFunc();
 
 #endif
 
+#ifdef C
+
+void someFunc();
+
+#endif
+
 int otherFunc(int, int);
 
 #endif

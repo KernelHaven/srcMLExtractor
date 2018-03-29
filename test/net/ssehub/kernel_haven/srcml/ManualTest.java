@@ -25,7 +25,7 @@ public class ManualTest extends AbstractSrcMLExtractorTest {
 //        SourceFile ast = loadFile("NestedCppIfs.c");
 //        SourceFile ast = loadFile("test.c");
 //        SourceFile ast = loadFile("FunctionWithIfdefHeader.c");
-        SourceFile ast = loadFile("test2.c", HeaderHandling.INCLUDE);
+        SourceFile ast = loadFile("test2.c", HeaderHandling.EXPAND_FUNCTION_CONDITION);
 //        SourceFile ast = loadFile("../real/Linux4.15/pci_stub.c");
         System.out.println(ast.getElement(0));
     }

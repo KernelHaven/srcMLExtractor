@@ -55,7 +55,8 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             "code.extractor.header_handling", HeaderHandling.class, true, HeaderHandling.IGNORE,
             "How #include directives should be handled.\n\n- IGNORE: Does nothing; leaves the #include directives as"
             + " preprocessor statements in the AST.\n- INCLUDE: Parses the headers and includes their AST instead of the"
-            + " #include directive.\n- EXPAND_FUNCTION_CONDITION: Searches for declarations of functions in the headers."
+            + " #include directive.\n- EXPAND_FUNCTION_CONDITION: Includes headers like INCLUDE. Searches for"
+            + " declarations of functions in the headers."
             + " If declarations for the functions that are implemented in the C file are found, then their conditions"
             + " are expanded by the condition of the declaration.\n\nCurrently only quote include directives"
             + " (#include \"file.h\") relative to the source file being parsed are supported.");

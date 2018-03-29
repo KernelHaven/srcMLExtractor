@@ -27,7 +27,6 @@ import net.ssehub.kernel_haven.code_model.ast.SwitchStatement;
 import net.ssehub.kernel_haven.code_model.ast.TypeDefinition;
 import net.ssehub.kernel_haven.srcml.SrcMLExtractor;
 import net.ssehub.kernel_haven.util.CodeExtractorException;
-import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 import net.ssehub.kernel_haven.util.null_checks.Nullable;
@@ -57,7 +56,7 @@ public class IncludeExpander implements ISyntaxElementVisitor {
         this.parents = new LinkedList<>();
     }
     
-    public void expand(@NonNull ISyntaxElement file) throws FormatException {
+    public void expand(@NonNull ISyntaxElement file) {
         file.accept(this);
     }
 
