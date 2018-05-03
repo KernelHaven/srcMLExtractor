@@ -30,6 +30,7 @@ public class PreprocessorElse extends PreprocessorBlock {
      * Returns the first block of the if-elif-else structure, the <tt>&#35;if</tt> block.
      * @return The <tt>&#35;if</tt> block to which this else block belongs to.
      */
+    @Override
     public @NonNull PreprocessorIf getStartingIf() {
         return startElement;
     }

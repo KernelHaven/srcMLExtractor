@@ -56,4 +56,9 @@ public class PreprocessorIf extends PreprocessorBlock {
     public @NonNull PreprocessorElse getElseBlock(int index) {
         return notNull(siblings.get(index));
     }
+
+    @Override
+    public PreprocessorIf getStartingIf() {
+        return this;
+    }
 }

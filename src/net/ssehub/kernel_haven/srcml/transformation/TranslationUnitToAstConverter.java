@@ -4,8 +4,10 @@ import static net.ssehub.kernel_haven.util.null_checks.NullHelpers.notNull;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import net.ssehub.kernel_haven.code_model.ast.BranchStatement;
 import net.ssehub.kernel_haven.code_model.ast.CaseStatement;
@@ -46,6 +48,7 @@ public class TranslationUnitToAstConverter {
     
     private @NonNull Deque<@NonNull Formula> cppPresenceConditions;
     private @NonNull Deque<@NonNull Formula> cppEffectiveConditions;
+    private @NonNull Map<@NonNull PreprocessorBlock, CppBlock> translatedBlocks;
     
     /**
      * Holds all switch statements while preserving nesting. This is needed to find the correct switch a
@@ -60,6 +63,7 @@ public class TranslationUnitToAstConverter {
     public TranslationUnitToAstConverter(java.io. @NonNull File sourceFile) {
         cppPresenceConditions = new ArrayDeque<>();
         cppEffectiveConditions = new ArrayDeque<>();
+        translatedBlocks = new HashMap<>();
         switchs = new ArrayDeque<>();
         this.sourceFile = sourceFile;
     }
@@ -491,8 +495,7 @@ public class TranslationUnitToAstConverter {
     private @NonNull CppBlock convertPreprocessorBlock(@NonNull PreprocessorBlock cppBlock) throws FormatException {
         Formula condition = notNull(cppBlock.getEffectiveCondition()); // all CPP blocks have effective conditions now
         pushFormula(condition);
-        Type type = Type.valueOf(cppBlock.getType());
-        CppBlock translatedBlock = new CppBlock(getPc(), condition, type);
+        CppBlock translatedBlock = createCppBlock(cppBlock);
         translatedBlock.setSourceFile(sourceFile);
         translatedBlock.setCondition(getEffectiveCondition());
         
@@ -502,6 +505,44 @@ public class TranslationUnitToAstConverter {
         }
         popFormula();
         
+        return translatedBlock;
+    }
+
+    /**
+     * Creates the {@link CppBlock} and handles correct setting of siblings.
+     * @param cppBlock The currently translated preprocessor block.
+     * @return <tt>cppBlock</tt> translated to an {@link CppBlock}.
+     */
+    private CppBlock createCppBlock(PreprocessorBlock cppBlock) {
+        // All CPP blocks have effective conditions now
+        CppBlock translatedBlock = new CppBlock(getPc(), notNull(cppBlock.getEffectiveCondition()),
+            notNull(Type.valueOf(cppBlock.getType())));
+        translatedBlocks.put(cppBlock, translatedBlock);
+        // Add siblings (which have been translated so far)
+        PreprocessorIf start = cppBlock.getStartingIf();
+        if (start != cppBlock) {
+            CppBlock firstSibling = translatedBlocks.get(start);
+            // Test if it was already translated (should be the case)
+            if (null != firstSibling) {
+                // Add sibling to currently translated element
+                translatedBlock.addSibling(firstSibling);
+                // Add currently translated element to already translated sibling
+                firstSibling.addSibling(translatedBlock);
+            }
+        }
+        for (int i = 0; i < start.getNumberOfElseBlocks(); i++) {
+            CppBlock siblingBlock = translatedBlocks.get(start.getElseBlock(i));
+            // Test if it was already translated (not necessarily the case)
+            if (null != siblingBlock) {
+                // Add sibling to currently translated element
+                translatedBlock.addSibling(siblingBlock);
+                // Add currently translated element to already translated sibling
+                siblingBlock.addSibling(translatedBlock);
+            } else {
+                // Last siblings may have not been translated so far.
+                break;
+            }
+        }
         return translatedBlock;
     }
     
@@ -554,8 +595,7 @@ public class TranslationUnitToAstConverter {
                 // all CPP blocks have effective conditions now
                 Formula condition = notNull(((PreprocessorBlock) child).getEffectiveCondition());
                 pushFormula(condition);
-                Type type = Type.valueOf(((PreprocessorBlock) child).getType());
-                CppBlock cppif = new CppBlock(getPc(), condition, type);
+                CppBlock cppif = createCppBlock((PreprocessorBlock) child);
                 cppif.setSourceFile(sourceFile);
                 cppif.setCondition(getEffectiveCondition());
                 ICode nested = makeCode(child, 0, child.size() - 1, allowTranslationUnits);

@@ -172,4 +172,9 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
         nestedElements.add(index, newUnit);
     }
     
+    /**
+     * Returns the first block of the if-elif-else structure, the <tt>&#35;if</tt> block.
+     * @return The <tt>&#35;if</tt> block to which this else block belongs to.
+     */
+    public abstract @NonNull PreprocessorIf getStartingIf();
 }
