@@ -14,6 +14,7 @@ import net.ssehub.kernel_haven.code_model.ast.Code;
 import net.ssehub.kernel_haven.code_model.ast.CompoundStatement;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock;
 import net.ssehub.kernel_haven.code_model.ast.CppStatement;
+import net.ssehub.kernel_haven.code_model.ast.File;
 import net.ssehub.kernel_haven.code_model.ast.Function;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
 import net.ssehub.kernel_haven.code_model.ast.SingleStatement;
@@ -100,18 +101,22 @@ public class CTest extends AbstractSrcMLExtractorTest {
     @SuppressWarnings("null")
     public void testLineNumbers() {
         SourceFile ast = loadFile("LineNumbers.c");
-        List<ISyntaxElement> elements = getElements(ast);
+        assertThat(ast.getTopElementCount(), is(1));
         
-        assertThat(elements.size(), is(2));
+        File file = assertElement(File.class, "1", "1", ast.getElement(0));
+        assertThat(file.getPath(), is(new java.io.File("c/LineNumbers.c")));
+        assertThat(file.getLineStart(), is(1));
+        assertThat(file.getLineEnd(), is(9));
+        assertThat(file.getNestedElementCount(), is(2));
         
-        CppStatement stmt = assertElement(CppStatement.class, "1", "1", elements.get(0));
+        CppStatement stmt = assertElement(CppStatement.class, "1", "1", file.getNestedElement(0));
         assertThat(stmt.getType(), is(CppStatement.Type.INCLUDE));
         assertThat(((Code) stmt.getExpression()).getText(), is("< stdio.h >"));
         assertThat(stmt.getLineStart(), is(1));
         assertThat(stmt.getLineEnd(), is(1));
         assertThat(stmt.getNestedElementCount(), is(0));
         
-        Function func = assertElement(Function.class, "1", "1", elements.get(1));
+        Function func = assertElement(Function.class, "1", "1", file.getNestedElement(1));
         assertThat(func.getName(), is("main"));
         assertThat(((Code) func.getHeader()).getText(), is("int main ( int argc , char * * argv )"));
         assertThat(func.getLineStart(), is(3));
@@ -128,14 +133,19 @@ public class CTest extends AbstractSrcMLExtractorTest {
         assertThat(block.getLineStart(), is(4));
         assertThat(block.getLineEnd(), is(5));
         
+        SingleStatement printStmt = assertElement(SingleStatement.class, "CONFIG_DEBUG", "CONFIG_DEBUG", block.getNestedElement(0));
+        assertThat(((Code) printStmt.getCode()).getText(), is("printf ( \"Debugging\" ) ;"));
+        assertThat(printStmt.getType(), is(SingleStatement.Type.INSTRUCTION));
+        assertThat(printStmt.getNestedElementCount(), is(0));
+        assertThat(printStmt.getLineStart(), is(5));
+        assertThat(printStmt.getLineEnd(), is(5));
+        
         SingleStatement retStmt = assertElement(SingleStatement.class, "1", "1", funcBlock.getNestedElement(1));
         assertThat(((Code) retStmt.getCode()).getText(), is("return 0 ;"));
+        assertThat(retStmt.getType(), is(SingleStatement.Type.INSTRUCTION));
         assertThat(retStmt.getNestedElementCount(), is(0));
         assertThat(retStmt.getLineStart(), is(7));
         assertThat(retStmt.getLineEnd(), is(7));
-        
-        
-        System.out.println(func);
     }
     
     @Override
