@@ -144,6 +144,8 @@ public class TranslationUnitToAstConverter {
             Label label = new Label(pc, makeCode(unit, 0, unit.size() - 1, false));
             label.setSourceFile(sourceFile);
             label.setCondition(getEffectiveCondition());
+            label.setLineStart(unit.getStartLine());
+            label.setLineEnd(unit.getEndLine());
             return label;
         }
         
@@ -151,6 +153,8 @@ public class TranslationUnitToAstConverter {
             Comment comment = new Comment(pc, makeCode(unit, 0, unit.size() - 1, false));
             comment.setSourceFile(sourceFile);
             comment.setCondition(getEffectiveCondition());
+            comment.setLineStart(unit.getStartLine());
+            comment.setLineEnd(unit.getEndLine());
             return comment;
         }
         
@@ -182,6 +186,8 @@ public class TranslationUnitToAstConverter {
                     makeCode(unit, 0, lastCodeElement, true));
             ifStatement.setSourceFile(sourceFile);
             ifStatement.setCondition(getEffectiveCondition());
+            ifStatement.setLineStart(unit.getStartLine());
+            ifStatement.setLineEnd(unit.getEndLine());
             ifStatement.addSibling(ifStatement);
             for (int i = lastCodeElement + 1; i < unit.size(); i++) {
                 ISyntaxElement child = convert(unit.getNestedElement(i));
@@ -215,6 +221,8 @@ public class TranslationUnitToAstConverter {
             BranchStatement elifBlock = new BranchStatement(pc, BranchStatement.Type.ELSE_IF, condition);
             elifBlock.setSourceFile(sourceFile);
             elifBlock.setCondition(getEffectiveCondition());
+            elifBlock.setLineStart(unit.getStartLine());
+            elifBlock.setLineEnd(unit.getEndLine());
             for (int i = 0; i < unit.size(); i++) {
                 ITranslationUnit child = unit.getNestedElement(i);
                 if (child instanceof CodeUnit) {
@@ -230,6 +238,8 @@ public class TranslationUnitToAstConverter {
             BranchStatement elseBlock = new BranchStatement(pc, BranchStatement.Type.ELSE, null);
             elseBlock.setSourceFile(sourceFile);
             elseBlock.setCondition(getEffectiveCondition());
+            elseBlock.setLineStart(unit.getStartLine());
+            elseBlock.setLineEnd(unit.getEndLine());
             for (int i = 0; i < unit.size(); i++) {
                 ITranslationUnit child = unit.getNestedElement(i);
                 if (child instanceof CodeUnit) {
@@ -262,6 +272,8 @@ public class TranslationUnitToAstConverter {
             File file = new File(pc, sourceFile);
             file.setSourceFile(sourceFile);
             file.setCondition(getEffectiveCondition());
+            file.setLineStart(unit.getStartLine());
+            file.setLineEnd(unit.getEndLine());
             for (int i = 0; i < unit.size(); i++) {
                 file.addNestedElement(convert(unit.getNestedElement(i)));
             }
@@ -289,6 +301,8 @@ public class TranslationUnitToAstConverter {
             CompoundStatement block = new CompoundStatement(pc);
             block.setSourceFile(sourceFile);
             block.setCondition(getEffectiveCondition());
+            block.setLineStart(unit.getStartLine());
+            block.setLineEnd(unit.getEndLine());
             for (int i = 0; i < unit.size(); i++) {
                 ITranslationUnit child = unit.getNestedElement(i);
                 if (child instanceof CodeUnit) {
@@ -308,6 +322,8 @@ public class TranslationUnitToAstConverter {
             SwitchStatement switchStatement = new SwitchStatement(getPc(), makeCode(unit, 0, unit.size() - 2, false));
             switchStatement.setSourceFile(sourceFile);
             switchStatement.setCondition(getEffectiveCondition());
+            switchStatement.setLineStart(unit.getStartLine());
+            switchStatement.setLineEnd(unit.getEndLine());
             switchs.push(switchStatement);
             switchStatement.addNestedElement(convert(unit.getNestedElement(unit.size() - 1)));
             switchs.pop();
@@ -400,6 +416,8 @@ public class TranslationUnitToAstConverter {
         CppStatement statement = new CppStatement(getPc(), type, expression);
         statement.setSourceFile(sourceFile);
         statement.setCondition(getEffectiveCondition());
+        statement.setLineStart(unit.getStartLine());
+        statement.setLineEnd(unit.getEndLine());
         return statement;
     }
 
@@ -413,6 +431,8 @@ public class TranslationUnitToAstConverter {
         CaseStatement caseStatement = new CaseStatement(getPc(), makeCode(unit, 0, condEndIndex, false), type, switchStmt);
         caseStatement.setSourceFile(sourceFile);
         caseStatement.setCondition(getEffectiveCondition());
+        caseStatement.setLineStart(unit.getStartLine());
+        caseStatement.setLineEnd(unit.getEndLine());
         switchStmt.addCase(caseStatement);
         for (int i = condEndIndex + 1; i < unit.size(); i++) {
             caseStatement.addNestedElement(convert(unit.getNestedElement(i)));
@@ -474,6 +494,8 @@ public class TranslationUnitToAstConverter {
         TypeDefinition typeDef = new TypeDefinition(pc, code, type);
         typeDef.setSourceFile(sourceFile);
         typeDef.setCondition(getEffectiveCondition());
+        typeDef.setLineStart(unit.getStartLine());
+        typeDef.setLineEnd(unit.getEndLine());
         if (nested != null) {
             typeDef.addNestedElement(nested);
         }
@@ -488,6 +510,8 @@ public class TranslationUnitToAstConverter {
         LoopStatement loop = new LoopStatement(getPc(),  condition, type);
         loop.setSourceFile(sourceFile);
         loop.setCondition(getEffectiveCondition());
+        loop.setLineStart(unit.getStartLine());
+        loop.setLineEnd(unit.getEndLine());
         loop.addNestedElement(convert(unit.getNestedElement(blockIndex)));
         return loop;
     }
@@ -498,6 +522,8 @@ public class TranslationUnitToAstConverter {
         CppBlock translatedBlock = createCppBlock(cppBlock);
         translatedBlock.setSourceFile(sourceFile);
         translatedBlock.setCondition(getEffectiveCondition());
+        translatedBlock.setLineStart(cppBlock.getStartLine());
+        translatedBlock.setLineEnd(cppBlock.getEndLine());
         
         for (int i = 0; i < cppBlock.size(); i++) {
             ITranslationUnit child = cppBlock.getNestedElement(i);
@@ -517,6 +543,10 @@ public class TranslationUnitToAstConverter {
         // All CPP blocks have effective conditions now
         CppBlock translatedBlock = new CppBlock(getPc(), notNull(cppBlock.getEffectiveCondition()),
             notNull(Type.valueOf(cppBlock.getType())));
+        translatedBlock.setSourceFile(sourceFile);
+        translatedBlock.setCondition(getEffectiveCondition());
+        translatedBlock.setLineStart(cppBlock.getStartLine());
+        translatedBlock.setLineEnd(cppBlock.getEndLine());
         translatedBlocks.put(cppBlock, translatedBlock);
         // Add siblings (which have been translated so far)
         PreprocessorIf start = cppBlock.getStartingIf();
@@ -588,6 +618,8 @@ public class TranslationUnitToAstConverter {
                     Code codeElement = new Code(getPc(), notNull(code.toString()));
                     codeElement.setSourceFile(sourceFile);
                     codeElement.setCondition(getEffectiveCondition());
+                    codeElement.setLineStart(unit.getStartLine());
+                    codeElement.setLineEnd(unit.getEndLine());
                     result.add(codeElement);
                     code = new StringBuilder();
                 }
@@ -598,6 +630,8 @@ public class TranslationUnitToAstConverter {
                 CppBlock cppif = createCppBlock((PreprocessorBlock) child);
                 cppif.setSourceFile(sourceFile);
                 cppif.setCondition(getEffectiveCondition());
+                cppif.setLineStart(unit.getStartLine());
+                cppif.setLineEnd(unit.getEndLine());
                 ICode nested = makeCode(child, 0, child.size() - 1, allowTranslationUnits);
                 if (nested instanceof CodeList) {
                     for (int j = 0; j < nested.getNestedElementCount(); j++) {
@@ -620,6 +654,8 @@ public class TranslationUnitToAstConverter {
                     Code codeElement = new Code(getPc(), notNull(code.toString()));
                     codeElement.setSourceFile(sourceFile);
                     codeElement.setCondition(getEffectiveCondition());
+                    codeElement.setLineStart(unit.getStartLine());
+                    codeElement.setLineEnd(unit.getEndLine());
                     result.add(codeElement);
                     code = new StringBuilder();
                 }
@@ -638,6 +674,8 @@ public class TranslationUnitToAstConverter {
             Code codeElement = new Code(getPc(), notNull(code.toString()));
             codeElement.setSourceFile(sourceFile);
             codeElement.setCondition(getEffectiveCondition());
+            codeElement.setLineStart(unit.getStartLine());
+            codeElement.setLineEnd(unit.getEndLine());
             result.add(codeElement);
         }
         
@@ -677,11 +715,15 @@ public class TranslationUnitToAstConverter {
                     + ((Code) code2).getText());
             result.setCondition(code1.getCondition());
             result.setSourceFile(sourceFile);
+            result.setLineStart(code1.getLineStart());
+            result.setLineEnd(code2.getLineEnd());
             
         } else {
             result = new CodeList(code1.getPresenceCondition());
             result.setCondition(code1.getCondition());
             result.setSourceFile(sourceFile);
+            result.setLineStart(code1.getLineStart());
+            result.setLineEnd(code2.getLineEnd());
             
             if (code1 instanceof CodeList) {
                 CodeList list = (CodeList) code1;
