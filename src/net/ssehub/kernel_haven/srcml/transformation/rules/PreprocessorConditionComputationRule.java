@@ -85,7 +85,7 @@ public class PreprocessorConditionComputationRule implements ITransformationRule
                         found = true;
                     }
                 }
-                StringBuffer effectiveCondition = new StringBuffer("!");
+                StringBuilder effectiveCondition = new StringBuilder("!");
                 effectiveCondition.append('(').append(start.getCondition()).append(')');
                 for (PreprocessorElse preprocessorBlock : previous) {
                     effectiveCondition.append(" && !");

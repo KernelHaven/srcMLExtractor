@@ -99,7 +99,7 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
     
     @Override
     public @NonNull String toString() {
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         result.append("#");
         result.append(type.name());
         Formula parsedCondition = this.parsedCondition;

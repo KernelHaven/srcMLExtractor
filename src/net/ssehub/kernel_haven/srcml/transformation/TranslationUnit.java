@@ -70,7 +70,7 @@ public class TranslationUnit implements ITranslationUnit {
     
     @Override
     public @NonNull String toString() {
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         result.append(type.toUpperCase());
         result.append(":");
         boolean lastWasUnit = false;

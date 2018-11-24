@@ -116,7 +116,7 @@ public class PreprocessorTranslation implements ITransformationRule {
     }
     
     private @NonNull String getCondition(@NonNull TranslationUnit unit, boolean replaceMissingdefined) {
-        StringBuffer condition = new StringBuffer();
+        StringBuilder condition = new StringBuilder();
         
         for (int i = 2; i < unit.size(); i++) {
             ITranslationUnit conditionPart = unit.getNestedElement(i);
