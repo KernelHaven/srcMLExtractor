@@ -12,7 +12,6 @@ import java.util.Set;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
 import net.ssehub.kernel_haven.srcml.SrcMLExtractor;
 import net.ssehub.kernel_haven.srcml.transformation.rules.Preprocessing;
@@ -209,7 +208,7 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
     }
     
     @Override
-    protected @NonNull CodeElement getAst() throws FormatException {
+    protected @NonNull ISyntaxElement getAst() throws FormatException {
         ITranslationUnit unit = notNull(elements.removeFirst());
         if (DEBUG_LOGGING) {
             System.out.println("XML -> Translation Units");

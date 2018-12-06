@@ -13,6 +13,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import net.ssehub.kernel_haven.code_model.SourceFile;
+import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
 import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
@@ -50,7 +51,7 @@ public class XmlToAstConverter {
      * @return An AST representing the parsed file.
      * @throws FormatException If the input could not be parsed due to an invalid input.
      */
-    public @NonNull SourceFile parseToAst() throws FormatException {
+    public @NonNull SourceFile<ISyntaxElement> parseToAst() throws FormatException {
         try {
             saxParser.parse(in, converter);
         } catch (SAXException | IOException e) {

@@ -15,6 +15,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import net.ssehub.kernel_haven.code_model.SourceFile;
+import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
 
 /**
  * Tests that {@link SrcMLExtractor} does not crash when processing real code files.
@@ -52,7 +53,7 @@ public class RobustnessTests extends AbstractSrcMLExtractorTest {
     @Test
     public void testFile() throws IOException {
         Path relativePath = BASE_PATH.relativize(file);
-        SourceFile parsed = loadFile(relativePath.toString());
+        SourceFile<ISyntaxElement> parsed = loadFile(relativePath.toString());
         
         assertNotNull("Could not parse " + relativePath.toString(), parsed);
     }

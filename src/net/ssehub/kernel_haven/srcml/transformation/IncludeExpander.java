@@ -116,12 +116,12 @@ public class IncludeExpander implements ISyntaxElementVisitor {
                     
                     try {
                         // TODO AK: use some kind of cache to prevent endless recursion
-                        SourceFile header = extractor.parseFile(file, file);
+                        SourceFile<ISyntaxElement> header = extractor.parseFile(file, file);
                         
                         LOGGER.logDebug("Replacing #include with parsed header " + file);
                         
                         ISyntaxElement parent = notNull(parents.peek());
-                        parent.replaceNestedElement(cppStatement, (ISyntaxElement) header.getElement(0));
+                        parent.replaceNestedElement(cppStatement, header.getElement(0));
                         
                     } catch (CodeExtractorException e) {
                         LOGGER.logException("Can't parse header " + file, e);

@@ -31,7 +31,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
      */
     @Test
     public void testSimpleIfDef() {
-        SourceFile ast = loadFile("SimpleIfDef.c");
+        SourceFile<ISyntaxElement> ast = loadFile("SimpleIfDef.c");
         List<ISyntaxElement> elements = getElements(ast);
         
         assertEquals("Got unexpected number of elements", 1, elements.size());
@@ -46,7 +46,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
      */
     @Test
     public void testNestedIfDef() {
-        SourceFile ast = loadFile("NestedIfDef.c");
+        SourceFile<ISyntaxElement> ast = loadFile("NestedIfDef.c");
         List<ISyntaxElement> elements = getElements(ast);
         
         assertEquals("Got unexpected number of elements", 3, elements.size());
@@ -68,7 +68,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
      */
     @Test
     public void testElseForIfDef() {
-        SourceFile ast = loadFile("ElseForIfdef.c");
+        SourceFile<ISyntaxElement> ast = loadFile("ElseForIfdef.c");
         List<ISyntaxElement> elements = getElements(ast);
         
         assertEquals("Got unexpected number of elements", 4, elements.size());
@@ -87,7 +87,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
      */
     @Test
     public void testSimpleIfNDef() {
-        SourceFile ast = loadFile("SimpleIfNDef.c");
+        SourceFile<ISyntaxElement> ast = loadFile("SimpleIfNDef.c");
         List<ISyntaxElement> elements = getElements(ast);
         
         assertEquals("Got unexpected number of elements", 3, elements.size());
@@ -104,7 +104,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
      */
     @Test
     public void testNestedIfNDef() {
-        SourceFile ast = loadFile("NestedIfNDef.c");
+        SourceFile<ISyntaxElement> ast = loadFile("NestedIfNDef.c");
         List<ISyntaxElement> elements = getElements(ast);
         
         assertEquals("Got unexpected number of elements", 1, elements.size());
@@ -124,7 +124,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
      */
     @Test
     public void testElseForIfNdef() {
-        SourceFile ast = loadFile("ElseForIfNdef.c");
+        SourceFile<ISyntaxElement> ast = loadFile("ElseForIfNdef.c");
         List<ISyntaxElement> elements = getElements(ast);
         
         assertEquals("Got unexpected number of elements", 4, elements.size());
@@ -143,7 +143,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
      */
     @Test
     public void testSimpleIf() {
-        SourceFile ast = loadFile("SimpleIf.c");
+        SourceFile<ISyntaxElement> ast = loadFile("SimpleIf.c");
         List<ISyntaxElement> elements = getElements(ast);
         
         assertEquals("Got unexpected number of elements", 1, elements.size());
@@ -158,7 +158,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
      */
     @Test
     public void testSimpleIfElse() {
-        SourceFile ast = loadFile("SimpleIfElse.c");
+        SourceFile<ISyntaxElement> ast = loadFile("SimpleIfElse.c");
         List<ISyntaxElement> elements = getElements(ast);
         
         assertEquals("Got unexpected number of elements", 2, elements.size());
@@ -175,7 +175,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
      */
     @Test
     public void testSimpleIfElif() {
-        SourceFile ast = loadFile("SimpleIfElif.c");
+        SourceFile<ISyntaxElement> ast = loadFile("SimpleIfElif.c");
         List<ISyntaxElement> elements = getElements(ast);
         
         assertEquals("Got unexpected number of elements", 2, elements.size());
@@ -193,7 +193,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
      */
     @Test
     public void testSimpleIfElifElse() {
-        SourceFile ast = loadFile("SimpleIfElifElse.c");
+        SourceFile<ISyntaxElement> ast = loadFile("SimpleIfElifElse.c");
         List<ISyntaxElement> elements = getElements(ast);
         
         assertEquals("Got unexpected number of elements", 3, elements.size());
@@ -212,7 +212,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
      */
     @Test
     public void testNestedIf() {
-        SourceFile ast = loadFile("NestedIf.c");
+        SourceFile<ISyntaxElement> ast = loadFile("NestedIf.c");
         List<ISyntaxElement> elements = getElements(ast);
         
         assertEquals("Got unexpected number of elements", 3, elements.size());
@@ -234,7 +234,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
      */
     @Test
     public void testCompoundIf() {
-        SourceFile ast = loadFile("CompoundIf.c");
+        SourceFile<ISyntaxElement> ast = loadFile("CompoundIf.c");
         List<ISyntaxElement> elements = getElements(ast);
         
         assertEquals("Got unexpected number of elements", 3, elements.size());
@@ -252,7 +252,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
      */
     @Test
     public void testCompoundIfElifElse() {
-        SourceFile ast = loadFile("CompoundIfElifElse.c");
+        SourceFile<ISyntaxElement> ast = loadFile("CompoundIfElifElse.c");
         List<ISyntaxElement> elements = getElements(ast);
         
         assertEquals("Got unexpected number of elements", 5, elements.size());
@@ -277,7 +277,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
      */
     @Test
     public void testNestedCompoundIf() {
-        SourceFile ast = loadFile("NestedCompoundIf.c");
+        SourceFile<ISyntaxElement> ast = loadFile("NestedCompoundIf.c");
         List<ISyntaxElement> elements = getElements(ast);
         
         assertEquals("Got unexpected number of elements", 3, elements.size());
@@ -301,7 +301,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
      */
     @Test
     public void testComplicatedIf() {
-        SourceFile ast = loadFile("ComplicatedIf.c");
+        SourceFile<ISyntaxElement> ast = loadFile("ComplicatedIf.c");
         List<ISyntaxElement> elements = getElements(ast);
         
         assertEquals("Got unexpected number of elements", 3, elements.size());
@@ -321,7 +321,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
      */
     @Test
     public void testMissingDefined() {
-        SourceFile ast = loadFile("MissingDefined.c");
+        SourceFile<ISyntaxElement> ast = loadFile("MissingDefined.c");
         List<ISyntaxElement> elements = getElements(ast);
         
         assertEquals("Got unexpected number of elements", 3, elements.size());
@@ -338,7 +338,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
      */
     @Test
     public void testIf0() {
-        SourceFile ast = loadFile("If0.c");
+        SourceFile<ISyntaxElement> ast = loadFile("If0.c");
         List<ISyntaxElement> elements = getElements(ast);
         
         assertEquals("Got unexpected number of elements", 3, elements.size());
@@ -349,7 +349,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
     }
     
     @Override
-    protected SourceFile loadFile(String file) {
+    protected SourceFile<ISyntaxElement> loadFile(String file) {
         return super.loadFile("cpp/" + file);
     }
     

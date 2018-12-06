@@ -150,7 +150,7 @@ public class FunctionConditionExpander implements ISyntaxElementVisitor {
             element.setPresenceCondition(newPart);
         }
         
-        for (ISyntaxElement child : element.iterateNestedSyntaxElements()) {
+        for (ISyntaxElement child : element) {
             updateAllPcs(child, newPart);
         }
     }

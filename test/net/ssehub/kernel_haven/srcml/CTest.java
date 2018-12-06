@@ -30,7 +30,7 @@ public class CTest extends AbstractSrcMLExtractorTest {
     
     @Test
     public void returnStatement() {
-        SourceFile ast = loadFile("Statement_SingleReturn.c");
+        SourceFile<ISyntaxElement> ast = loadFile("Statement_SingleReturn.c");
         List<ISyntaxElement> elements = getElements(ast);
         
         assertEquals("Got unexpected number of elements", 1, elements.size());
@@ -42,7 +42,7 @@ public class CTest extends AbstractSrcMLExtractorTest {
     
     @Test
     public void globalVariables() {
-        SourceFile ast = loadFile("GlobalVariables.c");
+        SourceFile<ISyntaxElement> ast = loadFile("GlobalVariables.c");
         List<ISyntaxElement> elements = getElements(ast);
         
         // Variables + comments
@@ -100,7 +100,7 @@ public class CTest extends AbstractSrcMLExtractorTest {
     @Test
     @SuppressWarnings("null")
     public void testLineNumbers() {
-        SourceFile ast = loadFile("LineNumbers.c");
+        SourceFile<ISyntaxElement> ast = loadFile("LineNumbers.c");
         assertThat(ast.getTopElementCount(), is(1));
         
         File file = assertElement(File.class, "1", "1", ast.getElement(0));
@@ -149,7 +149,7 @@ public class CTest extends AbstractSrcMLExtractorTest {
     }
     
     @Override
-    protected SourceFile loadFile(String file) {
+    protected SourceFile<ISyntaxElement> loadFile(String file) {
         return super.loadFile("c/" + file);
     }
 

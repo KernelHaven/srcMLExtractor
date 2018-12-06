@@ -14,6 +14,7 @@ import org.xml.sax.SAXException;
 import net.ssehub.kernel_haven.SetUpException;
 import net.ssehub.kernel_haven.code_model.AbstractCodeModelExtractor;
 import net.ssehub.kernel_haven.code_model.SourceFile;
+import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
 import net.ssehub.kernel_haven.config.Configuration;
 import net.ssehub.kernel_haven.config.DefaultSettings;
 import net.ssehub.kernel_haven.config.EnumSetting;
@@ -79,7 +80,7 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
     }
     
     @Override
-    protected @NonNull SourceFile runOnFile(@NonNull File target) throws ExtractorException {
+    protected @NonNull SourceFile<ISyntaxElement> runOnFile(@NonNull File target) throws ExtractorException {
         File absoulteTarget = new File(sourceTree, target.getPath());
         if (!absoulteTarget.exists()) {
             throw new ExtractorException("srcML could not parse specified file, which does not exist: "
@@ -100,7 +101,7 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
      * 
      * @throws CodeExtractorException If parsing the file fails.
      */
-    public @NonNull SourceFile parseFile(@NonNull File absoulteTarget, @NonNull File relativeTarget)
+    public @NonNull SourceFile<ISyntaxElement> parseFile(@NonNull File absoulteTarget, @NonNull File relativeTarget)
             throws CodeExtractorException {
         
         
@@ -151,7 +152,7 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             }, "SrcMLExtractor-Worker").start();
             // CHECKSTYLE:ON
             
-            SourceFile resultFile = converter.parseToAst();
+            SourceFile<ISyntaxElement> resultFile = converter.parseToAst();
             
             
             return resultFile;

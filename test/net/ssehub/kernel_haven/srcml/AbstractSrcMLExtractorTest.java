@@ -14,7 +14,6 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 
 import net.ssehub.kernel_haven.SetUpException;
-import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.code_model.SourceFile;
 import net.ssehub.kernel_haven.code_model.ast.Code;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock;
@@ -51,22 +50,16 @@ public class AbstractSrcMLExtractorTest {
      * @param file A file, which was translated with {@link SrcMLExtractor}.
      * @return The top level elements.
      */
-    protected List<ISyntaxElement> getElements(SourceFile file) {
+    protected List<ISyntaxElement> getElements(SourceFile<ISyntaxElement> file) {
         List<ISyntaxElement> result = new ArrayList<>();
         Assert.assertEquals("The SourceFile has more than only one translation unit: "
             + file.getPath().getAbsolutePath(), 1, file.getTopElementCount());
         
         // Extract translation unit
-        for (CodeElement element : file) {
-            if (!(element instanceof ISyntaxElement)) {
-                Assert.fail("SourceFile \"" + file.getPath().getAbsolutePath() + "\" contains a non SrcMlSyntaxElement: "
-                    + element);
-            }
-            
+        for (ISyntaxElement element : file) {
             // Extract the relevant, top level elements
-            ISyntaxElement translationUnit = (ISyntaxElement) element;
-            for (int i = 0; i < translationUnit.getNestedElementCount(); i++) {
-                result.add(translationUnit.getNestedElement(i));                
+            for (int i = 0; i < element.getNestedElementCount(); i++) {
+                result.add(element.getNestedElement(i));                
             }
         }
         
@@ -79,7 +72,7 @@ public class AbstractSrcMLExtractorTest {
      * @param file The source file to parse.
      * @return The parsed code model, ready for testing the result.
      */
-    protected SourceFile loadFile(String file) {
+    protected SourceFile<ISyntaxElement> loadFile(String file) {
         return loadFile(file, HeaderHandling.IGNORE);
     }
     
@@ -89,11 +82,11 @@ public class AbstractSrcMLExtractorTest {
      * @param file The source file to parse.
      * @return The parsed code model, ready for testing the result.
      */
-    protected SourceFile loadFile(String file, HeaderHandling headerHandling) {
+    protected SourceFile<ISyntaxElement> loadFile(String file, HeaderHandling headerHandling) {
         File srcFile = new File(AllTests.TESTDATA, file);
         Assert.assertTrue("Specified test file does not exist: " + srcFile, srcFile.isFile());
         
-        SourceFile result = null;
+        SourceFile<ISyntaxElement> result = null;
         try {
             Properties props = new Properties();
             props.setProperty("resource_dir", RESOURCE_DIR.getAbsolutePath());
@@ -127,7 +120,7 @@ public class AbstractSrcMLExtractorTest {
      */
     @SuppressWarnings({ "null", "unchecked" })
     protected <T extends ISyntaxElement> @NonNull T assertElement(Class<T> type, String condition,
-            String presenceCondition, CodeElement element) {
+            String presenceCondition, ISyntaxElement element) {
         
         // Class check
         Assert.assertTrue("Wrong syntax element type: expected " + type.getSimpleName() + "; actual: "
@@ -150,7 +143,7 @@ public class AbstractSrcMLExtractorTest {
     }
     
     protected CppBlock assertIf(String condition, String presenceCondition, Formula ifCondition, int numNested,
-            Type type, CodeElement element) {
+            Type type, ISyntaxElement element) {
         
         assertElement(CppBlock.class, condition, presenceCondition, element);
         
@@ -169,7 +162,7 @@ public class AbstractSrcMLExtractorTest {
         return cppIf;
     }
     
-    protected void assertCode(String text, CodeElement element) {
+    protected void assertCode(String text, ISyntaxElement element) {
         // Class check
         Assert.assertTrue("Wrong syntax element type: expected " + Code.class.getSimpleName() + "; actual: "
                 + element.getClass().getSimpleName(), element.getClass().equals(Code.class));
