@@ -107,6 +107,8 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
         
         ByteArrayOutputStream stderr = new ByteArrayOutputStream();
         
+        Thread worker = null;
+        
         try {
             PipedOutputStream out = new PipedOutputStream();
             PipedInputStream stdout = new PipedInputStream(out);
@@ -128,7 +130,7 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             XmlToAstConverter converter = new XmlToAstConverter(stdout, xmlConverter);
 
             // CHECKSTYLE:OFF
-            new Thread(() -> {
+            worker = new Thread(() -> {
                 boolean success;
                 try {
                     success = Util.executeProcess(builder, "srcML", out, stderr, 0);
@@ -149,11 +151,11 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
                 if (!success) {
                     LOGGER.logWarning("srcML exe did not execute succesfully.");
                 }
-            }, "SrcMLExtractor-Worker").start();
+            }, "SrcMLExtractor-Worker");
             // CHECKSTYLE:ON
+            worker.start();
             
             SourceFile<ISyntaxElement> resultFile = converter.parseToAst();
-            
             
             return resultFile;
             
@@ -161,6 +163,14 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             throw new CodeExtractorException(relativeTarget, e);
             
         } finally {
+            if (worker != null) {
+                try {
+                    worker.join();
+                } catch (InterruptedException e) {
+                    // ignore
+                }
+            }
+            
             if (!stderr.toString().isEmpty()) {
                 LOGGER.logDebug(stderr.toString().split("\n"));
             }
