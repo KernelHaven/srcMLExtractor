@@ -26,10 +26,28 @@ import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
 @RunWith(Parameterized.class)
 public class RobustnessTests extends AbstractSrcMLExtractorTest {
     
-    private static final Path BASE_PATH = AllTests.TESTDATA.toPath();
-    
     protected static final Path TEST_FILES_PATH = new File(AllTests.TESTDATA, "real").toPath();
     
+    private static final Path BASE_PATH = AllTests.TESTDATA.toPath();
+    
+    private Path file;
+    
+    /**
+     * Creates a test instance.
+     * 
+     * @param file The test file to run.
+     */
+    public RobustnessTests(Path file) {
+        this.file = file;
+    }
+    
+    /**
+     * Creates the test data.
+     * 
+     * @return The test data.
+     * 
+     * @throws IOException If reading file names fails.
+     */
     @Parameters(name = "{0}")
     public static Object[] data() throws IOException {
         List<Path> sourceFiles = Files.walk(TEST_FILES_PATH)
@@ -40,18 +58,11 @@ public class RobustnessTests extends AbstractSrcMLExtractorTest {
         return sourceFiles.toArray();
     }
     
-    private Path file;
-    
-    public RobustnessTests(Path file) {
-        this.file = file;
-    }
-    
     /**
      * Tests that all C-files placed in real test folder are translated without throwing an exception.
-     * @throws IOException
      */
     @Test
-    public void testFile() throws IOException {
+    public void testFile() {
         Path relativePath = BASE_PATH.relativize(file);
         SourceFile<ISyntaxElement> parsed = loadFile(relativePath.toString());
         

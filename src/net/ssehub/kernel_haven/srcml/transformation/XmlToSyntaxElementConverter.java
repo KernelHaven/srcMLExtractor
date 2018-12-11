@@ -24,8 +24,8 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
  * in 3 steps:
  * <ol>
  *     <li>The XML output is parsed by this class to create {@link ITranslationUnit}s.</li>
- *     <li>The {@link ITranslationUnit}s are refined by the {@link Preprocessing} to be closer to the target AST structure,
- *     to simplify the final parsing.</li>
+ *     <li>The {@link ITranslationUnit}s are refined by the {@link Preprocessing} to be closer to the target AST
+ *     structure, to simplify the final parsing.</li>
  *     <li>The {@link ITranslationUnit}s are parsed into {@link ISyntaxElement} by the
  *     {@link TranslationUnitToAstConverter}</li>
  * </ol>
@@ -124,6 +124,8 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
      * 
      * @param absolutePath The absolute path to the source file. Used for finding headers.
      * @param path The relative path to the source file in the source tree. Must not be <code>null</code>.
+     * @param headerHandling The {@link HeaderHandling} that should be applied.
+     * @param extractor The {@link SrcMLExtractor} to use for header parsing.
      */
     public XmlToSyntaxElementConverter(@NonNull File absolutePath, @NonNull File path,
             @NonNull HeaderHandling headerHandling, @NonNull SrcMLExtractor extractor) {

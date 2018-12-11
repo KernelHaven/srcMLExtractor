@@ -55,8 +55,8 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
     private static final @NonNull Setting<@NonNull HeaderHandling> HEADER_HANDLING_SETTING = new EnumSetting<>(
             "code.extractor.header_handling", HeaderHandling.class, true, HeaderHandling.IGNORE,
             "How #include directives should be handled.\n\n- IGNORE: Does nothing; leaves the #include directives as"
-            + " preprocessor statements in the AST.\n- INCLUDE: Parses the headers and includes their AST instead of the"
-            + " #include directive.\n- EXPAND_FUNCTION_CONDITION: Includes headers like INCLUDE. Searches for"
+            + " preprocessor statements in the AST.\n- INCLUDE: Parses the headers and includes their AST instead of"
+            + " the #include directive.\n- EXPAND_FUNCTION_CONDITION: Includes headers like INCLUDE. Searches for"
             + " declarations of functions in the headers."
             + " If declarations for the functions that are implemented in the C file are found, then their conditions"
             + " are expanded by the condition of the declaration.\n\nCurrently only quote include directives"
@@ -103,12 +103,9 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
      */
     public @NonNull SourceFile<ISyntaxElement> parseFile(@NonNull File absoulteTarget, @NonNull File relativeTarget)
             throws CodeExtractorException {
-        
-        
         ByteArrayOutputStream stderr = new ByteArrayOutputStream();
         
         Thread worker = null;
-        
         try {
             PipedOutputStream out = new PipedOutputStream();
             PipedInputStream stdout = new PipedInputStream(out);
@@ -129,7 +126,6 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
                     headerHandling, this);
             XmlToAstConverter converter = new XmlToAstConverter(stdout, xmlConverter);
 
-            // CHECKSTYLE:OFF
             worker = new Thread(() -> {
                 boolean success;
                 try {
@@ -137,6 +133,7 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
                 } finally {
+                    // CHECKSTYLE:OFF // too much try nesting
                     try {
                         out.close();
                     } catch (IOException e) {
@@ -147,12 +144,12 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
                     } catch (IOException e) {
                         LOGGER.logException("Exception while closing piped stream for stderr", e);
                     }
+                    // CHECKSTYLE:ON
                 }
                 if (!success) {
-                    LOGGER.logWarning("srcML exe did not execute succesfully.");
+                    LOGGER.logWarning("srcML exe did not execute succesfully");
                 }
             }, "SrcMLExtractor-Worker");
-            // CHECKSTYLE:ON
             worker.start();
             
             SourceFile<ISyntaxElement> resultFile = converter.parseToAst();
@@ -170,7 +167,6 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
                     // ignore
                 }
             }
-            
             if (!stderr.toString().isEmpty()) {
                 LOGGER.logDebug(stderr.toString().split("\n"));
             }

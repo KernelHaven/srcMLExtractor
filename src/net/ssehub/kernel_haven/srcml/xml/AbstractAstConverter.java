@@ -33,7 +33,7 @@ public abstract class AbstractAstConverter extends DefaultHandler {
     
     @Override
     public void setDocumentLocator(Locator locator) {
-      this.locator = locator;
+        this.locator = locator;
     }
     
     /**
@@ -58,7 +58,10 @@ public abstract class AbstractAstConverter extends DefaultHandler {
     
     /**
      * Returns the parsed AST.
+     * 
      * @return The {@link SourceFile} representing the parsed file.
+     * 
+     * @throws FormatException If parsing the AST fails.
      */
     public @NonNull SourceFile<ISyntaxElement> getResult() throws FormatException {
         file.addElement(getAst());
@@ -69,6 +72,8 @@ public abstract class AbstractAstConverter extends DefaultHandler {
      * Returns the AST node representing the completed file.
      * 
      * @return The AST node that is the result of the conversion.
+     * 
+     * @throws FormatException If parsing the AST fails.
      */
     protected abstract @NonNull ISyntaxElement getAst() throws FormatException;
     

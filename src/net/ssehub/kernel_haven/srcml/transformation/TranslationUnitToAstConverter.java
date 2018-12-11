@@ -37,10 +37,11 @@ import net.ssehub.kernel_haven.util.logic.True;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
- * Translates the {@link ITranslationUnit}-structure into a {@link ISyntaxElement} (AST). This is the final parsing step.
+ * Translates the {@link ITranslationUnit}-structure into a {@link ISyntaxElement} (AST).
+ * This is the final parsing step.
+ * 
  * @author Adam
  * @author El-Sharkawy
- *
  */
 public class TranslationUnitToAstConverter {
 
@@ -58,9 +59,9 @@ public class TranslationUnitToAstConverter {
      */
     private @NonNull Deque<@NonNull SwitchStatement> switchs;
     
-    private java.io. @NonNull File sourceFile;
+    private java.io.@NonNull File sourceFile;
     
-    public TranslationUnitToAstConverter(java.io. @NonNull File sourceFile) {
+    public TranslationUnitToAstConverter(java.io.@NonNull File sourceFile) {
         cppPresenceConditions = new ArrayDeque<>();
         cppEffectiveConditions = new ArrayDeque<>();
         translatedBlocks = new HashMap<>();
@@ -107,14 +108,17 @@ public class TranslationUnitToAstConverter {
      * @return The translated AST still representing the complete file.
      */
     public @NonNull ISyntaxElement convert(@NonNull ITranslationUnit element) throws FormatException {
+        ISyntaxElement result;
         
         if (element instanceof TranslationUnit) {
-            return convertTranslationUnit((TranslationUnit) element);
+            result = convertTranslationUnit((TranslationUnit) element);
         } else if (element instanceof PreprocessorIf || element instanceof PreprocessorElse) {
-            return convertPreprocessorBlock((PreprocessorBlock) element);
+            result = convertPreprocessorBlock((PreprocessorBlock) element);
+        } else {
+            throw ExceptionUtil.makeException("Illegal element " + element.getClass().getName(), element);
         }
         
-        throw ExceptionUtil.makeException("Illegal element " + element.getClass().getName(), element);
+        return result;
     }
     
     private @NonNull ISyntaxElement convertTranslationUnit(@NonNull TranslationUnit unit) throws FormatException {
@@ -225,9 +229,8 @@ public class TranslationUnitToAstConverter {
             elifBlock.setLineEnd(unit.getEndLine());
             for (int i = 0; i < unit.size(); i++) {
                 ITranslationUnit child = unit.getNestedElement(i);
-                if (child instanceof CodeUnit) {
-                    // ignore { and }
-                } else {
+                // ignore { and }
+                if (!(child instanceof CodeUnit)) {
                     elifBlock.addNestedElement(convert(child));
                 }
             }
@@ -242,9 +245,8 @@ public class TranslationUnitToAstConverter {
             elseBlock.setLineEnd(unit.getEndLine());
             for (int i = 0; i < unit.size(); i++) {
                 ITranslationUnit child = unit.getNestedElement(i);
-                if (child instanceof CodeUnit) {
-                    // ignore { and }
-                } else {
+                // ignore { and }
+                if (!(child instanceof CodeUnit)) {
                     elseBlock.addNestedElement(convert(child));
                 }
             }
@@ -305,9 +307,8 @@ public class TranslationUnitToAstConverter {
             block.setLineEnd(unit.getEndLine());
             for (int i = 0; i < unit.size(); i++) {
                 ITranslationUnit child = unit.getNestedElement(i);
-                if (child instanceof CodeUnit) {
-                    // ignore { and }
-                } else {
+                // ignore { and }
+                if (!(child instanceof CodeUnit)) {
                     block.addNestedElement(convert(child));
                 }
             }
@@ -341,7 +342,7 @@ public class TranslationUnitToAstConverter {
             while (unit.size() > lastElementIndex && !colonFound) {
                 ITranslationUnit nested = unit.getNestedElement(lastElementIndex);
                 if (isCode(nested)) {
-                    if (nested instanceof CodeUnit && ":".equals(((CodeUnit)nested).getCode())) {
+                    if (nested instanceof CodeUnit && ":".equals(((CodeUnit) nested).getCode())) {
                         colonFound = true;
                     } else {
                         lastElementIndex++;
@@ -390,12 +391,16 @@ public class TranslationUnitToAstConverter {
         case "cpp:empty": {
             return convertCppStatement(unit, CppStatement.Type.EMPTY);
         }
+        
+        default:
+            throw ExceptionUtil.makeException("Unexpected unit type: " + unit.getType(), unit);
         }
 
-        throw ExceptionUtil.makeException("Unexpected unit type: " + unit.getType(), unit);
     }
     
-    private @NonNull SingleStatement createSingleStatement(@NonNull TranslationUnit unit, SingleStatement.@NonNull Type type) throws FormatException {
+    private @NonNull SingleStatement createSingleStatement(@NonNull TranslationUnit unit,
+            SingleStatement.@NonNull Type type) throws FormatException {
+        
         // allow translationUnits in makeCode, since e.g. decl_stmts may contain blocks
         SingleStatement singleStatement = new SingleStatement(getPc(), makeCode(unit, 0, unit.size() - 1, true), type);
         singleStatement.setSourceFile(sourceFile);
@@ -405,7 +410,7 @@ public class TranslationUnitToAstConverter {
         return singleStatement;
     }
     
-    private @NonNull CppStatement convertCppStatement(@NonNull TranslationUnit unit, CppStatement. @NonNull Type type)
+    private @NonNull CppStatement convertCppStatement(@NonNull TranslationUnit unit, CppStatement.@NonNull Type type)
             throws FormatException {
         ICode expression = null;
         // first two strings inside are # and the type, skip these
@@ -428,7 +433,8 @@ public class TranslationUnitToAstConverter {
             throw ExceptionUtil.makeException("Found " + type + " outside of switch ", unit);
         }
         SwitchStatement switchStmt = notNull(switchs.peek());
-        CaseStatement caseStatement = new CaseStatement(getPc(), makeCode(unit, 0, condEndIndex, false), type, switchStmt);
+        CaseStatement caseStatement
+                = new CaseStatement(getPc(), makeCode(unit, 0, condEndIndex, false), type, switchStmt);
         caseStatement.setSourceFile(sourceFile);
         caseStatement.setCondition(getEffectiveCondition());
         caseStatement.setLineStart(unit.getStartLine());
@@ -645,8 +651,8 @@ public class TranslationUnitToAstConverter {
                 popFormula();
                 
             } else if (allowTranslationUnits // this means we should recursively walk through non-allowed elements
-                    || child.getType().equals("macro" ) // sometimes srcML randomly interprets function calls as macros...
-                    ) { 
+                || child.getType().equals("macro") // sometimes srcML randomly interprets function calls as macros...
+            ) { 
                 // TODO: log a warning here?
                 
                 // save everything up to this point
@@ -679,22 +685,23 @@ public class TranslationUnitToAstConverter {
             result.add(codeElement);
         }
         
+        ICode resultCode;
+        
         if (result.size() == 0) {
             throw ExceptionUtil.makeException("makeCode() Found no elements to make code", unit);
             
         } else if (result.size() == 1) {
-            return notNull(result.get(0));
+            resultCode = notNull(result.get(0));
             
         } else {
-            ICode combined = notNull(result.get(0));
+            resultCode = notNull(result.get(0));
             
             for (int i = 1; i < result.size(); i++) {
-                combined = joinCodes(combined, result.get(i));
+                resultCode = joinCodes(resultCode, result.get(i));
             }
-            
-            return combined;
         }
         
+        return resultCode;
     }
     
     /**

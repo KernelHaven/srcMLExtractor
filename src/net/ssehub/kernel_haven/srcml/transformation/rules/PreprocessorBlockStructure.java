@@ -32,8 +32,8 @@ public class PreprocessorBlockStructure implements ITransformationRule {
      *
      */
     private static class NestedElement {
-        @NonNull ITranslationUnit parent;
-        @NonNull ITranslationUnit child;
+        private @NonNull ITranslationUnit parent;
+        private @NonNull ITranslationUnit child;
         
         public NestedElement(@NonNull ITranslationUnit parent, @NonNull ITranslationUnit child) {
             this.parent = parent;
@@ -56,7 +56,7 @@ public class PreprocessorBlockStructure implements ITransformationRule {
     
     /**
      * Stores for each {@link PreprocessorBlock} the encapsulated translation units, that are the nodes which are on
-     * the same layer but should be nested inside the {@link PreprocessorBlock}
+     * the same layer but should be nested inside the {@link PreprocessorBlock}.
      */
     private Map<@Nullable PreprocessorBlock, List<@NonNull NestedElement>> encapsulatedElementsMap
             = new HashMap<>();

@@ -262,8 +262,10 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         
         assertElement(SingleStatement.class, "1", "1", elements.get(0));
         CppBlock ifElem = assertIf("A && B", "A && B", and("A", "B"), 1, Type.IF, elements.get(1));
-        CppBlock elifElem = assertIf("!(A && B) && !C", "!(A && B) && !C", notAAndBAndNotC, 1, Type.ELSEIF, elements.get(2));
-        CppBlock elseElem = assertIf("!(A && B) && !!C", "!(A && B) && !!C", notAAndBAndNotNotC, 1, Type.ELSE, elements.get(3));
+        CppBlock elifElem = assertIf("!(A && B) && !C", "!(A && B) && !C", notAAndBAndNotC, 1,
+                Type.ELSEIF, elements.get(2));
+        CppBlock elseElem = assertIf("!(A && B) && !!C", "!(A && B) && !!C", notAAndBAndNotNotC, 1,
+                Type.ELSE, elements.get(3));
         assertElement(SingleStatement.class, "1", "1", elements.get(4));
         
         assertElement(SingleStatement.class, "A && B", "A && B", ifElem.getNestedElement(0));
@@ -309,7 +311,8 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         Formula f = and(not(and(or("A", not(not("B"))), "C")), not("D"));
 
         assertElement(SingleStatement.class, "1", "1", elements.get(0));
-        CppBlock ifElem = assertIf("!((A || !!B) && C) && !D", "!((A || !!B) && C) && !D", f, 1, Type.IF, elements.get(1));
+        CppBlock ifElem = assertIf("!((A || !!B) && C) && !D", "!((A || !!B) && C) && !D", f, 1,
+                Type.IF, elements.get(1));
         assertElement(SingleStatement.class, "1", "1", elements.get(2));
         
         assertElement(SingleStatement.class, "!((A || !!B) && C) && !D", "!((A || !!B) && C) && !D",

@@ -81,7 +81,7 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
     /**
      * Sets the effective condition (for all <tt>&#35;else</tt> and <tt>&#35;elif</tt> statements
      * it considers also the negation of previous blocks).
-     * @param effectiveCondition The effective condition considering previous elements (not the presence condition, also
+     * @param parsedCondition The effective condition considering previous elements (not the presence condition, also
      *     considering surrounding blocks!).
      */
     public void setEffectiveCondition(@NonNull Formula parsedCondition) {

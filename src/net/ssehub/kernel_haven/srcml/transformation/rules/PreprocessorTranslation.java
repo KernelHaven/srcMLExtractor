@@ -72,7 +72,7 @@ public class PreprocessorTranslation implements ITransformationRule {
     private void createElse(@NonNull ITranslationUnit parent, @NonNull TranslationUnit child) {
         PreprocessorIf startingIf = notNull(parents.peekFirst());
         PreprocessorElse newUnit = null;
-        switch (((CodeUnit)child.getNestedElement(1)).getCode()) {
+        switch (((CodeUnit) child.getNestedElement(1)).getCode()) {
         case "else":
             newUnit = new PreprocessorElse(Type.ELSE, null, startingIf);
             startingIf.addSibling(newUnit);
@@ -81,6 +81,8 @@ public class PreprocessorTranslation implements ITransformationRule {
             newUnit = new PreprocessorElse(Type.ELSEIF, getCondition(child, true), startingIf);
             startingIf.addSibling(newUnit);
             break;
+        default:
+            // ignore
         }
         if (null != newUnit) {
             newUnit.setStartLine(child.getStartLine());
@@ -97,7 +99,7 @@ public class PreprocessorTranslation implements ITransformationRule {
      */
     private void createIf(@NonNull ITranslationUnit parent, @NonNull TranslationUnit child) {
         PreprocessorIf newUnit = null;
-        switch (((CodeUnit)child.getNestedElement(1)).getCode()) {
+        switch (((CodeUnit) child.getNestedElement(1)).getCode()) {
         case "ifdef":
             newUnit = new PreprocessorIf(Type.IFDEF, "defined(" + getCondition(child, false) + ")");
             break;
@@ -107,6 +109,8 @@ public class PreprocessorTranslation implements ITransformationRule {
         case "if":
             newUnit = new PreprocessorIf(Type.IF, getCondition(child, true));
             break;
+        default:
+            // ignore
         }
         if (null != newUnit) {
             newUnit.setStartLine(child.getStartLine());

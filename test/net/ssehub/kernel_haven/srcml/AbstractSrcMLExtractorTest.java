@@ -80,6 +80,8 @@ public class AbstractSrcMLExtractorTest {
      * Helper method which runs the {@link SrcMLExtractor} on the specified source file.
      *  
      * @param file The source file to parse.
+     * @param headerHandling The header handling that should be used.
+     * 
      * @return The parsed code model, ready for testing the result.
      */
     protected SourceFile<ISyntaxElement> loadFile(String file, HeaderHandling headerHandling) {
@@ -117,6 +119,10 @@ public class AbstractSrcMLExtractorTest {
      * @param presenceCondition The expected presence/compound in c-style. This contains also all surrounding
      *     conditions.
      * @param element The element to test.
+     * 
+     * @param <T> The type of element that is expected.
+     * 
+     * @return The element to test, cast to the correct type.
      */
     @SuppressWarnings({ "null", "unchecked" })
     protected <T extends ISyntaxElement> @NonNull T assertElement(Class<T> type, String condition,
@@ -154,7 +160,7 @@ public class AbstractSrcMLExtractorTest {
         assertEquals("Wrong number of nested statements", numNested, cppIf.getNestedElementCount());
         
         if (ifCondition == null) {
-            assertNull("Wrong CPP-If condition",cppIf.getCondition());
+            assertNull("Wrong CPP-If condition", cppIf.getCondition());
         } else {
             assertEquals("Wrong CPP-If condition", ifCondition, cppIf.getCondition());
         }

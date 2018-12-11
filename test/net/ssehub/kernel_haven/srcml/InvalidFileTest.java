@@ -9,6 +9,11 @@ import net.ssehub.kernel_haven.SetUpException;
 import net.ssehub.kernel_haven.test_utils.TestConfiguration;
 import net.ssehub.kernel_haven.util.ExtractorException;
 
+/**
+ * Tests that invalid source files are correctly detected.
+ * 
+ * @author Adam
+ */
 public class InvalidFileTest extends AbstractSrcMLExtractorTest {
 
     /**

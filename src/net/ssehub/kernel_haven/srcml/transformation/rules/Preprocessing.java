@@ -25,7 +25,10 @@ public class Preprocessing {
     
     /**
      * Restructures the {@link ITranslationUnit}s.
+     * 
      * @param baseUnit The root element of the AST, which represents to complete parsed file.
+     * 
+     * @throws FormatException If converting the translation unit fails.
      */
     public void convert(@NonNull ITranslationUnit baseUnit) throws FormatException {
         /*

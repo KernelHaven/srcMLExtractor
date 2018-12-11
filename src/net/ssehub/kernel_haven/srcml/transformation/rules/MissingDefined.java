@@ -10,6 +10,10 @@ import net.ssehub.kernel_haven.srcml.transformation.PreprocessorBlock;
 import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
+/**
+ * Replace all variables in PreprocessorBlock conditions that have no surrounding "defined()" with "0"
+ * Removes the spaces between the elements, e.g. "defined ( A ) & & defined ( B )" -> "defined(A)&&defined(B)"
+ */
 public class MissingDefined implements ITransformationRule {
 
     private static final @NonNull Pattern VARIABLE_PATTERN = notNull(Pattern.compile("[A-Za-z0-9_]+"));

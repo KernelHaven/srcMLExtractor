@@ -18,6 +18,22 @@ import org.junit.runners.Parameterized.Parameters;
 @RunWith(Parameterized.class)
 public class DeactivatedRobustnessTests extends RobustnessTests {
     
+    /**
+     * Creates a test instance.
+     * 
+     * @param file The file to run for.
+     */
+    public DeactivatedRobustnessTests(Path file) {
+        super(file);
+    }
+    
+    /**
+     * Returns the test data.
+     * 
+     * @return The list of files that this test should run on.
+     * 
+     * @throws IOException If enumerating the files fails.
+     */
     @Parameters(name = "{0}")
     public static Object[] data() throws IOException {
         List<Path> sourceFiles = Files.walk(TEST_FILES_PATH)
@@ -28,8 +44,5 @@ public class DeactivatedRobustnessTests extends RobustnessTests {
         return sourceFiles.toArray();
     }
     
-    public DeactivatedRobustnessTests(Path file) {
-        super(file);
-    }
 
 }

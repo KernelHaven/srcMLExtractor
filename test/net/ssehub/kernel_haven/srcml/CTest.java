@@ -133,7 +133,8 @@ public class CTest extends AbstractSrcMLExtractorTest {
         assertThat(block.getLineStart(), is(4));
         assertThat(block.getLineEnd(), is(5));
         
-        SingleStatement printStmt = assertElement(SingleStatement.class, "CONFIG_DEBUG", "CONFIG_DEBUG", block.getNestedElement(0));
+        SingleStatement printStmt = assertElement(SingleStatement.class, "CONFIG_DEBUG", "CONFIG_DEBUG",
+                block.getNestedElement(0));
         assertThat(((Code) printStmt.getCode()).getText(), is("printf ( \"Debugging\" ) ;"));
         assertThat(printStmt.getType(), is(SingleStatement.Type.INSTRUCTION));
         assertThat(printStmt.getNestedElementCount(), is(0));

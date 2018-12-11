@@ -14,6 +14,7 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
  *   <li> Ternary operators will be translated into a statement and an else expression</li>
  *   <li> Array declarations may be translated into a statement and a block</li>
  * </ul>
+ * .
  * 
  * @author El-Sharkawy
  *
@@ -66,7 +67,7 @@ public class SingleStatementStructures implements ITransformationRule {
         
         // Remove touched elements
         boolean allElementsRemoved = false;
-        while(!allElementsRemoved) {
+        while (!allElementsRemoved) {
             int removalIndex = unit.size() - 1;
             ITranslationUnit lastElement = unit.getNestedElement(removalIndex);
             unit.removeNested(removalIndex);
