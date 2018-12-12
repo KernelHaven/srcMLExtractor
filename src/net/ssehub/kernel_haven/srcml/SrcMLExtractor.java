@@ -160,13 +160,13 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             throw new CodeExtractorException(relativeTarget, e);
             
         } finally {
-//            if (worker != null) {
-//                try {
-//                    worker.join();
-//                } catch (InterruptedException e) {
-//                    // ignore
-//                }
-//            }
+            if (worker != null) {
+                try {
+                    worker.join();
+                } catch (InterruptedException e) {
+                    // ignore
+                }
+            }
             if (!stderr.toString().isEmpty()) {
                 LOGGER.logDebug(stderr.toString().split("\n"));
             }
