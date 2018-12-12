@@ -64,6 +64,11 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
         return condition;
     }
     
+    /**
+     * Sets a new value for the condition of this block.
+     * 
+     * @param condition The new condition for this element.
+     */
     public void setCondition(@Nullable String condition) {
         this.condition = condition;
     }

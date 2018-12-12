@@ -50,20 +50,46 @@ public class IncludeExpander implements ISyntaxElementVisitor {
     
     private @NonNull Deque<@NonNull ISyntaxElement> parents;
     
+    /**
+     * Creates a new {@link IncludeExpander} for the given target file.
+     * 
+     * @param absoulteTarget The absolute path to the file that we are expanding #includes for.
+     * @param extractor The extractor to use for parsing included headers.
+     */
     public IncludeExpander(@NonNull File absoulteTarget, @NonNull SrcMLExtractor extractor) {
         this.extractor = extractor;
         this.folder = notNull(absoulteTarget.getParentFile());
         this.parents = new LinkedList<>();
     }
     
+    /**
+     * Does #include expansion on the given file.
+     * 
+     * @param file The file to expand #includes in.
+     */
     public void expand(@NonNull ISyntaxElement file) {
         file.accept(this);
     }
 
+    /**
+     * Returns the location of the given system-include.
+     * 
+     * @param include The system-include as found inside the #include <> statement. 
+     * 
+     * @return The path to the system-include file, or <code>null</code> if not found.
+     */
     private @Nullable File findSystemFile(@NonNull String include) {
         return null; // TODO AK: currently not supported
     }
     
+    /**
+     * Returns the location of the given quote-include. This falls back to {@link #findSystemFile(String)} if no
+     * local file is found.
+     * 
+     * @param include The quote-include as found inside the #include "" statement. 
+     * 
+     * @return The path to the quote-include file, or <code>null</code> if not found.
+     */
     private @Nullable File findQuoteFile(@NonNull String include) {
         File result = null;
         
@@ -81,6 +107,13 @@ public class IncludeExpander implements ISyntaxElementVisitor {
         return result;
     }
     
+    /**
+     * Finds the file location for the given include directive.
+     * 
+     * @param include The include directive to find the location for. Must either be surrounded with "" or <>.
+     * 
+     * @return The location of the given included file, or <code>null</code> if not found.
+     */
     private @Nullable File findFile(@NonNull String include) {
         File result = null;
         

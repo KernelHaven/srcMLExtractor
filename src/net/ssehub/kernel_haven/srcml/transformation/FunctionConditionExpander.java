@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.ssehub.kernel_haven.code_model.ast.Code;
+import net.ssehub.kernel_haven.code_model.ast.File;
 import net.ssehub.kernel_haven.code_model.ast.Function;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElementVisitor;
@@ -24,6 +25,11 @@ import net.ssehub.kernel_haven.util.logic.True;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 import net.ssehub.kernel_haven.util.null_checks.Nullable;
 
+/**
+ * Expands the function definition with conditions surrounding previous declaration for this function.
+ * 
+ * @author Adam
+ */
 public class FunctionConditionExpander implements ISyntaxElementVisitor {
     
     private static final Logger LOGGER = Logger.get();
@@ -33,10 +39,18 @@ public class FunctionConditionExpander implements ISyntaxElementVisitor {
      */
     private Map<String, List<@NonNull Formula>> declPcs;
     
+    /**
+     * Creates a new {@link FunctionConditionExpander}.
+     */
     public FunctionConditionExpander() {
         declPcs = new HashMap<>();
     }
     
+    /**
+     * Does the condition expansion for the given AST.
+     * 
+     * @param unit The AST to expand conditions in. Typically, this a the complete {@link File}.
+     */
     public void expand(@NonNull ISyntaxElement unit) {
         unit.accept(this);
     }
@@ -45,6 +59,14 @@ public class FunctionConditionExpander implements ISyntaxElementVisitor {
      * The following functions are used for filling declPcs
      */
     
+    /**
+     * Returns the name of the function that is declared inside the given {@link SingleStatement}.
+     * 
+     * @param functionDecl The statement to search the function name in. Its type should be
+     *      {@link SingleStatement.Type#FUNCTION_DECLARATION}.
+     *      
+     * @return The name of the function, or <code>null</code> if it could not be found.
+     */
     private @Nullable String getFunctionName(@NonNull SingleStatement functionDecl) {
         String result = null;
         
@@ -113,6 +135,13 @@ public class FunctionConditionExpander implements ISyntaxElementVisitor {
         return result;
     }
     
+    /**
+     * Adds a presence condition of a declaration of a function to its list. This is called for all function
+     * declarations that are found.
+     * 
+     * @param name The name of the function that was declared.
+     * @param pc The presence condition of the declaration.
+     */
     private void putDeclPc(@NonNull String name, @NonNull Formula pc) {
         // ignore True constants
         if (pc == True.INSTANCE) {
@@ -142,6 +171,12 @@ public class FunctionConditionExpander implements ISyntaxElementVisitor {
      * The following functions are used for applying the new conditions for the function
      */
     
+    /**
+     * Recursively appends a {@link Formula} to all presence conditions of sub-tree.
+     * 
+     * @param element The element to add the new part to (including all nested elements).
+     * @param newPart The new part to add to all presence conditions (using a {@link Conjunction}).
+     */
     private void updateAllPcs(@NonNull ISyntaxElement element, @NonNull Formula newPart) {
         Formula previousPc = element.getPresenceCondition();
         if (previousPc != True.INSTANCE) {

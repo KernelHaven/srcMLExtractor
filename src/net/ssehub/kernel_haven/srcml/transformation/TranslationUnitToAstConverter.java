@@ -61,6 +61,11 @@ public class TranslationUnitToAstConverter {
     
     private java.io.@NonNull File sourceFile;
     
+    /**
+     * Creates a {@link TranslationUnitToAstConverter} for the given source file.
+     * 
+     * @param sourceFile The source file that the translation units stem from.
+     */
     public TranslationUnitToAstConverter(java.io.@NonNull File sourceFile) {
         cppPresenceConditions = new ArrayDeque<>();
         cppEffectiveConditions = new ArrayDeque<>();
@@ -78,6 +83,12 @@ public class TranslationUnitToAstConverter {
         return cppPresenceConditions.isEmpty() ? True.INSTANCE : notNull(cppPresenceConditions.peek());
     }
     
+    /**
+     * Returns the currently effective condition. The currently effective condition is the condition that is directly
+     * surrounding the current element.
+     * 
+     * @return The currently effective condition.
+     */
     private @NonNull Formula getEffectiveCondition() {
         return cppEffectiveConditions.isEmpty() ? True.INSTANCE : notNull(cppEffectiveConditions.peek());
     }
@@ -85,7 +96,8 @@ public class TranslationUnitToAstConverter {
     /**
      * Will compute a new presence condition based on the given formula on the current state of the stack and pushes
      * the result on top of the stack.
-     * @param cppCondition
+     * 
+     * @param cppCondition The new encountered CPP condition.
      */
     private void pushFormula(@NonNull Formula cppCondition) {
         cppEffectiveConditions.push(cppCondition);
@@ -97,6 +109,11 @@ public class TranslationUnitToAstConverter {
         }
     }
     
+    /**
+     * Pops the previously pushed CPP condition. 
+     * 
+     * @see #pushFormula(Formula)
+     */
     private void popFormula() {
         cppPresenceConditions.pop();
         cppEffectiveConditions.pop();
@@ -104,8 +121,12 @@ public class TranslationUnitToAstConverter {
     
     /**
      * Translates the {@link ITranslationUnit}-structure into a {@link ISyntaxElement} (AST).
+     * 
      * @param element The root element representing the complete file.
+     * 
      * @return The translated AST still representing the complete file.
+     * 
+     * @throws FormatException If converting the given {@link ITranslationUnit} fails.
      */
     public @NonNull ISyntaxElement convert(@NonNull ITranslationUnit element) throws FormatException {
         ISyntaxElement result;
@@ -121,6 +142,16 @@ public class TranslationUnitToAstConverter {
         return result;
     }
     
+    /**
+     * Converts the given {@link TranslationUnit} based on its {@link TranslationUnit#getType()}. Recursively
+     * descends into nested elements.
+     * 
+     * @param unit The unit to convert.
+     * 
+     * @return The result of the conversion.
+     * 
+     * @throws FormatException If converting the element fails.
+     */
     private @NonNull ISyntaxElement convertTranslationUnit(@NonNull TranslationUnit unit) throws FormatException {
         Formula pc = getPc();
         
@@ -398,6 +429,17 @@ public class TranslationUnitToAstConverter {
 
     }
     
+    /**
+     * Creates a {@link SingleStatement} based on the given {@link TranslationUnit}. The nested elements inside the
+     * given unit are converted to {@link Code} (see {@link #makeCode(ITranslationUnit, int, int, boolean)}).
+     * 
+     * @param unit The unit that a {@link SingleStatement} should be created for.
+     * @param type The type of {@link SingleStatement} that should be created.
+     * 
+     * @return The created {@link SingleStatement}.
+     * 
+     * @throws FormatException If converting fails.
+     */
     private @NonNull SingleStatement createSingleStatement(@NonNull TranslationUnit unit,
             SingleStatement.@NonNull Type type) throws FormatException {
         
@@ -410,6 +452,18 @@ public class TranslationUnitToAstConverter {
         return singleStatement;
     }
     
+    /**
+     * Creates a {@link CppStatement} based on the given {@link TranslationUnit}. The nested elements inside the
+     * given unit are converted to {@link Code} (except the first two)
+     * (see {@link #makeCode(ITranslationUnit, int, int, boolean)}).
+     * 
+     * @param unit The unit that a {@link CppStatement} should be created for.
+     * @param type The type of {@link CppStatement} that should be created.
+     * 
+     * @return The created {@link CppStatement}.
+     * 
+     * @throws FormatException If converting fails.
+     */
     private @NonNull CppStatement convertCppStatement(@NonNull TranslationUnit unit, CppStatement.@NonNull Type type)
             throws FormatException {
         ICode expression = null;
@@ -426,6 +480,20 @@ public class TranslationUnitToAstConverter {
         return statement;
     }
 
+    /**
+     * Creates a {@link CaseStatement} based on the given {@link TranslationUnit}. The nested elements inside the
+     * given unit up to condEndIndex are converted to {@link Code}
+     * (see {@link #makeCode(ITranslationUnit, int, int, boolean)}). Further nested elements are recursively
+     * converted and added as children.
+     * 
+     * @param unit The unit that a {@link CaseStatement} should be created for.
+     * @param condEndIndex The index of nested elements where the case condition ends.
+     * @param type The type of {@link CaseStatement} that should be created.
+     * 
+     * @return The created {@link CaseStatement}.
+     * 
+     * @throws FormatException If converting fails.
+     */
     private @NonNull CaseStatement convertCaseStatement(@NonNull TranslationUnit unit, int condEndIndex,
             @NonNull CaseType type) throws FormatException {
         
@@ -446,6 +514,17 @@ public class TranslationUnitToAstConverter {
         return caseStatement;
     }
 
+    /**
+     * Creates a {@link TypeDefinition} out of the given {@link TranslationUnit}.
+     * 
+     * @param unit The unit to convert to a {@link TypeDefinition}.
+     * @param pc The presence condition of the {@link TypeDefinition}.
+     * @param type The type of the {@link TypeDefinition}.
+     * 
+     * @return The converted {@link TypeDefinition}.
+     * 
+     * @throws FormatException If converting fails.
+     */
     private @NonNull TypeDefinition createTypeDef(@NonNull TranslationUnit unit, @NonNull Formula pc,
             @NonNull TypeDefType type) throws FormatException {
         /*
@@ -509,6 +588,19 @@ public class TranslationUnitToAstConverter {
         return typeDef;
     }
 
+    /**
+     * Creates a {@link LoopStatement} from the given {@link TranslationUnit}.
+     * 
+     * @param unit The unit to convert to a {@link LoopStatement}.
+     * @param type The type of {@link LoopStatement} to create.
+     * @param blockIndex The index of nested elements where the loop body block is located at.
+     * @param condStartIndex The index of nested elements where the first condition element is located at. 
+     * @param condEndIndex The index of nested elements where the last condition element is located at.
+     *  
+     * @return The created {@link LoopStatement}.
+     * 
+     * @throws FormatException If converting fails.
+     */
     private @NonNull LoopStatement createLoop(@NonNull TranslationUnit unit, @NonNull LoopType type, int blockIndex,
             int condStartIndex, int condEndIndex) throws FormatException {
         
@@ -522,6 +614,15 @@ public class TranslationUnitToAstConverter {
         return loop;
     }
     
+    /**
+     * Converts the given {@link PreprocessorBlock} to a {@link CppBlock}.
+     * 
+     * @param cppBlock The {@link PreprocessorBlock} to convert.
+     * 
+     * @return The converted {@link CppBlock}.
+     * 
+     * @throws FormatException If converting fails.
+     */
     private @NonNull CppBlock convertPreprocessorBlock(@NonNull PreprocessorBlock cppBlock) throws FormatException {
         Formula condition = notNull(cppBlock.getEffectiveCondition()); // all CPP blocks have effective conditions now
         pushFormula(condition);
@@ -589,7 +690,7 @@ public class TranslationUnitToAstConverter {
      * @param element The element that may be added as a sibling to ifStatement.
      * @param ifStatement The ifStatement that element may be a sibling of.
      */
-    private void addIfSibling(ISyntaxElement element, BranchStatement ifStatement) throws FormatException {
+    private void addIfSibling(ISyntaxElement element, BranchStatement ifStatement) {
         if (element instanceof BranchStatement) {
             ifStatement.addSibling((BranchStatement) element);
             
@@ -600,6 +701,18 @@ public class TranslationUnitToAstConverter {
         }
     }
     
+    /**
+     * Converts the given nested elements of the given unit to {@link ICode}. 
+     * 
+     * @param unit The unit that the nested elements should be converted for.
+     * @param start The index of the first element to convert; inclusive.
+     * @param end The index of the last element to convert, inclusive.
+     * @param allowTranslationUnits Whether {@link TranslationUnit}s should be recursively turned into {@link ICode}.
+     * 
+     * @return An {@link ICode} representation of the given nested elements.
+     * 
+     * @throws FormatException If converting the elmeents fails.
+     */
     private @NonNull ICode makeCode(@NonNull ITranslationUnit unit, int start, int end,
             boolean allowTranslationUnits) throws FormatException {
         
@@ -754,6 +867,13 @@ public class TranslationUnitToAstConverter {
         return result;
     }
     
+    /**
+     * Helper method to determine if the given {@link ITranslationUnit} can be converted to {@link Code}.
+     * 
+     * @param unit The unit to test.
+     * 
+     * @return Whether the given unit can safely be considered to be a {@link Code}.
+     */
     private boolean isCode(ITranslationUnit unit) {
         return !(unit instanceof TranslationUnit) || unit.getType().equals("comment") || unit.getType().equals("macro");
     }

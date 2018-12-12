@@ -25,6 +25,11 @@ public class CodeUnit implements ITranslationUnit {
         this.code = code;
     }
     
+    /**
+     * Returns the code that is stored in this {@link CodeUnit}.
+     * 
+     * @return The literal code text.
+     */
     public @NonNull String getCode() {
         return code;
     }
