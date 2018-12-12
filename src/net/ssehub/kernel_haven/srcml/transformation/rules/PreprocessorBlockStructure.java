@@ -28,13 +28,17 @@ public class PreprocessorBlockStructure implements ITransformationRule {
     
     /**
      * Simple data structure/container. Stores the current, obsolete parent and its child (which shall be moved).
-     * @author El-Sharkawy
-     *
      */
     private static class NestedElement {
         private @NonNull ITranslationUnit parent;
         private @NonNull ITranslationUnit child;
         
+        /**
+         * Creates a {@link NestedElement}.
+         * 
+         * @param parent The parent element.
+         * @param child The child element.
+         */
         public NestedElement(@NonNull ITranslationUnit parent, @NonNull ITranslationUnit child) {
             this.parent = parent;
             this.child = child;
@@ -43,11 +47,16 @@ public class PreprocessorBlockStructure implements ITransformationRule {
     }
     
     private static class BlockParent {
-        @NonNull ITranslationUnit parent;
-        @NonNull PreprocessorBlock child;
-        
+        private @NonNull ITranslationUnit parent;
+        private @NonNull PreprocessorBlock child;
+
+        /**
+         * Creates a {@link BlockParent}.
+         * 
+         * @param parent The parent element.
+         * @param child The child element.
+         */
         public BlockParent(@NonNull ITranslationUnit parent, @NonNull PreprocessorBlock child) {
-            super();
             this.parent = parent;
             this.child = child;
         }
@@ -79,11 +88,13 @@ public class PreprocessorBlockStructure implements ITransformationRule {
     
     /**
      * Returns the list of elements, which shall be nested below the specified {@link PreprocessorBlock}.
+     * 
      * @param cppBlock The specified {@link PreprocessorBlock} under which the elements shall be nested, may be
      *     <tt>null</tt> in case of an {@link PreprocessorEndIf} shall be removed from the top level.
-     * @return
+     *     
+     * @return The list of encapsulated elements.
      */
-    private List<@NonNull NestedElement> getEncapsulatedElements(@Nullable PreprocessorBlock cppBlock) {
+    private @NonNull List<@NonNull NestedElement> getEncapsulatedElements(@Nullable PreprocessorBlock cppBlock) {
         List<@NonNull NestedElement> list = encapsulatedElementsMap.get(cppBlock);
         if (null == list) {
             list = new ArrayList<>();
