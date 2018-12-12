@@ -154,15 +154,18 @@ public class TranslationUnitToAstConverter {
      */
     private @NonNull ISyntaxElement convertTranslationUnit(@NonNull TranslationUnit unit) throws FormatException {
         Formula pc = getPc();
+        ISyntaxElement result;
         
         switch (unit.getType()) {
         
         case "function_decl":
-            return createSingleStatement(unit, SingleStatement.Type.FUNCTION_DECLARATION);
+            result = createSingleStatement(unit, SingleStatement.Type.FUNCTION_DECLARATION);
+            break;
             
         case "struct_decl": // falls through
         case "decl_stmt":
-            return createSingleStatement(unit, SingleStatement.Type.DECLARATION);
+            result = createSingleStatement(unit, SingleStatement.Type.DECLARATION);
+            break;
             
         case "expr_stmt": // falls through
         case "continue":  // falls through
@@ -170,10 +173,12 @@ public class TranslationUnitToAstConverter {
         case "goto":      // falls through 
         case "return":    // falls through
         case "empty_stmt":
-            return createSingleStatement(unit, SingleStatement.Type.INSTRUCTION);
+            result = createSingleStatement(unit, SingleStatement.Type.INSTRUCTION);
+            break;
             
         case "macro":
-            return createSingleStatement(unit, SingleStatement.Type.PREPROCESSOR_MACRO);
+            result = createSingleStatement(unit, SingleStatement.Type.PREPROCESSOR_MACRO);
+            break;
         
         case "label": {
             Label label = new Label(pc, makeCode(unit, 0, unit.size() - 1, false));
@@ -181,7 +186,8 @@ public class TranslationUnitToAstConverter {
             label.setCondition(getEffectiveCondition());
             label.setLineStart(unit.getStartLine());
             label.setLineEnd(unit.getEndLine());
-            return label;
+            result = label;
+            break;
         }
         
         case "comment": {
@@ -190,22 +196,26 @@ public class TranslationUnitToAstConverter {
             comment.setCondition(getEffectiveCondition());
             comment.setLineStart(unit.getStartLine());
             comment.setLineEnd(unit.getEndLine());
-            return comment;
+            result = comment;
+            break;
         }
         
         case "for": {
             // Last nested is the loop block, everything before is the condition
-            return createLoop(unit, LoopType.FOR, unit.size() - 1, 0, unit.size() - 2);
+            result = createLoop(unit, LoopType.FOR, unit.size() - 1, 0, unit.size() - 2);
+            break;
         }
             
         case "while": {
             // Last nested is the loop block, everything before is the condition
-            return createLoop(unit, LoopType.WHILE, unit.size() - 1, 0, unit.size() - 2);
+            result = createLoop(unit, LoopType.WHILE, unit.size() - 1, 0, unit.size() - 2);
+            break;
         }
         
         case "do": {
             // 2nd is block everything after is condition, we skip last element (a semicolon)
-            return createLoop(unit, LoopType.DO_WHILE, 1, 3, unit.size() - 2);
+            result = createLoop(unit, LoopType.DO_WHILE, 1, 3, unit.size() - 2);
+            break;
         }
         
         case "if": {
@@ -240,7 +250,8 @@ public class TranslationUnitToAstConverter {
                 }
             }
             
-            return ifStatement;
+            result = ifStatement;
+            break;
         }
             
         case "elseif": {
@@ -265,7 +276,8 @@ public class TranslationUnitToAstConverter {
                     elifBlock.addNestedElement(convert(child));
                 }
             }
-            return elifBlock;
+            result = elifBlock;
+            break;
         }
         
         case "else": {
@@ -282,23 +294,28 @@ public class TranslationUnitToAstConverter {
                 }
             }
             
-            return elseBlock;
+            result = elseBlock;
+            break;
         }
         
         case "enum": {
-            return createTypeDef(unit, pc, TypeDefType.ENUM);
+            result = createTypeDef(unit, pc, TypeDefType.ENUM);
+            break;
         }
             
         case "struct": {
-            return createTypeDef(unit, pc, TypeDefType.STRUCT);
+            result = createTypeDef(unit, pc, TypeDefType.STRUCT);
+            break;
         }
             
         case "typedef": {
-            return createTypeDef(unit, pc, TypeDefType.TYPEDEF);
+            result = createTypeDef(unit, pc, TypeDefType.TYPEDEF);
+            break;
         }
             
         case "union": {
-            return createTypeDef(unit, pc, TypeDefType.UNION);
+            result = createTypeDef(unit, pc, TypeDefType.UNION);
+            break;
         }
             
         case "unit": {
@@ -311,7 +328,8 @@ public class TranslationUnitToAstConverter {
                 file.addNestedElement(convert(unit.getNestedElement(i)));
             }
             
-            return file;
+            result = file;
+            break;
         }
         
         case "function": {
@@ -327,7 +345,8 @@ public class TranslationUnitToAstConverter {
             
             f.addNestedElement(convert(unit.getNestedElement(unit.size() - 1)));
             
-            return f;
+            result = f;
+            break;
         }
         
         case "block": {
@@ -344,7 +363,8 @@ public class TranslationUnitToAstConverter {
                 }
             }
             
-            return block;
+            result = block;
+            break;
         }
         
         case "switch": {
@@ -359,7 +379,8 @@ public class TranslationUnitToAstConverter {
             switchs.push(switchStatement);
             switchStatement.addNestedElement(convert(unit.getNestedElement(unit.size() - 1)));
             switchs.pop();
-            return switchStatement;
+            result = switchStatement;
+            break;
         }
         
         case "case": {
@@ -380,53 +401,64 @@ public class TranslationUnitToAstConverter {
                     }
                 }
             }
-            return convertCaseStatement(unit, lastElementIndex, CaseType.CASE);
+            result = convertCaseStatement(unit, lastElementIndex, CaseType.CASE);
+            break;
         }
         
         case "default": {
             /*
              * First Element is the condition, afterwards come nested statements
              */
-            return convertCaseStatement(unit, 0, CaseType.DEFAULT);
+            result = convertCaseStatement(unit, 0, CaseType.DEFAULT);
+            break;
         }
             
             
         case "cpp:define": {
-            return convertCppStatement(unit, CppStatement.Type.DEFINE);
+            result = convertCppStatement(unit, CppStatement.Type.DEFINE);
+            break;
         }
 
         case "cpp:undef": {
-            return convertCppStatement(unit, CppStatement.Type.UNDEF);
+            result = convertCppStatement(unit, CppStatement.Type.UNDEF);
+            break;
         }
             
         case "cpp:include": {
-            return convertCppStatement(unit, CppStatement.Type.INCLUDE);
+            result = convertCppStatement(unit, CppStatement.Type.INCLUDE);
+            break;
         }
             
         case "cpp:pragma": {
-            return convertCppStatement(unit, CppStatement.Type.PRAGMA);
+            result = convertCppStatement(unit, CppStatement.Type.PRAGMA);
+            break;
         }
             
         case "cpp:error": {
-            return convertCppStatement(unit, CppStatement.Type.ERROR);
+            result = convertCppStatement(unit, CppStatement.Type.ERROR);
+            break;
         }
             
         case "cpp:warning": {
-            return convertCppStatement(unit, CppStatement.Type.WARNING);
+            result = convertCppStatement(unit, CppStatement.Type.WARNING);
+            break;
         }
             
         case "cpp:line": {
-            return convertCppStatement(unit, CppStatement.Type.LINE);
+            result = convertCppStatement(unit, CppStatement.Type.LINE);
+            break;
         }
             
         case "cpp:empty": {
-            return convertCppStatement(unit, CppStatement.Type.EMPTY);
+            result = convertCppStatement(unit, CppStatement.Type.EMPTY);
+            break;
         }
         
         default:
             throw ExceptionUtil.makeException("Unexpected unit type: " + unit.getType(), unit);
         }
 
+        return result;
     }
     
     /**
