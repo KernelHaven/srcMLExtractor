@@ -35,11 +35,19 @@ public class AbstractSrcMLExtractorTest {
     
     protected static final @NonNull File RESOURCE_DIR = new File(AllTests.TESTDATA, "tmpRes");
     
+    /**
+     * Creates the temporary resource directory.
+     */
     @BeforeClass
     public static void setup() {
         RESOURCE_DIR.mkdir();
     }
     
+    /**
+     * Clears the temporary resource directory.
+     * 
+     * @throws IOException If clearing fails.
+     */
     @AfterClass
     public static void teardown() throws IOException {
         Util.deleteFolder(RESOURCE_DIR);
@@ -148,8 +156,22 @@ public class AbstractSrcMLExtractorTest {
         return (T) element;
     }
     
+    /**
+     * Tests that the given element is a {@link CppBlock}.
+     * 
+     * @param condition The expected condition of the element.
+     * @param presenceCondition The expected presence condition of the element.
+     * @param ifCondition The expected CPP condition of the CPP block. May be <code>null</code>.
+     * @param numNested The expected number of nested elements.
+     * @param type The expected type of CPP block.
+     * @param element The element that should be a CPP block.
+     * 
+     * @return The element cast to a {@link CppBlock}.
+     */
+    // CHECKSTYLE:OFF // too many arguments
     protected CppBlock assertIf(String condition, String presenceCondition, Formula ifCondition, int numNested,
             Type type, ISyntaxElement element) {
+    // CHECKSTYLE:ON
         
         assertElement(CppBlock.class, condition, presenceCondition, element);
         
@@ -168,6 +190,12 @@ public class AbstractSrcMLExtractorTest {
         return cppIf;
     }
     
+    /**
+     * Asserts that the given element is a {@link Code}.
+     * 
+     * @param text The expected literal code text.
+     * @param element The element that should be a {@link Code}.
+     */
     protected void assertCode(String text, ISyntaxElement element) {
         // Class check
         Assert.assertTrue("Wrong syntax element type: expected " + Code.class.getSimpleName() + "; actual: "

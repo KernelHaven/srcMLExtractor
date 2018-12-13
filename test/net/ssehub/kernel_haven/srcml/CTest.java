@@ -28,6 +28,9 @@ import net.ssehub.kernel_haven.code_model.ast.TypeDefinition;
  */
 public class CTest extends AbstractSrcMLExtractorTest {
     
+    /**
+     * Tests parsing of a file that contains only a single return statement.
+     */
     @Test
     public void returnStatement() {
         SourceFile<ISyntaxElement> ast = loadFile("Statement_SingleReturn.c");
@@ -39,7 +42,9 @@ public class CTest extends AbstractSrcMLExtractorTest {
         assertCode("return true ;", ret.getCode());
     }
     
-    
+    /**
+     * Tests that the names of global variables can be found in the parsed AST.
+     */
     @Test
     public void globalVariables() {
         SourceFile<ISyntaxElement> ast = loadFile("GlobalVariables.c");
@@ -97,6 +102,10 @@ public class CTest extends AbstractSrcMLExtractorTest {
         }
     }
     
+    /**
+     * Checks the AST created for testdata/c/LineNUmbers.c. Especially checks that that the line numbers of the
+     * elements are set properly.
+     */
     @Test
     @SuppressWarnings("null")
     public void testLineNumbers() {
