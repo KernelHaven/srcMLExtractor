@@ -30,7 +30,8 @@ public class SwitchCaseStructure implements ITransformationRule {
     /**
      * Searches for block-statements directly nested inside a switch to reorder elements only in this block and not
      * also in recursively nested blocks. Will also consider CPP-blocks.
-     * @param parent
+     * 
+     * @param parent The parent element to search in.
      */
     private void determineSwitchBlock(@NonNull ITranslationUnit parent) {
         // Determine recursively first layer of block-statements (probably there is more than 1 due to CPP).
@@ -47,7 +48,9 @@ public class SwitchCaseStructure implements ITransformationRule {
     /**
      * Reorders statements belonging to a case or default statement into this case or default statement, i.e., creating
      * the hierarchy.
+     * 
      * @param switchBlock A block which is directly nested inside a switch-statement.
+     * @param blockEndsWithBracket Whether the block ends with a curly bracket.
      */
     private void reorderElementsInSwitchBlock(@NonNull ITranslationUnit switchBlock, boolean blockEndsWithBracket) {
         // TODO SE: This won't consider if complete content of block is surrounded by one big CPP-block

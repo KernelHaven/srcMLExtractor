@@ -43,6 +43,9 @@ public class PreprocessorConditionComputationRule implements ITransformationRule
     private Formula unsupportedMacroFormula;
     private Pattern numericOperators;
     
+    /**
+     * Creates this rule.
+     */
     PreprocessorConditionComputationRule() {
         try {
             unsupportedExpressionFormula
@@ -107,8 +110,11 @@ public class PreprocessorConditionComputationRule implements ITransformationRule
     /**
      * Parses the passed condition into a Formula and sets it directly to the given {@link PreprocessorBlock}. Will
      * report any parsing error to the Logger.
+     * 
      * @param block The block to which the condition belongs to.
      * @param condition The unparsed condition in a form that the {@link SrcMlConditionGrammar} can handle it.
+     * 
+     * @throws FormatException If the condition could not be parsed.
      */
     private void parseAndSetCondition(@NonNull PreprocessorBlock block, @NonNull String condition)
             throws FormatException {

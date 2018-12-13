@@ -78,7 +78,7 @@ public class PreprocessorTranslation implements ITransformationRule {
             startingIf.addSibling(newUnit);
             break;
         case "elif":
-            newUnit = new PreprocessorElse(Type.ELSEIF, getCondition(child, true), startingIf);
+            newUnit = new PreprocessorElse(Type.ELSEIF, getCondition(child), startingIf);
             startingIf.addSibling(newUnit);
             break;
         default:
@@ -101,13 +101,13 @@ public class PreprocessorTranslation implements ITransformationRule {
         PreprocessorIf newUnit = null;
         switch (((CodeUnit) child.getNestedElement(1)).getCode()) {
         case "ifdef":
-            newUnit = new PreprocessorIf(Type.IFDEF, "defined(" + getCondition(child, false) + ")");
+            newUnit = new PreprocessorIf(Type.IFDEF, "defined(" + getCondition(child) + ")");
             break;
         case "ifndef":
-            newUnit = new PreprocessorIf(Type.IFNDEF, "!defined(" + getCondition(child, false) + ")");
+            newUnit = new PreprocessorIf(Type.IFNDEF, "!defined(" + getCondition(child) + ")");
             break;
         case "if":
-            newUnit = new PreprocessorIf(Type.IF, getCondition(child, true));
+            newUnit = new PreprocessorIf(Type.IF, getCondition(child));
             break;
         default:
             // ignore
@@ -119,7 +119,15 @@ public class PreprocessorTranslation implements ITransformationRule {
         }
     }
     
-    private @NonNull String getCondition(@NonNull TranslationUnit unit, boolean replaceMissingdefined) {
+    /**
+     * Returns the condition string of the given #ifdef, #ifndef or #if unit. This skips comments and considers
+     * line continuation.
+     * 
+     * @param unit The unit holding the condition.
+     * 
+     * @return The condition of the unit.
+     */
+    private @NonNull String getCondition(@NonNull TranslationUnit unit) {
         StringBuilder condition = new StringBuilder();
         
         for (int i = 2; i < unit.size(); i++) {

@@ -23,21 +23,24 @@ public class SingleStatementStructures implements ITransformationRule {
 
     @Override
     public void transform(@NonNull ITranslationUnit unit) throws FormatException {
-        int index;
-        if (unit instanceof TranslationUnit && (index = nestedStatementPosition(unit)) != -1) {
+        if (unit instanceof TranslationUnit) {
+            int index = nestedStatementPosition(unit);
             
-            // Designed as a loop, because elements may further contain a comment
-            boolean furtherProcessingNeeded;
-            do {
-                furtherProcessingNeeded = false;
-                if ("expr_stmt".equals(unit.getType()) || "decl_stmt".equals(unit.getType())
-                    || "return".equals(unit.getType())) {
-                    
-                    fixTranslationUnit((TranslationUnit) unit, index);
-                    index = nestedStatementPosition(unit);
-                    furtherProcessingNeeded = (-1 != index);
-                }
-            } while (furtherProcessingNeeded);
+            if (index != -1) {
+                // Designed as a loop, because elements may further contain a comment
+                boolean furtherProcessingNeeded;
+                do {
+                    furtherProcessingNeeded = false;
+                    if ("expr_stmt".equals(unit.getType()) || "decl_stmt".equals(unit.getType())
+                            || "return".equals(unit.getType())) {
+                        
+                        fixTranslationUnit((TranslationUnit) unit, index);
+                        index = nestedStatementPosition(unit);
+                        furtherProcessingNeeded = (-1 != index);
+                    }
+                } while (furtherProcessingNeeded);
+                
+            }
         }
         
         // Recursive part

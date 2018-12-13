@@ -7,10 +7,10 @@ import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
- * Else-If Statement hold a nested if statement. This rule will pull up all the nested statements and eleminate the
+ * Else-If Statement hold a nested if statement. This rule will pull up all the nested statements and eliminate the
  * nested if statement.
+ * 
  * @author El-Sharkawy
- *
  */
 public class ElseIfFixture implements ITransformationRule {
 
@@ -27,6 +27,13 @@ public class ElseIfFixture implements ITransformationRule {
         }
     }
 
+    /**
+     * Fixes the given else-if block. Pulls up the nested if statement.
+     * 
+     * @param elseIfBlock The else-if block to fix.
+     * 
+     * @throws FormatException If fixing the block fails.
+     */
     private void fixElseIfBlock(@NonNull ITranslationUnit elseIfBlock) throws FormatException {
         if (elseIfBlock.size() == 2 && elseIfBlock.getNestedElement(1) instanceof TranslationUnit
             && "if".equals(elseIfBlock.getNestedElement(1).getType()) && elseIfBlock instanceof TranslationUnit) {
