@@ -4,11 +4,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import net.ssehub.kernel_haven.code_model.JsonCodeModelCache;
 import net.ssehub.kernel_haven.code_model.SourceFile;
 import net.ssehub.kernel_haven.code_model.ast.Code;
 import net.ssehub.kernel_haven.code_model.ast.CompoundStatement;
@@ -19,6 +21,7 @@ import net.ssehub.kernel_haven.code_model.ast.Function;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
 import net.ssehub.kernel_haven.code_model.ast.SingleStatement;
 import net.ssehub.kernel_haven.code_model.ast.TypeDefinition;
+import net.ssehub.kernel_haven.util.FormatException;
 
 /**
  * Tests the translation of C-statements.
@@ -156,6 +159,25 @@ public class CTest extends AbstractSrcMLExtractorTest {
         assertThat(retStmt.getNestedElementCount(), is(0));
         assertThat(retStmt.getLineStart(), is(7));
         assertThat(retStmt.getLineEnd(), is(7));
+    }
+    
+    /**
+     * Tests that the AST from "testdata/c/Komplex2.c" is parsed correctly. This test does a full equality check on
+     * the AST.
+     * 
+     * @throws FormatException unwanted. 
+     * @throws IOException unwanted.
+     */
+    @SuppressWarnings("null")
+    @Test
+    public void testComplexAst() throws IOException, FormatException {
+        SourceFile<ISyntaxElement> ast = loadFile("Komplex2.c");
+        
+        // load manually verified, cached version of the AST; this is known to be correct
+        JsonCodeModelCache cache = new JsonCodeModelCache(new java.io.File("testdata/c"));
+        SourceFile<ISyntaxElement> expected = cache.read(new java.io.File("Komplex2.c")).castTo(ISyntaxElement.class);
+        
+        assertThat(ast, is(expected));
     }
     
     @Override

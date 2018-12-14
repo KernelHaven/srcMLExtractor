@@ -1,0 +1,737 @@
+{
+	"version": 2,
+	"path": "c/Komplex2.c",
+	"elements": [
+		{
+			"class": "net.ssehub.kernel_haven.code_model.ast.File",
+			"id": 1,
+			"sourceFile": "c/Komplex2.c",
+			"lineStart": 1,
+			"lineEnd": 49,
+			"condition": "1",
+			"presenceCondition": "1",
+			"filePath": "c/Komplex2.c",
+			"nested": [
+				{
+					"class": "net.ssehub.kernel_haven.code_model.ast.CppStatement",
+					"id": 2,
+					"sourceFile": "c/Komplex2.c",
+					"lineStart": 1,
+					"lineEnd": 1,
+					"condition": "1",
+					"presenceCondition": "1",
+					"cppType": "INCLUDE",
+					"cppExpression": {
+						"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+						"id": 3,
+						"sourceFile": "c/Komplex2.c",
+						"lineStart": 1,
+						"lineEnd": 1,
+						"condition": "1",
+						"presenceCondition": "1",
+						"code": "< something.h >"
+					}
+				},
+				{
+					"class": "net.ssehub.kernel_haven.code_model.ast.TypeDefinition",
+					"id": 4,
+					"sourceFile": "c/Komplex2.c",
+					"lineStart": 3,
+					"lineEnd": 9,
+					"condition": "1",
+					"presenceCondition": "1",
+					"typedefType": "STRUCT",
+					"typedefDeclaration": {
+						"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+						"id": 5,
+						"sourceFile": "c/Komplex2.c",
+						"lineStart": 3,
+						"lineEnd": 9,
+						"condition": "1",
+						"presenceCondition": "1",
+						"code": "struct adresse ;"
+					},
+					"nested": [
+						{
+							"class": "net.ssehub.kernel_haven.code_model.ast.CompoundStatement",
+							"id": 6,
+							"sourceFile": "c/Komplex2.c",
+							"lineStart": 3,
+							"lineEnd": 9,
+							"condition": "1",
+							"presenceCondition": "1",
+							"nested": [
+								{
+									"class": "net.ssehub.kernel_haven.code_model.ast.SingleStatement",
+									"id": 7,
+									"sourceFile": "c/Komplex2.c",
+									"lineStart": 4,
+									"lineEnd": 4,
+									"condition": "1",
+									"presenceCondition": "1",
+									"statementType": "DECLARATION",
+									"statement": {
+										"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+										"id": 8,
+										"sourceFile": "c/Komplex2.c",
+										"lineStart": 4,
+										"lineEnd": 4,
+										"condition": "1",
+										"presenceCondition": "1",
+										"code": "char name [ 50 ] ;"
+									}
+								},
+								{
+									"class": "net.ssehub.kernel_haven.code_model.ast.SingleStatement",
+									"id": 9,
+									"sourceFile": "c/Komplex2.c",
+									"lineStart": 5,
+									"lineEnd": 5,
+									"condition": "1",
+									"presenceCondition": "1",
+									"statementType": "DECLARATION",
+									"statement": {
+										"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+										"id": 10,
+										"sourceFile": "c/Komplex2.c",
+										"lineStart": 5,
+										"lineEnd": 5,
+										"condition": "1",
+										"presenceCondition": "1",
+										"code": "char strasse [ 100 ] ;"
+									}
+								},
+								{
+									"class": "net.ssehub.kernel_haven.code_model.ast.SingleStatement",
+									"id": 11,
+									"sourceFile": "c/Komplex2.c",
+									"lineStart": 6,
+									"lineEnd": 6,
+									"condition": "1",
+									"presenceCondition": "1",
+									"statementType": "DECLARATION",
+									"statement": {
+										"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+										"id": 12,
+										"sourceFile": "c/Komplex2.c",
+										"lineStart": 6,
+										"lineEnd": 6,
+										"condition": "1",
+										"presenceCondition": "1",
+										"code": "short hausnummer ;"
+									}
+								},
+								{
+									"class": "net.ssehub.kernel_haven.code_model.ast.SingleStatement",
+									"id": 13,
+									"sourceFile": "c/Komplex2.c",
+									"lineStart": 7,
+									"lineEnd": 7,
+									"condition": "1",
+									"presenceCondition": "1",
+									"statementType": "DECLARATION",
+									"statement": {
+										"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+										"id": 14,
+										"sourceFile": "c/Komplex2.c",
+										"lineStart": 7,
+										"lineEnd": 7,
+										"condition": "1",
+										"presenceCondition": "1",
+										"code": "long plz ;"
+									}
+								},
+								{
+									"class": "net.ssehub.kernel_haven.code_model.ast.SingleStatement",
+									"id": 15,
+									"sourceFile": "c/Komplex2.c",
+									"lineStart": 8,
+									"lineEnd": 8,
+									"condition": "1",
+									"presenceCondition": "1",
+									"statementType": "DECLARATION",
+									"statement": {
+										"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+										"id": 16,
+										"sourceFile": "c/Komplex2.c",
+										"lineStart": 8,
+										"lineEnd": 8,
+										"condition": "1",
+										"presenceCondition": "1",
+										"code": "char stadt [ 50 ] ;"
+									}
+								}
+							]
+						}
+					]
+				},
+				{
+					"class": "net.ssehub.kernel_haven.code_model.ast.Function",
+					"id": 17,
+					"sourceFile": "c/Komplex2.c",
+					"lineStart": 11,
+					"lineEnd": 48,
+					"condition": "1",
+					"presenceCondition": "1",
+					"functionName": "function",
+					"functionHeader": {
+						"class": "net.ssehub.kernel_haven.code_model.ast.CodeList",
+						"id": 18,
+						"sourceFile": "c/Komplex2.c",
+						"lineStart": 11,
+						"lineEnd": 15,
+						"condition": "1",
+						"presenceCondition": "1",
+						"nested": [
+							{
+								"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+								"id": 19,
+								"sourceFile": "c/Komplex2.c",
+								"lineStart": 11,
+								"lineEnd": 12,
+								"condition": "1",
+								"presenceCondition": "1",
+								"code": "void function ("
+							},
+							{
+								"class": "net.ssehub.kernel_haven.code_model.ast.CppBlock",
+								"id": 20,
+								"sourceFile": "c/Komplex2.c",
+								"lineStart": 12,
+								"lineEnd": 14,
+								"condition": "A",
+								"presenceCondition": "A",
+								"cppType": "IFDEF",
+								"cppCondition": "A",
+								"cppSiblings": [],
+								"nested": [
+									{
+										"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+										"id": 21,
+										"sourceFile": "c/Komplex2.c",
+										"lineStart": 13,
+										"lineEnd": 14,
+										"condition": "A",
+										"presenceCondition": "A",
+										"code": "int a ,"
+									}
+								]
+							},
+							{
+								"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+								"id": 22,
+								"sourceFile": "c/Komplex2.c",
+								"lineStart": 15,
+								"lineEnd": 15,
+								"condition": "1",
+								"presenceCondition": "1",
+								"code": "int b )"
+							}
+						]
+					},
+					"nested": [
+						{
+							"class": "net.ssehub.kernel_haven.code_model.ast.CompoundStatement",
+							"id": 23,
+							"sourceFile": "c/Komplex2.c",
+							"lineStart": 15,
+							"lineEnd": 48,
+							"condition": "1",
+							"presenceCondition": "1",
+							"nested": [
+								{
+									"class": "net.ssehub.kernel_haven.code_model.ast.SingleStatement",
+									"id": 24,
+									"sourceFile": "c/Komplex2.c",
+									"lineStart": 16,
+									"lineEnd": 16,
+									"condition": "1",
+									"presenceCondition": "1",
+									"statementType": "DECLARATION",
+									"statement": {
+										"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+										"id": 25,
+										"sourceFile": "c/Komplex2.c",
+										"lineStart": 16,
+										"lineEnd": 16,
+										"condition": "1",
+										"presenceCondition": "1",
+										"code": "int y = 2 ;"
+									}
+								},
+								{
+									"class": "net.ssehub.kernel_haven.code_model.ast.SingleStatement",
+									"id": 26,
+									"sourceFile": "c/Komplex2.c",
+									"lineStart": 17,
+									"lineEnd": 23,
+									"condition": "1",
+									"presenceCondition": "1",
+									"statementType": "INSTRUCTION",
+									"statement": {
+										"class": "net.ssehub.kernel_haven.code_model.ast.CodeList",
+										"id": 27,
+										"sourceFile": "c/Komplex2.c",
+										"lineStart": 17,
+										"lineEnd": 23,
+										"condition": "1",
+										"presenceCondition": "1",
+										"nested": [
+											{
+												"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+												"id": 28,
+												"sourceFile": "c/Komplex2.c",
+												"lineStart": 17,
+												"lineEnd": 17,
+												"condition": "1",
+												"presenceCondition": "1",
+												"code": "y +="
+											},
+											{
+												"class": "net.ssehub.kernel_haven.code_model.ast.CppBlock",
+												"id": 29,
+												"sourceFile": "c/Komplex2.c",
+												"lineStart": 18,
+												"lineEnd": 19,
+												"condition": "A",
+												"presenceCondition": "A",
+												"cppType": "IFDEF",
+												"cppCondition": "A",
+												"cppSiblings": [
+													30
+												],
+												"nested": [
+													{
+														"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+														"id": 31,
+														"sourceFile": "c/Komplex2.c",
+														"lineStart": 19,
+														"lineEnd": 19,
+														"condition": "A",
+														"presenceCondition": "A",
+														"code": "3"
+													}
+												]
+											},
+											{
+												"class": "net.ssehub.kernel_haven.code_model.ast.CppBlock",
+												"id": 30,
+												"sourceFile": "c/Komplex2.c",
+												"lineStart": 20,
+												"lineEnd": 21,
+												"condition": "!A",
+												"presenceCondition": "!A",
+												"cppType": "ELSE",
+												"cppCondition": "!A",
+												"cppSiblings": [
+													29,
+													30,
+													30
+												],
+												"nested": [
+													{
+														"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+														"id": 32,
+														"sourceFile": "c/Komplex2.c",
+														"lineStart": 21,
+														"lineEnd": 21,
+														"condition": "!A",
+														"presenceCondition": "!A",
+														"code": "5"
+													}
+												]
+											},
+											{
+												"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+												"id": 33,
+												"sourceFile": "c/Komplex2.c",
+												"lineStart": 23,
+												"lineEnd": 23,
+												"condition": "1",
+												"presenceCondition": "1",
+												"code": ";"
+											}
+										]
+									}
+								},
+								{
+									"class": "net.ssehub.kernel_haven.code_model.ast.SingleStatement",
+									"id": 34,
+									"sourceFile": "c/Komplex2.c",
+									"lineStart": 24,
+									"lineEnd": 24,
+									"condition": "1",
+									"presenceCondition": "1",
+									"statementType": "INSTRUCTION",
+									"statement": {
+										"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+										"id": 35,
+										"sourceFile": "c/Komplex2.c",
+										"lineStart": 24,
+										"lineEnd": 24,
+										"condition": "1",
+										"presenceCondition": "1",
+										"code": "func ( y ) ;"
+									}
+								},
+								{
+									"class": "net.ssehub.kernel_haven.code_model.ast.BranchStatement",
+									"id": 36,
+									"sourceFile": "c/Komplex2.c",
+									"lineStart": 26,
+									"lineEnd": 35,
+									"condition": "1",
+									"presenceCondition": "1",
+									"branchType": "IF",
+									"branchCondition": {
+										"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+										"id": 37,
+										"sourceFile": "c/Komplex2.c",
+										"lineStart": 26,
+										"lineEnd": 26,
+										"condition": "1",
+										"presenceCondition": "1",
+										"code": "if ( y < 2 )"
+									},
+									"branchSiblings": [
+										36,
+										38
+									],
+									"nested": [
+										{
+											"class": "net.ssehub.kernel_haven.code_model.ast.CompoundStatement",
+											"id": 39,
+											"sourceFile": "c/Komplex2.c",
+											"lineStart": 26,
+											"lineEnd": 30,
+											"condition": "1",
+											"presenceCondition": "1",
+											"nested": [
+												{
+													"class": "net.ssehub.kernel_haven.code_model.ast.LoopStatement",
+													"id": 40,
+													"sourceFile": "c/Komplex2.c",
+													"lineStart": 27,
+													"lineEnd": 29,
+													"condition": "1",
+													"presenceCondition": "1",
+													"loopType": "WHILE",
+													"loopCondition": {
+														"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+														"id": 41,
+														"sourceFile": "c/Komplex2.c",
+														"lineStart": 27,
+														"lineEnd": 27,
+														"condition": "1",
+														"presenceCondition": "1",
+														"code": "while ( y > 0 )"
+													},
+													"nested": [
+														{
+															"class": "net.ssehub.kernel_haven.code_model.ast.CompoundStatement",
+															"id": 42,
+															"sourceFile": "c/Komplex2.c",
+															"lineStart": 27,
+															"lineEnd": 29,
+															"condition": "1",
+															"presenceCondition": "1",
+															"nested": [
+																{
+																	"class": "net.ssehub.kernel_haven.code_model.ast.SingleStatement",
+																	"id": 43,
+																	"sourceFile": "c/Komplex2.c",
+																	"lineStart": 28,
+																	"lineEnd": 28,
+																	"condition": "1",
+																	"presenceCondition": "1",
+																	"statementType": "INSTRUCTION",
+																	"statement": {
+																		"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+																		"id": 44,
+																		"sourceFile": "c/Komplex2.c",
+																		"lineStart": 28,
+																		"lineEnd": 28,
+																		"condition": "1",
+																		"presenceCondition": "1",
+																		"code": "y ++ ;"
+																	}
+																}
+															]
+														}
+													]
+												}
+											]
+										},
+										{
+											"class": "net.ssehub.kernel_haven.code_model.ast.BranchStatement",
+											"id": 38,
+											"sourceFile": "c/Komplex2.c",
+											"lineStart": 30,
+											"lineEnd": 35,
+											"condition": "1",
+											"presenceCondition": "1",
+											"branchType": "ELSE",
+											"branchSiblings": [
+												36,
+												38
+											],
+											"nested": [
+												{
+													"class": "net.ssehub.kernel_haven.code_model.ast.CompoundStatement",
+													"id": 45,
+													"sourceFile": "c/Komplex2.c",
+													"lineStart": 30,
+													"lineEnd": 35,
+													"condition": "1",
+													"presenceCondition": "1",
+													"nested": [
+														{
+															"class": "net.ssehub.kernel_haven.code_model.ast.LoopStatement",
+															"id": 46,
+															"sourceFile": "c/Komplex2.c",
+															"lineStart": 31,
+															"lineEnd": 34,
+															"condition": "1",
+															"presenceCondition": "1",
+															"loopType": "FOR",
+															"loopCondition": {
+																"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+																"id": 47,
+																"sourceFile": "c/Komplex2.c",
+																"lineStart": 31,
+																"lineEnd": 31,
+																"condition": "1",
+																"presenceCondition": "1",
+																"code": "for ( int a ; a < y ; a ++ )"
+															},
+															"nested": [
+																{
+																	"class": "net.ssehub.kernel_haven.code_model.ast.CompoundStatement",
+																	"id": 48,
+																	"sourceFile": "c/Komplex2.c",
+																	"lineStart": 31,
+																	"lineEnd": 34,
+																	"condition": "1",
+																	"presenceCondition": "1",
+																	"nested": [
+																		{
+																			"class": "net.ssehub.kernel_haven.code_model.ast.SingleStatement",
+																			"id": 49,
+																			"sourceFile": "c/Komplex2.c",
+																			"lineStart": 32,
+																			"lineEnd": 32,
+																			"condition": "1",
+																			"presenceCondition": "1",
+																			"statementType": "INSTRUCTION",
+																			"statement": {
+																				"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+																				"id": 50,
+																				"sourceFile": "c/Komplex2.c",
+																				"lineStart": 32,
+																				"lineEnd": 32,
+																				"condition": "1",
+																				"presenceCondition": "1",
+																				"code": "a += y ;"
+																			}
+																		},
+																		{
+																			"class": "net.ssehub.kernel_haven.code_model.ast.SingleStatement",
+																			"id": 51,
+																			"sourceFile": "c/Komplex2.c",
+																			"lineStart": 33,
+																			"lineEnd": 33,
+																			"condition": "1",
+																			"presenceCondition": "1",
+																			"statementType": "INSTRUCTION",
+																			"statement": {
+																				"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+																				"id": 52,
+																				"sourceFile": "c/Komplex2.c",
+																				"lineStart": 33,
+																				"lineEnd": 33,
+																				"condition": "1",
+																				"presenceCondition": "1",
+																				"code": "continue;"
+																			}
+																		}
+																	]
+																}
+															]
+														}
+													]
+												}
+											]
+										}
+									]
+								},
+								{
+									"class": "net.ssehub.kernel_haven.code_model.ast.SwitchStatement",
+									"id": 53,
+									"sourceFile": "c/Komplex2.c",
+									"lineStart": 37,
+									"lineEnd": 43,
+									"condition": "1",
+									"presenceCondition": "1",
+									"switchCondition": {
+										"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+										"id": 54,
+										"sourceFile": "c/Komplex2.c",
+										"lineStart": 37,
+										"lineEnd": 37,
+										"condition": "1",
+										"presenceCondition": "1",
+										"code": "switch ( y )"
+									},
+									"cases": [
+										55,
+										56
+									],
+									"nested": [
+										{
+											"class": "net.ssehub.kernel_haven.code_model.ast.CompoundStatement",
+											"id": 57,
+											"sourceFile": "c/Komplex2.c",
+											"lineStart": 37,
+											"lineEnd": 43,
+											"condition": "1",
+											"presenceCondition": "1",
+											"nested": [
+												{
+													"class": "net.ssehub.kernel_haven.code_model.ast.CaseStatement",
+													"id": 55,
+													"sourceFile": "c/Komplex2.c",
+													"lineStart": 38,
+													"lineEnd": 38,
+													"condition": "1",
+													"presenceCondition": "1",
+													"caseType": "CASE",
+													"caseCondition": {
+														"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+														"id": 58,
+														"sourceFile": "c/Komplex2.c",
+														"lineStart": 38,
+														"lineEnd": 38,
+														"condition": "1",
+														"presenceCondition": "1",
+														"code": "case 1 :"
+													},
+													"switch": 53,
+													"nested": [
+														{
+															"class": "net.ssehub.kernel_haven.code_model.ast.SingleStatement",
+															"id": 59,
+															"sourceFile": "c/Komplex2.c",
+															"lineStart": 39,
+															"lineEnd": 39,
+															"condition": "1",
+															"presenceCondition": "1",
+															"statementType": "INSTRUCTION",
+															"statement": {
+																"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+																"id": 60,
+																"sourceFile": "c/Komplex2.c",
+																"lineStart": 39,
+																"lineEnd": 39,
+																"condition": "1",
+																"presenceCondition": "1",
+																"code": "y % 2 ;"
+															}
+														},
+														{
+															"class": "net.ssehub.kernel_haven.code_model.ast.SingleStatement",
+															"id": 61,
+															"sourceFile": "c/Komplex2.c",
+															"lineStart": 40,
+															"lineEnd": 40,
+															"condition": "1",
+															"presenceCondition": "1",
+															"statementType": "INSTRUCTION",
+															"statement": {
+																"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+																"id": 62,
+																"sourceFile": "c/Komplex2.c",
+																"lineStart": 40,
+																"lineEnd": 40,
+																"condition": "1",
+																"presenceCondition": "1",
+																"code": "break;"
+															}
+														}
+													]
+												},
+												{
+													"class": "net.ssehub.kernel_haven.code_model.ast.CaseStatement",
+													"id": 56,
+													"sourceFile": "c/Komplex2.c",
+													"lineStart": 41,
+													"lineEnd": 41,
+													"condition": "1",
+													"presenceCondition": "1",
+													"caseType": "DEFAULT",
+													"switch": 53,
+													"nested": [
+														{
+															"class": "net.ssehub.kernel_haven.code_model.ast.SingleStatement",
+															"id": 64,
+															"sourceFile": "c/Komplex2.c",
+															"lineStart": 42,
+															"lineEnd": 42,
+															"condition": "1",
+															"presenceCondition": "1",
+															"statementType": "INSTRUCTION",
+															"statement": {
+																"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+																"id": 65,
+																"sourceFile": "c/Komplex2.c",
+																"lineStart": 42,
+																"lineEnd": 42,
+																"condition": "1",
+																"presenceCondition": "1",
+																"code": "y *= y ;"
+															}
+														}
+													]
+												}
+											]
+										}
+									]
+								},
+								{
+									"class": "net.ssehub.kernel_haven.code_model.ast.CompoundStatement",
+									"id": 66,
+									"sourceFile": "c/Komplex2.c",
+									"lineStart": 45,
+									"lineEnd": 47,
+									"condition": "1",
+									"presenceCondition": "1",
+									"nested": [
+										{
+											"class": "net.ssehub.kernel_haven.code_model.ast.SingleStatement",
+											"id": 67,
+											"sourceFile": "c/Komplex2.c",
+											"lineStart": 46,
+											"lineEnd": 46,
+											"condition": "1",
+											"presenceCondition": "1",
+											"statementType": "DECLARATION",
+											"statement": {
+												"class": "net.ssehub.kernel_haven.code_model.ast.Code",
+												"id": 68,
+												"sourceFile": "c/Komplex2.c",
+												"lineStart": 46,
+												"lineEnd": 46,
+												"condition": "1",
+												"presenceCondition": "1",
+												"code": "char [] a ;"
+											}
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

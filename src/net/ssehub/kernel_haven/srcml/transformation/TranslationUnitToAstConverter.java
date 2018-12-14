@@ -535,8 +535,13 @@ public class TranslationUnitToAstConverter {
             throw ExceptionUtil.makeException("Found " + type + " outside of switch ", unit);
         }
         SwitchStatement switchStmt = notNull(switchs.peek());
+        
+        ICode conditionCode = null;
+        if (type == CaseType.CASE) {
+            conditionCode = makeCode(unit, 0, condEndIndex, false);
+        }
         CaseStatement caseStatement
-                = new CaseStatement(getPc(), makeCode(unit, 0, condEndIndex, false), type, switchStmt);
+                = new CaseStatement(getPc(), conditionCode, type, switchStmt);
         caseStatement.setSourceFile(sourceFile);
         caseStatement.setCondition(getEffectiveCondition());
         caseStatement.setLineStart(unit.getStartLine());
@@ -753,6 +758,8 @@ public class TranslationUnitToAstConverter {
     // CHECKSTYLE:ON
         
         StringBuilder code = new StringBuilder();
+        int firstCodeLine = -1; // the starting line number of the first element in "code"
+        int lastCodeLine = -1; // the end line number of the last element in "code"
         List<@NonNull ICode> result = new LinkedList<>();
         
         for (int i = start; i <= end; i++) {
@@ -761,22 +768,42 @@ public class TranslationUnitToAstConverter {
             if (child instanceof CodeUnit) {
                 if (code.length() != 0) {
                     code.append(' ');
+                    // update lastCodeLine
+                    lastCodeLine = child.getEndLine();
+                } else {
+                    // initialize firstCodeLine and lastCodeLine
+                    firstCodeLine = child.getStartLine(); 
+                    lastCodeLine = child.getStartLine(); 
                 }
                 code.append(((CodeUnit) child).getCode());
                 
             } else if ("comment".equals(child.getType())) {
+                if (code.length() > 0) { // handle remainder of code
+                    Code codeElement = new Code(getPc(), notNull(code.toString()));
+                    codeElement.setSourceFile(sourceFile);
+                    codeElement.setCondition(getEffectiveCondition());
+                    codeElement.setLineStart(firstCodeLine);
+                    codeElement.setLineEnd(lastCodeLine);
+                    result.add(codeElement);
+                    code = new StringBuilder();
+                    firstCodeLine = 0;
+                    lastCodeLine = 0;
+                }
+                
                 Comment comment = (Comment) convert(child);
                 result.add(comment);
                 
             } else if (child instanceof PreprocessorBlock) {
-                if (code.length() > 0) {
+                if (code.length() > 0) { // handle remainder of code
                     Code codeElement = new Code(getPc(), notNull(code.toString()));
                     codeElement.setSourceFile(sourceFile);
                     codeElement.setCondition(getEffectiveCondition());
-                    codeElement.setLineStart(unit.getStartLine());
-                    codeElement.setLineEnd(unit.getEndLine());
+                    codeElement.setLineStart(firstCodeLine);
+                    codeElement.setLineEnd(lastCodeLine);
                     result.add(codeElement);
                     code = new StringBuilder();
+                    firstCodeLine = 0;
+                    lastCodeLine = 0;
                 }
                 
                 // all CPP blocks have effective conditions now
@@ -785,8 +812,8 @@ public class TranslationUnitToAstConverter {
                 CppBlock cppif = createCppBlock((PreprocessorBlock) child);
                 cppif.setSourceFile(sourceFile);
                 cppif.setCondition(getEffectiveCondition());
-                cppif.setLineStart(unit.getStartLine());
-                cppif.setLineEnd(unit.getEndLine());
+                cppif.setLineStart(child.getStartLine());
+                cppif.setLineEnd(child.getEndLine());
                 ICode nested = makeCode(child, 0, child.size() - 1, allowTranslationUnits);
                 if (nested instanceof CodeList) {
                     for (int j = 0; j < nested.getNestedElementCount(); j++) {
@@ -809,10 +836,12 @@ public class TranslationUnitToAstConverter {
                     Code codeElement = new Code(getPc(), notNull(code.toString()));
                     codeElement.setSourceFile(sourceFile);
                     codeElement.setCondition(getEffectiveCondition());
-                    codeElement.setLineStart(unit.getStartLine());
-                    codeElement.setLineEnd(unit.getEndLine());
+                    codeElement.setLineStart(firstCodeLine);
+                    codeElement.setLineEnd(lastCodeLine);
                     result.add(codeElement);
                     code = new StringBuilder();
+                    firstCodeLine = 0;
+                    lastCodeLine = 0;
                 }
                 
                 // recursively transform everything into code
@@ -829,8 +858,8 @@ public class TranslationUnitToAstConverter {
             Code codeElement = new Code(getPc(), notNull(code.toString()));
             codeElement.setSourceFile(sourceFile);
             codeElement.setCondition(getEffectiveCondition());
-            codeElement.setLineStart(unit.getStartLine());
-            codeElement.setLineEnd(unit.getEndLine());
+            codeElement.setLineStart(firstCodeLine);
+            codeElement.setLineEnd(lastCodeLine);
             result.add(codeElement);
         }
         
