@@ -25,30 +25,7 @@ public class MissingDefined implements ITransformationRule {
             String condition = block.getCondition();
             
             if (condition != null) {
-                String[] parts = condition.split(" ");
-                
-                StringBuilder newCondition = new StringBuilder();
-                for (int i = 0; i < parts.length; i++) {
-                    
-                    // skip fields that are "defined" followed by a "(", since these aren't variables
-                    if (!(parts[i].equals("defined") && i + 1 < parts.length && parts[i + 1].equals("("))) {
-                        Matcher m = VARIABLE_PATTERN.matcher(parts[i]);
-                        if (m.matches()) {
-                            // we found a variable, check if there is a "defined()" call around it
-                            if (i < 2 || !parts[i - 2].equals("defined") || !parts[i - 1].equals("(")
-                                    || i + 1 >= parts.length || !parts[i + 1].equals(")")) {
-                                
-                                // we found a variable without a defined() call around it; replace with false
-                                parts[i] =  "0";
-                            }
-                            
-                        }
-                    }
-                    
-                    newCondition.append(parts[i]);
-                }
-                
-                block.setCondition(newCondition.toString());
+                block.setCondition(transformCondition(condition));
             }
         }
         
@@ -56,6 +33,66 @@ public class MissingDefined implements ITransformationRule {
         for (int i = 0; i < unit.size(); i++) {
             transform(unit.getNestedElement(i));
         }
+    }
+
+    /**
+     * Transforms the given condition string.
+     * 
+     * @param condition The condition to transform.
+     * 
+     * @return The transformed condition.
+     */
+    private String transformCondition(String condition) {
+        String[] parts = condition.split(" ");
+        
+        StringBuilder newCondition = new StringBuilder();
+        for (int i = 0; i < parts.length; i++) {
+            
+            // skip fields that are "defined" followed by a "(", since these aren't variables
+            if (!(parts[i].equals("defined") && i + 1 < parts.length && parts[i + 1].equals("("))) {
+                Matcher m = VARIABLE_PATTERN.matcher(parts[i]);
+                if (m.matches()) {
+                    // we found a variable, check if there is a "defined()" call around it
+                    if (!hasDefined(parts, i)) {
+                        
+                        // we found a variable without a defined() call around it; replace with false
+                        parts[i] =  "0";
+                    }
+                    
+                }
+            }
+            
+            newCondition.append(parts[i]);
+        }
+        return newCondition.toString();
+    }
+    
+    /**
+     * Checks whether the variable at the given index has a "defined()" call around it.
+     * 
+     * @param parts The tokens of the expression.
+     * @param index The index of the variable.
+     * 
+     * @return Whether the variable has a defined call around it.
+     */
+    private boolean hasDefined(String[] parts, int index) {
+        boolean result;
+        
+        // we need two tokens in front ("defined", "("), and one token after the index (")")
+        
+        // -> check that this is in the given bounds
+        if (index < 2 || index + 1 >= parts.length) {
+            result = false;
+        
+        // check that the right tokens are present
+        } else if (parts[index - 2].equals("defined") && parts[index - 1].equals("(") && parts[index + 1].equals(")")) {
+            result = true;
+            
+        } else {
+            result = false;
+        }
+        
+        return result;
     }
 
 }

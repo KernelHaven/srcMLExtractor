@@ -152,7 +152,9 @@ public class TranslationUnitToAstConverter {
      * 
      * @throws FormatException If converting the element fails.
      */
+    // CHECKSTYLE:OFF // method is too long
     private @NonNull ISyntaxElement convertTranslationUnit(@NonNull TranslationUnit unit) throws FormatException {
+    // CHECKSTYLE:ON
         Formula pc = getPc();
         ISyntaxElement result;
         
@@ -745,8 +747,10 @@ public class TranslationUnitToAstConverter {
      * 
      * @throws FormatException If converting the elmeents fails.
      */
+    // CHECKSTYLE:OFF // method is too long
     private @NonNull ICode makeCode(@NonNull ITranslationUnit unit, int start, int end,
             boolean allowTranslationUnits) throws FormatException {
+    // CHECKSTYLE:ON
         
         StringBuilder code = new StringBuilder();
         List<@NonNull ICode> result = new LinkedList<>();
