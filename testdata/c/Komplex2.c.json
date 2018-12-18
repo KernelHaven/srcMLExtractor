@@ -203,7 +203,9 @@
 								"presenceCondition": "A",
 								"cppType": "IFDEF",
 								"cppCondition": "A",
-								"cppSiblings": [],
+								"cppSiblings": [
+									20
+								],
 								"nested": [
 									{
 										"class": "net.ssehub.kernel_haven.code_model.ast.Code",
@@ -298,6 +300,7 @@
 												"cppType": "IFDEF",
 												"cppCondition": "A",
 												"cppSiblings": [
+													29,
 													30
 												],
 												"nested": [
@@ -325,7 +328,6 @@
 												"cppCondition": "!A",
 												"cppSiblings": [
 													29,
-													30,
 													30
 												],
 												"nested": [

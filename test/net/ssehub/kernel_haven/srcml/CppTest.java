@@ -3,7 +3,10 @@ package net.ssehub.kernel_haven.srcml;
 import static net.ssehub.kernel_haven.util.logic.FormulaBuilder.and;
 import static net.ssehub.kernel_haven.util.logic.FormulaBuilder.not;
 import static net.ssehub.kernel_haven.util.logic.FormulaBuilder.or;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import java.util.List;
 
@@ -37,8 +40,11 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         assertEquals("Got unexpected number of elements", 1, elements.size());
         
         CppBlock ifElem = assertIf("A", "A", new Variable("A"), 1, Type.IFDEF, elements.get(0));
+        
         assertElement(SingleStatement.class, "A", "A", ifElem.getNestedElement(0));
         
+        assertThat(ifElem.getSiblingCount(), is(1));
+        assertThat(ifElem.getSibling(0), sameInstance(ifElem));
     }
     
     /**
@@ -53,6 +59,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         
         assertElement(SingleStatement.class, "1", "1", elements.get(0));
         CppBlock outerIf = assertIf("A", "A", new Variable("A"), 3, Type.IFDEF, elements.get(1));
+        
         assertElement(SingleStatement.class, "1", "1", elements.get(2));
         
         
@@ -61,6 +68,11 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         assertElement(SingleStatement.class, "A", "A", outerIf.getNestedElement(2));
         
         assertElement(SingleStatement.class, "B", "A && B", innerIf.getNestedElement(0));
+        
+        assertThat(outerIf.getSiblingCount(), is(1));
+        assertThat(outerIf.getSibling(0), sameInstance(outerIf));
+        assertThat(innerIf.getSiblingCount(), is(1));
+        assertThat(innerIf.getSibling(0), sameInstance(innerIf));
     }
     
     /**
@@ -80,6 +92,14 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         
         assertElement(SingleStatement.class, "A", "A", ifElem.getNestedElement(0));
         assertElement(SingleStatement.class, "!A", "!A", elseElem.getNestedElement(0));
+        
+
+        assertThat(ifElem.getSiblingCount(), is(2));
+        assertThat(ifElem.getSibling(0), sameInstance(ifElem));
+        assertThat(ifElem.getSibling(1), sameInstance(elseElem));
+        assertThat(elseElem.getSiblingCount(), is(2));
+        assertThat(elseElem.getSibling(0), sameInstance(ifElem));
+        assertThat(elseElem.getSibling(1), sameInstance(elseElem));
     }
     
     /**
@@ -97,6 +117,9 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         assertElement(SingleStatement.class, "1", "1", elements.get(2));
         
         assertElement(SingleStatement.class, "!A", "!A", ifElem.getNestedElement(0));
+        
+        assertThat(ifElem.getSiblingCount(), is(1));
+        assertThat(ifElem.getSibling(0), sameInstance(ifElem));
     }
     
     /**
@@ -116,6 +139,11 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         assertElement(SingleStatement.class, "A", "A", outerIf.getNestedElement(2));
         
         assertElement(SingleStatement.class, "!B", "A && !B", innerIf.getNestedElement(0));
+        
+        assertThat(outerIf.getSiblingCount(), is(1));
+        assertThat(outerIf.getSibling(0), sameInstance(outerIf));
+        assertThat(innerIf.getSiblingCount(), is(1));
+        assertThat(innerIf.getSibling(0), sameInstance(innerIf));
     }
     
     
@@ -136,6 +164,13 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         
         assertElement(SingleStatement.class, "!A", "!A", ifElem.getNestedElement(0));
         assertElement(SingleStatement.class, "!!A", "!!A", elseElem.getNestedElement(0));
+        
+        assertThat(ifElem.getSiblingCount(), is(2));
+        assertThat(ifElem.getSibling(0), sameInstance(ifElem));
+        assertThat(ifElem.getSibling(1), sameInstance(elseElem));
+        assertThat(elseElem.getSiblingCount(), is(2));
+        assertThat(elseElem.getSibling(0), sameInstance(ifElem));
+        assertThat(elseElem.getSibling(1), sameInstance(elseElem));
     }
 
     /**
@@ -151,6 +186,9 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         CppBlock ifElem = assertIf("A", "A", new Variable("A"), 1, Type.IF, elements.get(0));
         
         assertElement(SingleStatement.class, "A", "A", ifElem.getNestedElement(0));
+        
+        assertThat(ifElem.getSiblingCount(), is(1));
+        assertThat(ifElem.getSibling(0), sameInstance(ifElem));
     }
     
     /**
@@ -168,6 +206,13 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         
         assertElement(SingleStatement.class, "A", "A", ifElem.getNestedElement(0));
         assertElement(SingleStatement.class, "!A", "!A", elseElem.getNestedElement(0));
+        
+        assertThat(ifElem.getSiblingCount(), is(2));
+        assertThat(ifElem.getSibling(0), sameInstance(ifElem));
+        assertThat(ifElem.getSibling(1), sameInstance(elseElem));
+        assertThat(elseElem.getSiblingCount(), is(2));
+        assertThat(elseElem.getSibling(0), sameInstance(ifElem));
+        assertThat(elseElem.getSibling(1), sameInstance(elseElem));
     }
     
     /**
@@ -185,6 +230,13 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         
         assertElement(SingleStatement.class, "A", "A", ifElem.getNestedElement(0));
         assertElement(SingleStatement.class, "!A && B", "!A && B", elifElem.getNestedElement(0));
+        
+        assertThat(ifElem.getSiblingCount(), is(2));
+        assertThat(ifElem.getSibling(0), sameInstance(ifElem));
+        assertThat(ifElem.getSibling(1), sameInstance(elifElem));
+        assertThat(elifElem.getSiblingCount(), is(2));
+        assertThat(elifElem.getSibling(0), sameInstance(ifElem));
+        assertThat(elifElem.getSibling(1), sameInstance(elifElem));
     }
     
     /**
@@ -205,6 +257,19 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         assertElement(SingleStatement.class, "A", "A", ifElem.getNestedElement(0));
         assertElement(SingleStatement.class, "!A && B", "!A && B", elifElem.getNestedElement(0));
         assertElement(SingleStatement.class, "!A && !B", "!A && !B", elseElem.getNestedElement(0));
+        
+        assertThat(ifElem.getSiblingCount(), is(3));
+        assertThat(ifElem.getSibling(0), sameInstance(ifElem));
+        assertThat(ifElem.getSibling(1), sameInstance(elifElem));
+        assertThat(ifElem.getSibling(2), sameInstance(elseElem));
+        assertThat(elifElem.getSiblingCount(), is(3));
+        assertThat(elifElem.getSibling(0), sameInstance(ifElem));
+        assertThat(elifElem.getSibling(1), sameInstance(elifElem));
+        assertThat(elifElem.getSibling(2), sameInstance(elseElem));
+        assertThat(elseElem.getSiblingCount(), is(3));
+        assertThat(elseElem.getSibling(0), sameInstance(ifElem));
+        assertThat(elseElem.getSibling(1), sameInstance(elifElem));
+        assertThat(elseElem.getSibling(2), sameInstance(elseElem));
     }
     
     /**
@@ -227,6 +292,11 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         assertElement(SingleStatement.class, "A", "A", outerIf.getNestedElement(2));
         
         assertElement(SingleStatement.class, "B", "A && B", innerIf.getNestedElement(0));
+        
+        assertThat(outerIf.getSiblingCount(), is(1));
+        assertThat(outerIf.getSibling(0), sameInstance(outerIf));
+        assertThat(innerIf.getSiblingCount(), is(1));
+        assertThat(innerIf.getSibling(0), sameInstance(innerIf));
     }
     
     /**
@@ -244,6 +314,9 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         assertElement(SingleStatement.class, "1", "1", elements.get(2));
         
         assertElement(SingleStatement.class, "A && B", "A && B", ifElem.getNestedElement(0));
+        
+        assertThat(ifElem.getSiblingCount(), is(1));
+        assertThat(ifElem.getSibling(0), sameInstance(ifElem));
     }
     
     /**
@@ -272,6 +345,19 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         assertElement(SingleStatement.class, "!(A && B) && !C", "!(A && B) && !C", elifElem.getNestedElement(0));
         assertElement(SingleStatement.class, "!(A && B) && !!C", "!(A && B) && !!C",
                 elseElem.getNestedElement(0));
+        
+        assertThat(ifElem.getSiblingCount(), is(3));
+        assertThat(ifElem.getSibling(0), sameInstance(ifElem));
+        assertThat(ifElem.getSibling(1), sameInstance(elifElem));
+        assertThat(ifElem.getSibling(2), sameInstance(elseElem));
+        assertThat(elifElem.getSiblingCount(), is(3));
+        assertThat(elifElem.getSibling(0), sameInstance(ifElem));
+        assertThat(elifElem.getSibling(1), sameInstance(elifElem));
+        assertThat(elifElem.getSibling(2), sameInstance(elseElem));
+        assertThat(elseElem.getSiblingCount(), is(3));
+        assertThat(elseElem.getSibling(0), sameInstance(ifElem));
+        assertThat(elseElem.getSibling(1), sameInstance(elifElem));
+        assertThat(elseElem.getSibling(2), sameInstance(elseElem));
     }
     
     /**
@@ -296,6 +382,11 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         assertElement(SingleStatement.class, "A && B", "A && B", outerIf.getNestedElement(2));
         
         assertElement(SingleStatement.class, "C && !D", "A && B && C && !D", innerIf.getNestedElement(0));
+        
+        assertThat(outerIf.getSiblingCount(), is(1));
+        assertThat(outerIf.getSibling(0), sameInstance(outerIf));
+        assertThat(innerIf.getSiblingCount(), is(1));
+        assertThat(innerIf.getSibling(0), sameInstance(innerIf));
     }
     
     /**
@@ -317,6 +408,9 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         
         assertElement(SingleStatement.class, "!((A || !!B) && C) && !D", "!((A || !!B) && C) && !D",
                 ifElem.getNestedElement(0));
+        
+        assertThat(ifElem.getSiblingCount(), is(1));
+        assertThat(ifElem.getSibling(0), sameInstance(ifElem));
     }
     
     /**
@@ -334,6 +428,9 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         assertElement(SingleStatement.class, "1", "1", elements.get(2));
         
         assertElement(SingleStatement.class, "0", "0", ifElem.getNestedElement(0));
+        
+        assertThat(ifElem.getSiblingCount(), is(1));
+        assertThat(ifElem.getSibling(0), sameInstance(ifElem));
     }
     
     /**
@@ -347,8 +444,11 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         assertEquals("Got unexpected number of elements", 3, elements.size());
 
         assertElement(SingleStatement.class, "1", "1", elements.get(0));
-        assertIf("0", "0", False.INSTANCE, 0, Type.IF, elements.get(1));
+        CppBlock ifElem = assertIf("0", "0", False.INSTANCE, 0, Type.IF, elements.get(1));
         assertElement(SingleStatement.class, "1", "1", elements.get(2));
+        
+        assertThat(ifElem.getSiblingCount(), is(1));
+        assertThat(ifElem.getSibling(0), sameInstance(ifElem));
     }
     
     @Override

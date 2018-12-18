@@ -694,31 +694,31 @@ public class TranslationUnitToAstConverter {
         translatedBlock.setLineStart(cppBlock.getStartLine());
         translatedBlock.setLineEnd(cppBlock.getEndLine());
         translatedBlocks.put(cppBlock, translatedBlock);
-        // Add siblings (which have been translated so far)
+        
         PreprocessorIf start = cppBlock.getStartingIf();
-        if (start != cppBlock) {
-            CppBlock firstSibling = translatedBlocks.get(start);
-            // Test if it was already translated (should be the case)
-            if (null != firstSibling) {
-                // Add sibling to currently translated element
-                translatedBlock.addSibling(firstSibling);
-                // Add currently translated element to already translated sibling
-                firstSibling.addSibling(translatedBlock);
+        // we will always have a start block, but it may be == translatedBlock
+        CppBlock startBlock = translatedBlocks.get(start);
+        
+        // add this block as sibling to the first block
+        startBlock.addSibling(translatedBlock);
+        
+        // copy all siblings from the start block to this new block
+        if (startBlock != translatedBlock) {
+            for (int i = 0; i < startBlock.getSiblingCount(); i++) {
+                translatedBlock.addSibling(startBlock.getSibling(i));
             }
         }
+        
+        // add to all other else-siblings that have been translated so far
         for (int i = 0; i < start.getNumberOfElseBlocks(); i++) {
             CppBlock siblingBlock = translatedBlocks.get(start.getElseBlock(i));
-            // Test if it was already translated (not necessarily the case)
-            if (null != siblingBlock) {
-                // Add sibling to currently translated element
-                translatedBlock.addSibling(siblingBlock);
-                // Add currently translated element to already translated sibling
+            // blocks may not have been translated -> check != null
+            // block may be the currently created block (and we already added it to itself) -> check != translatedBlock
+            if (siblingBlock != null && siblingBlock != translatedBlock) {
                 siblingBlock.addSibling(translatedBlock);
-            } else {
-                // Last siblings may have not been translated so far.
-                break;
             }
         }
+        
         return translatedBlock;
     }
     
