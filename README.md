@@ -30,3 +30,11 @@ This plugin is licensed under [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)
 
 Another license would be possible with the following restriction:
 * The plugin contains [srcML](https://www.srcml.org/) which is under GPLv3. We do not link against srcML, so technically we are not infected by GPL. However a release under a license other than GPLv3 would require the removal of the contained srcML.
+
+## Used Tools
+
+The following tools are used (and bundled in `res/`) by this plugin:
+
+| Tool | Version | License |
+|------|---------|---------|
+| [srcML](https://www.srcml.org/) | [Beta v0.9.5](https://www.srcml.org/#download) | [GPLv3](https://www.gnu.org/licenses/gpl.html) |
