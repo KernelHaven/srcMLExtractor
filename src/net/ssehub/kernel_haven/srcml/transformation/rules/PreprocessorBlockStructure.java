@@ -46,6 +46,11 @@ public class PreprocessorBlockStructure implements ITransformationRule {
         
     }
     
+    /**
+     * Simple data structure/container. Stores the current, obsolete parent and its child (which shall be moved).
+     * @author El-Sharkawy
+     *
+     */
     private static class BlockParent {
         private @NonNull ITranslationUnit parent;
         private @NonNull PreprocessorBlock child;

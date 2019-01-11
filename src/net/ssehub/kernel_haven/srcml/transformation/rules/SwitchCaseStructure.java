@@ -68,8 +68,18 @@ public class SwitchCaseStructure implements ITransformationRule {
         }
     }
 
+    /**
+     * Reorders statements belonging to a case or default statement into this case or default statement, i.e., creating
+     * the hierarchy.
+     * 
+     * @param switchBlock A block which is directly nested inside a switch-statement.
+     * @param caseStatement The case which is currently re-ordered.
+     * @param startIndex The index of the very first element of <tt>switchBlock</tt> after <tt>caseStatement</tt>
+     * @param endOffset 1 if <tt>switchBlock</tt> is terminated with a curly bracket, which should <b>not</b> copied
+     *     to the new structure, 0 otherwise.
+     */
     private void moveNestedCases(@NonNull ITranslationUnit switchBlock, @NonNull ITranslationUnit caseStatement,
-            int startIndex, int endOffset) {
+        int startIndex, int endOffset) {
         
         boolean nextCaseReached = false;
         // Very last element is closing bracket of the block, this shall be skipped
