@@ -1,6 +1,6 @@
 # srcMLExtractor
 
-![Build Status](https://jenkins.sse.uni-hildesheim.de/buildStatus/icon?job=KH_SrcMlExtractor)
+![Build Status](https://jenkins-2.sse.uni-hildesheim.de/buildStatus/icon?job=KH_SrcMlExtractor)
 
 A code-model extractor for [KernelHaven](https://github.com/KernelHaven/KernelHaven).
 
