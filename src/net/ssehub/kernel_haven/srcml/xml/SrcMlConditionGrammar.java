@@ -31,11 +31,10 @@ import net.ssehub.kernel_haven.util.logic.parser.VariableCache;
  * <p>
  * Examples:
  * <ul>
- *      <li><code>defined(CONFIG_X86_64)</code></li>
- *      <li><code>(defined(CONFIG_X86_PAE) && !defined(CONFIG_X86_64) && (defined(CONFIG_X86_64)
- *              || defined(CONFIG_X86_PAE)))</code></li>
+ *      <li>{@code defined(CONFIG_X86_64)}</li>
+ *      <li>{@code (defined(CONFIG_X86_PAE) && !defined(CONFIG_X86_64) && (defined(CONFIG_X86_64)
+ *              || defined(CONFIG_X86_PAE)))}</li>
  * </ul>
- * </p>
  * 
  * @author Adam Krafczyk
  */

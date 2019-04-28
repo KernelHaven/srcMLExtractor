@@ -48,7 +48,8 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
  * An extractor which uses <a href="https://www.srcml.org/">srcML</a> to create an AST, still containing variability
- * information. <br/>
+ * information.
+ * <p>
  * The AST has the following properties:
  * <ul>
  *   <li>C-AST</li>

@@ -92,7 +92,7 @@ public abstract class PreprocessorBlock implements ITranslationUnit {
     /**
      * Returns the parsed effective condition, considering previous if's and elif's, will also compute the condition
      * for an else, but won't consider the enclosing conditions.
-     * <tt>elif B -> !A && B</tt>
+     * {@code elif B -> !A && B}
      * @return The effective condition not considering surrounding blocks.
      */
     public @Nullable Formula getEffectiveCondition() {

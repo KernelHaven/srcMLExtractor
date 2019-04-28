@@ -46,7 +46,7 @@ import net.ssehub.kernel_haven.util.logic.Variable;
 public class CppTest extends AbstractSrcMLExtractorTest {
     
     /**
-     * Test that a simple <tt>&#35ifdef</tt> statement with a single empty statement can be parsed.
+     * Test that a simple <tt>&#35;ifdef</tt> statement with a single empty statement can be parsed.
      */
     @Test
     public void testSimpleIfDef() {
@@ -64,7 +64,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
     }
     
     /**
-     * Test translation of nested <tt>&#35ifdef</tt> statements.
+     * Test translation of nested <tt>&#35;ifdef</tt> statements.
      */
     @Test
     public void testNestedIfDef() {
@@ -119,7 +119,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
     }
     
     /**
-     * Test that a simple <tt>&#35ifndef</tt> statement with a single empty statement can be parsed.
+     * Test that a simple <tt>&#35;ifndef</tt> statement with a single empty statement can be parsed.
      */
     @Test
     public void testSimpleIfNDef() {
@@ -139,7 +139,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
     }
     
     /**
-     * Test translation of nested <tt>&#35ifdef</tt> statements.
+     * Test translation of nested <tt>&#35;ifdef</tt> statements.
      */
     @Test
     public void testNestedIfNDef() {
@@ -190,7 +190,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
     }
 
     /**
-     * Test that a simple <tt>&#35if defined()</tt> statement with a single empty statement can be parsed.
+     * Test that a simple <tt>&#35;if defined()</tt> statement with a single empty statement can be parsed.
      */
     @Test
     public void testSimpleIf() {
@@ -208,7 +208,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
     }
     
     /**
-     * Test that a simple <tt>&#35if defined()</tt> with an <tt>&#35else</tt> statement can be parsed.
+     * Test that a simple <tt>&#35;if defined()</tt> with an <tt>&#35;else</tt> statement can be parsed.
      */
     @Test
     public void testSimpleIfElse() {
@@ -232,7 +232,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
     }
     
     /**
-     * Test that a simple <tt>&#35if defined()</tt> with an <tt>&#35elif</tt> statement can be parsed.
+     * Test that a simple <tt>&#35;if defined()</tt> with an <tt>&#35;elif</tt> statement can be parsed.
      */
     @Test
     public void testSimpleIfElif() {
@@ -256,7 +256,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
     }
     
     /**
-     * Test that a simple <tt>&#35if defined()</tt> with an <tt>&#35elif</tt> and <tt>&#35else</tt> statements
+     * Test that a simple <tt>&#35;if defined()</tt> with an <tt>&#35;elif</tt> and <tt>&#35;else</tt> statements
      * can be parsed.
      */
     @Test
@@ -289,7 +289,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
     }
     
     /**
-     * Test translation of nested <tt>&#35if defined()</tt> statements.
+     * Test translation of nested <tt>&#35;if defined()</tt> statements.
      */
     @Test
     public void testNestedIf() {
@@ -316,7 +316,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
     }
     
     /**
-     * Test that a <tt>&#35if defined()</tt> statement with a compound expression can be parsed.
+     * Test that a <tt>&#35;if defined()</tt> statement with a compound expression can be parsed.
      */
     @Test
     public void testCompoundIf() {
@@ -336,7 +336,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
     }
     
     /**
-     * Test that <tt>&#35if defined()</tt> statement with compound expression, <tt>elif</tt> and <tt>else</tt>
+     * Test that <tt>&#35;if defined()</tt> statement with compound expression, <tt>elif</tt> and <tt>else</tt>
      * can be parsed.
      */
     @Test
@@ -377,7 +377,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
     }
     
     /**
-     * Test that nested <tt>&#35if defined()</tt> statements with compound expressions can be parsed.
+     * Test that nested <tt>&#35;if defined()</tt> statements with compound expressions can be parsed.
      */
     @Test
     public void testNestedCompoundIf() {
@@ -406,7 +406,7 @@ public class CppTest extends AbstractSrcMLExtractorTest {
     }
     
     /**
-     * Tests an if with a complicated structure of !, || and && operators and brackets.
+     * Tests an if with a complicated structure of {@code !}, {@code ||} and {@code &&} operators and brackets.
      */
     @Test
     public void testComplicatedIf() {

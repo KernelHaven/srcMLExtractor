@@ -33,8 +33,10 @@ import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
- * Translates preprocessor control structures into a simpler form for parsing. More precisely it translates:<br/>
- * <tt>#ifdef, #if, #else, #elseif, #endif</tt><br/>
+ * Translates preprocessor control structures into a simpler form for parsing. More precisely it translates:
+ * <p>
+ * <tt>#ifdef, #if, #else, #elseif, #endif</tt>
+ * <p>
  * This rule converts {@link TranslationUnit}s into {@link PreprocessorBlock}s
  * @author El-Sharkawy
  *

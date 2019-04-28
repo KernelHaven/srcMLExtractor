@@ -28,7 +28,7 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
  * Replace all variables in PreprocessorBlock conditions that have no surrounding "defined()" with "0"
- * Removes the spaces between the elements, e.g. "defined ( A ) & & defined ( B )" -> "defined(A)&&defined(B)"
+ * Removes the spaces between the elements, e.g. {@code "defined ( A ) & & defined ( B )" -> "defined(A)&&defined(B)"}.
  */
 public class MissingDefined implements ITransformationRule {
 

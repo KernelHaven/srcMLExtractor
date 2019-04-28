@@ -25,7 +25,8 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
 import net.ssehub.kernel_haven.util.null_checks.Nullable;
 
 /**
- * Basic {@link ITranslationUnit}, which does not require any special treatment.<br/>
+ * Basic {@link ITranslationUnit}, which does not require any special treatment.
+ * <p>
  * <b>Note:</b> All elements are initially parsed either as {@link TranslationUnit} or as {@link CodeUnit} and may be
  * refined in an alter step (or kept if no further treatment is required).
  * @author El-Sharkawy
