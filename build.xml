@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- author: malek, kevin, moritz, Sascha El-Sharkawy -->
+<!-- Author: Adam, Sascha El-Sharkawy -->
 <project name="SrcMLExtractor" default="jenkins" basedir=".">
 	<description>A code-model extractor based on the srcML tool</description>
 
