@@ -12,7 +12,7 @@ This extractors parsers C source code files (`*.c`, `*.h`) into an abstract synt
 
 ## Usage
 
-Place [`SrcMLExtractor.jar`](https://jenkins-2.sse.uni-hildesheim.de/view/KernelHaven/job/KH_SrcMlExtractor/lastSuccessfulBuild/artifact/build/jar/SrcMLExtractor.jar) in the plugins folder of KernelHaven.
+Place [`SrcMLExtractor.jar`](https://jenkins-2.sse.uni-hildesheim.de/job/KH_SrcMlExtractor/lastSuccessfulBuild/artifact/build/jar/SrcMLExtractor.jar) in the plugins folder of KernelHaven.
 
 To use this extractor, set `code.extractor.class` to `net.ssehub.kernel_haven.srcml.SrcMLExtractor` in the KernelHaven properties.
 
