@@ -135,18 +135,18 @@ public class IncludeExpander implements ISyntaxElementVisitor {
         
         if (include.startsWith("<")) {
             if (!include.endsWith(">")) {
-                LOGGER.logWarning("Found invalud include directive: " + include);
+                LOGGER.logWarning("Found invalid include directive: " + include);
             }
             result = findSystemFile(notNull(include.substring(1, include.length() - 1).trim()));
             
         } else if (include.startsWith("\"")) {
             if (!include.endsWith("\"")) {
-                LOGGER.logWarning("Found invalud include directive: " + include);
+                LOGGER.logWarning("Found invalid include directive: " + include);
             }
             result = findQuoteFile(notNull(include.substring(1, include.length() - 1).trim()));
             
         } else {
-            LOGGER.logWarning("Found invalud include directive: " + include);
+            LOGGER.logWarning("Found invalid include directive: " + include);
         }
         
         return result;

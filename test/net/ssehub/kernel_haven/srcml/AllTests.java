@@ -31,8 +31,9 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
     CppTest.class,
     CTest.class,
-    RobustnessTests.class,
+    IncludeTest.class,
     InvalidFileTest.class,
+    RobustnessTests.class,
     })
 public class AllTests {
     public static final File TESTDATA = new File("testdata");
