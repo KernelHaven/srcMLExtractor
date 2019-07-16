@@ -38,6 +38,7 @@ import net.ssehub.kernel_haven.config.Configuration;
 import net.ssehub.kernel_haven.config.DefaultSettings;
 import net.ssehub.kernel_haven.config.EnumSetting;
 import net.ssehub.kernel_haven.config.Setting;
+import net.ssehub.kernel_haven.srcml_old.transformation.FunctionConditionExpander;
 import net.ssehub.kernel_haven.util.CodeExtractorException;
 import net.ssehub.kernel_haven.util.ExtractorException;
 import net.ssehub.kernel_haven.util.FormatException;
@@ -81,7 +82,6 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             + " (#include \"file.h\") relative to the source file being parsed are supported.");
     // TODO AK: update "currently only supports" when applicable
     
-    @SuppressWarnings("unused") // TODO
     private @NonNull HeaderHandling headerHandling = HeaderHandling.IGNORE; // will be overriden in init()
     
     private @NonNull File sourceTree = new File("will be initialized"); // will be overriden in init()
@@ -112,7 +112,7 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
     /**
      * Parses the given source file.
      * 
-     * @param absoulteTarget The absolute path to the file to parse.
+     * @param absoluteTarget The absolute path to the file to parse.
      * @param relativeTarget The path to the file to parse, relative to the source tree. This is used in exceptions
      *      and as the path in the result {@link SourceFile}.
      *      
@@ -120,7 +120,7 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
      * 
      * @throws CodeExtractorException If parsing the file fails.
      */
-    public @NonNull SourceFile<ISyntaxElement> parseFile(@NonNull File absoulteTarget, @NonNull File relativeTarget)
+    public @NonNull SourceFile<ISyntaxElement> parseFile(@NonNull File absoluteTarget, @NonNull File relativeTarget)
             throws CodeExtractorException {
         
         ByteArrayOutputStream stderr = new ByteArrayOutputStream();
@@ -130,7 +130,7 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             PipedInputStream stdout = new PipedInputStream();
             PipedOutputStream stdoutIn = new PipedOutputStream(stdout);
             
-            ProcessBuilder builder = new ProcessBuilder(srcExec.getAbsolutePath(), absoulteTarget.getAbsolutePath());
+            ProcessBuilder builder = new ProcessBuilder(srcExec.getAbsolutePath(), absoluteTarget.getAbsolutePath());
             
 //            builder.directory(srcExec.getParentFile());
             /*
@@ -156,7 +156,7 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             worker.start();
             
             SourceFile<ISyntaxElement> result = new SourceFile<>(relativeTarget);
-            result.addElement(parse(relativeTarget, stdout));
+            result.addElement(parse(absoluteTarget, relativeTarget, stdout));
             
             return result;
             
@@ -183,7 +183,9 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
     /**
      * Parses the given XML stream to an AST.
      * 
-     * @param relativeTarget The file that is currently parsed. Relative to source_tree. Used in error messages.
+     * @param absoluteTarget The absolute path to the file to parse.
+     * @param relativeTarget The path to the file to parse, relative to the source tree. This is used in exceptions
+     *      and as the path in the result {@link SourceFile}.
      * @param xml The XML stream to parse.
      * 
      * @return The parsed AST.
@@ -192,8 +194,8 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
      * @throws SAXException If parsing the XML fails.
      * @throws IOException If reading the XML stream fails.
      */
-    private @NonNull ISyntaxElement parse(@NonNull File relativeTarget, @NonNull InputStream xml)
-            throws FormatException, SAXException, IOException {
+    private @NonNull ISyntaxElement parse(@NonNull File absoluteTarget, @NonNull File relativeTarget,
+            @NonNull InputStream xml) throws FormatException, SAXException, IOException {
         
         Document doc = XmlParser.parse(xml);
         Node root = notNull(doc.getDocumentElement());
@@ -234,6 +236,24 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             System.out.println("   Result");
             System.out.println("==============");
             System.out.println(file);
+        }
+        
+        switch (headerHandling) {
+        case IGNORE:
+            // do nothing
+            break;
+            
+        case INCLUDE:
+            new IncludeExpander(absoluteTarget, this).expand(file);
+            break;
+            
+        case EXPAND_FUNCTION_CONDITION:
+            new IncludeExpander(absoluteTarget, this).expand(file);
+            new FunctionConditionExpander().expand(file);
+            break;
+        
+        default:
+            throw new FormatException("Header handling " + headerHandling + " not implemented");
         }
         
         return file;

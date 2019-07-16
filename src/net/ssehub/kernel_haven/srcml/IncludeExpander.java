@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.ssehub.kernel_haven.srcml_old.transformation;
+package net.ssehub.kernel_haven.srcml;
 
 import static net.ssehub.kernel_haven.util.null_checks.NullHelpers.notNull;
 
@@ -31,14 +31,15 @@ import net.ssehub.kernel_haven.code_model.ast.Comment;
 import net.ssehub.kernel_haven.code_model.ast.CompoundStatement;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock;
 import net.ssehub.kernel_haven.code_model.ast.CppStatement;
+import net.ssehub.kernel_haven.code_model.ast.ErrorElement;
 import net.ssehub.kernel_haven.code_model.ast.CppStatement.Type;
-import net.ssehub.kernel_haven.srcml_old.OldSrcMLExtractor;
 import net.ssehub.kernel_haven.code_model.ast.Function;
 import net.ssehub.kernel_haven.code_model.ast.ICode;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElementVisitor;
 import net.ssehub.kernel_haven.code_model.ast.Label;
 import net.ssehub.kernel_haven.code_model.ast.LoopStatement;
+import net.ssehub.kernel_haven.code_model.ast.ReferenceElement;
 import net.ssehub.kernel_haven.code_model.ast.SingleStatement;
 import net.ssehub.kernel_haven.code_model.ast.SwitchStatement;
 import net.ssehub.kernel_haven.code_model.ast.TypeDefinition;
@@ -62,7 +63,7 @@ public class IncludeExpander implements ISyntaxElementVisitor {
      */
     private @NonNull File folder;
     
-    private @NonNull OldSrcMLExtractor extractor;
+    private @NonNull SrcMLExtractor extractor;
     
     private @NonNull Deque<@NonNull ISyntaxElement> parents;
     
@@ -72,7 +73,7 @@ public class IncludeExpander implements ISyntaxElementVisitor {
      * @param absoulteTarget The absolute path to the file that we are expanding #includes for.
      * @param extractor The extractor to use for parsing included headers.
      */
-    public IncludeExpander(@NonNull File absoulteTarget, @NonNull OldSrcMLExtractor extractor) {
+    public IncludeExpander(@NonNull File absoulteTarget, @NonNull SrcMLExtractor extractor) {
         this.extractor = extractor;
         this.folder = notNull(absoulteTarget.getParentFile());
         this.parents = new LinkedList<>();
@@ -163,17 +164,24 @@ public class IncludeExpander implements ISyntaxElementVisitor {
                 if (file != null) {
                     LOGGER.logDebug("Parsing include: " + include, "-> " + file);
                     
+                    ISyntaxElement parent = notNull(parents.peek());
+                    
                     try {
                         // TODO AK: use some kind of cache to prevent endless recursion
                         SourceFile<ISyntaxElement> header = extractor.parseFile(file, file);
                         
                         LOGGER.logDebug("Replacing #include with parsed header " + file);
                         
-                        ISyntaxElement parent = notNull(parents.peek());
                         parent.replaceNestedElement(cppStatement, header.getElement(0));
                         
                     } catch (CodeExtractorException e) {
-                        LOGGER.logException("Can't parse header " + file, e);
+                        ErrorElement error = new ErrorElement(cppStatement.getPresenceCondition(),
+                                "Can't parse header " + file + ": " + e.getMessage());
+                        error.setSourceFile(cppStatement.getSourceFile());
+                        error.setLineStart(cppStatement.getLineStart());
+                        error.setLineEnd(cppStatement.getLineEnd());
+                        error.setCondition(cppStatement.getCondition());
+                        parent.replaceNestedElement(cppStatement, error);
                     }
                     
                 } else {
@@ -285,6 +293,20 @@ public class IncludeExpander implements ISyntaxElementVisitor {
     public void visitTypeDefinition(@NonNull TypeDefinition typeDef) {
         parents.push(typeDef);
         ISyntaxElementVisitor.super.visitTypeDefinition(typeDef);
+        parents.pop();
+    }
+    
+    @Override
+    public void visitErrorElement(@NonNull ErrorElement error) {
+        parents.push(error);
+        ISyntaxElementVisitor.super.visitErrorElement(error);
+        parents.pop();
+    }
+    
+    @Override
+    public void visitReference(@NonNull ReferenceElement referenceElement) {
+        parents.push(referenceElement);
+        ISyntaxElementVisitor.super.visitReference(referenceElement);
         parents.pop();
     }
     

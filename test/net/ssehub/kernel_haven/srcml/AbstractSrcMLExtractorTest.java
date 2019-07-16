@@ -16,8 +16,10 @@
  */
 package net.ssehub.kernel_haven.srcml;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,6 +57,7 @@ public class AbstractSrcMLExtractorTest {
      */
     @BeforeClass
     public static void setup() {
+        assertThat(RESOURCE_DIR.exists(), is(false));
         RESOURCE_DIR.mkdir();
     }
     

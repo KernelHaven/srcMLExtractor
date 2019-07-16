@@ -116,10 +116,13 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
         SUPPORTED_ELEMENTS = Collections.unmodifiableSet(tmpSet);
     }
     
+    @SuppressWarnings("unused")
     private @NonNull HeaderHandling headerHandling;
     
+    @SuppressWarnings("unused")
     private @NonNull File absolutePath;
     
+    @SuppressWarnings("unused")
     private @NonNull OldSrcMLExtractor extractor;
     
     private @NonNull Deque<TranslationUnit> elements = new ArrayDeque<>();
@@ -259,23 +262,23 @@ public class XmlToSyntaxElementConverter extends AbstractAstConverter {
             System.out.println(astResult);
         }
         
-        switch (headerHandling) {
-        case IGNORE:
-            // do nothing
-            break;
-            
-        case INCLUDE:
-            new IncludeExpander(absolutePath, extractor).expand(astResult);
-            break;
-            
-        case EXPAND_FUNCTION_CONDITION:
-            new IncludeExpander(absolutePath, extractor).expand(astResult);
-            new FunctionConditionExpander().expand(astResult);
-            break;
-        
-        default:
-            throw new FormatException("Header handling " + headerHandling + " not implemented");
-        }
+//        switch (headerHandling) {
+//        case IGNORE:
+//            // do nothing
+//            break;
+//            
+//        case INCLUDE:
+//            new IncludeExpander(absolutePath, extractor).expand(astResult);
+//            break;
+//            
+//        case EXPAND_FUNCTION_CONDITION:
+//            new IncludeExpander(absolutePath, extractor).expand(astResult);
+//            new FunctionConditionExpander().expand(astResult);
+//            break;
+//        
+//        default:
+//            throw new FormatException("Header handling " + headerHandling + " not implemented");
+//        }
         
         return astResult;
     }
