@@ -35,7 +35,6 @@ import net.ssehub.kernel_haven.code_model.ast.Code;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock.Type;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
-import net.ssehub.kernel_haven.srcml.transformation.HeaderHandling;
 import net.ssehub.kernel_haven.test_utils.TestConfiguration;
 import net.ssehub.kernel_haven.util.ExtractorException;
 import net.ssehub.kernel_haven.util.Util;
@@ -122,6 +121,7 @@ public class AbstractSrcMLExtractorTest {
             
             TestConfiguration config = new TestConfiguration(props);
             
+//            OldSrcMLExtractor extractor = new OldSrcMLExtractor();
             SrcMLExtractor extractor = new SrcMLExtractor();
             extractor.init(config);
             result = extractor.runOnFile(new File(file));

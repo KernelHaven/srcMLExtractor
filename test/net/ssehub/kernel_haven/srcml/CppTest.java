@@ -80,10 +80,10 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         
         
         assertElement(SingleStatement.class, "A", "A", outerIf.getNestedElement(0));
-        CppBlock innerIf = assertIf("B", "A && B", new Variable("B"), 1, Type.IFDEF, outerIf.getNestedElement(1));
+        CppBlock innerIf = assertIf("B", "B && A", new Variable("B"), 1, Type.IFDEF, outerIf.getNestedElement(1));
         assertElement(SingleStatement.class, "A", "A", outerIf.getNestedElement(2));
         
-        assertElement(SingleStatement.class, "B", "A && B", innerIf.getNestedElement(0));
+        assertElement(SingleStatement.class, "B", "B && A", innerIf.getNestedElement(0));
         
         assertThat(outerIf.getSiblingCount(), is(1));
         assertThat(outerIf.getSibling(0), sameInstance(outerIf));
@@ -151,10 +151,10 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         CppBlock outerIf = assertIf("A", "A", new Variable("A"), 3, Type.IFDEF, elements.get(0));
         
         assertElement(SingleStatement.class, "A", "A", outerIf.getNestedElement(0));
-        CppBlock innerIf = assertIf("!B", "A && !B", not("B"), 1, Type.IFNDEF, outerIf.getNestedElement(1));
+        CppBlock innerIf = assertIf("!B", "!B && A", not("B"), 1, Type.IFNDEF, outerIf.getNestedElement(1));
         assertElement(SingleStatement.class, "A", "A", outerIf.getNestedElement(2));
         
-        assertElement(SingleStatement.class, "!B", "A && !B", innerIf.getNestedElement(0));
+        assertElement(SingleStatement.class, "!B", "!B && A", innerIf.getNestedElement(0));
         
         assertThat(outerIf.getSiblingCount(), is(1));
         assertThat(outerIf.getSibling(0), sameInstance(outerIf));
@@ -304,10 +304,10 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         
         
         assertElement(SingleStatement.class, "A", "A", outerIf.getNestedElement(0));
-        CppBlock innerIf = assertIf("B", "A && B", new Variable("B"), 1, Type.IF, outerIf.getNestedElement(1));
+        CppBlock innerIf = assertIf("B", "B && A", new Variable("B"), 1, Type.IF, outerIf.getNestedElement(1));
         assertElement(SingleStatement.class, "A", "A", outerIf.getNestedElement(2));
         
-        assertElement(SingleStatement.class, "B", "A && B", innerIf.getNestedElement(0));
+        assertElement(SingleStatement.class, "B", "B && A", innerIf.getNestedElement(0));
         
         assertThat(outerIf.getSiblingCount(), is(1));
         assertThat(outerIf.getSibling(0), sameInstance(outerIf));
@@ -394,10 +394,10 @@ public class CppTest extends AbstractSrcMLExtractorTest {
         assertElement(SingleStatement.class, "1", "1", elements.get(2));
         
         assertElement(SingleStatement.class, "A && B", "A && B", outerIf.getNestedElement(0));
-        CppBlock innerIf = assertIf("C && !D", "A && B && C && !D", cAndNotD, 1, Type.IF, outerIf.getNestedElement(1));
+        CppBlock innerIf = assertIf("C && !D", "C && !D && A && B", cAndNotD, 1, Type.IF, outerIf.getNestedElement(1));
         assertElement(SingleStatement.class, "A && B", "A && B", outerIf.getNestedElement(2));
         
-        assertElement(SingleStatement.class, "C && !D", "A && B && C && !D", innerIf.getNestedElement(0));
+        assertElement(SingleStatement.class, "C && !D", "C && !D && A && B", innerIf.getNestedElement(0));
         
         assertThat(outerIf.getSiblingCount(), is(1));
         assertThat(outerIf.getSibling(0), sameInstance(outerIf));

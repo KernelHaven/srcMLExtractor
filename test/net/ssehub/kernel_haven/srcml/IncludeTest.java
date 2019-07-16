@@ -32,7 +32,6 @@ import net.ssehub.kernel_haven.code_model.ast.File;
 import net.ssehub.kernel_haven.code_model.ast.Function;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
 import net.ssehub.kernel_haven.code_model.ast.SingleStatement;
-import net.ssehub.kernel_haven.srcml.transformation.HeaderHandling;
 import net.ssehub.kernel_haven.util.logic.Variable;
 
 /**

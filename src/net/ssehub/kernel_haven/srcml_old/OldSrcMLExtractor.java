@@ -14,20 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.ssehub.kernel_haven.srcml;
-
-import static net.ssehub.kernel_haven.util.null_checks.NullHelpers.notNull;
+package net.ssehub.kernel_haven.srcml_old;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.UncheckedIOException;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.xml.sax.SAXException;
 
 import net.ssehub.kernel_haven.SetUpException;
@@ -38,6 +35,10 @@ import net.ssehub.kernel_haven.config.Configuration;
 import net.ssehub.kernel_haven.config.DefaultSettings;
 import net.ssehub.kernel_haven.config.EnumSetting;
 import net.ssehub.kernel_haven.config.Setting;
+import net.ssehub.kernel_haven.srcml.HeaderHandling;
+import net.ssehub.kernel_haven.srcml_old.transformation.XmlToSyntaxElementConverter;
+import net.ssehub.kernel_haven.srcml_old.xml.AbstractAstConverter;
+import net.ssehub.kernel_haven.srcml_old.xml.XmlToAstConverter;
 import net.ssehub.kernel_haven.util.CodeExtractorException;
 import net.ssehub.kernel_haven.util.ExtractorException;
 import net.ssehub.kernel_haven.util.FormatException;
@@ -64,9 +65,7 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
  * @author El-Sharkawy
  *
  */
-public class SrcMLExtractor extends AbstractCodeModelExtractor {
-    
-    public static final boolean DEBUG_LOGGING = false;
+public class OldSrcMLExtractor extends AbstractCodeModelExtractor {
     
     private static final Logger LOGGER = Logger.get();
     
@@ -81,7 +80,6 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             + " (#include \"file.h\") relative to the source file being parsed are supported.");
     // TODO AK: update "currently only supports" when applicable
     
-    @SuppressWarnings("unused") // TODO
     private @NonNull HeaderHandling headerHandling = HeaderHandling.IGNORE; // will be overriden in init()
     
     private @NonNull File sourceTree = new File("will be initialized"); // will be overriden in init()
@@ -89,7 +87,7 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
     private File srcExec;
 
     @Override
-    protected void init(@NonNull Configuration config) throws SetUpException {
+    public void init(@NonNull Configuration config) throws SetUpException {
         sourceTree = config.getValue(DefaultSettings.SOURCE_TREE);
         config.registerSetting(HEADER_HANDLING_SETTING);
         headerHandling = config.getValue(HEADER_HANDLING_SETTING);
@@ -99,7 +97,8 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
     }
     
     @Override
-    protected @NonNull SourceFile<ISyntaxElement> runOnFile(@NonNull File target) throws ExtractorException {
+    @NonNull
+    public SourceFile<ISyntaxElement> runOnFile(@NonNull File target) throws ExtractorException {
         File absoulteTarget = new File(sourceTree, target.getPath());
         if (!absoulteTarget.exists()) {
             throw new ExtractorException("srcML could not parse specified file, which does not exist: "
@@ -122,13 +121,12 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
      */
     public @NonNull SourceFile<ISyntaxElement> parseFile(@NonNull File absoulteTarget, @NonNull File relativeTarget)
             throws CodeExtractorException {
-        
         ByteArrayOutputStream stderr = new ByteArrayOutputStream();
         
         Thread worker = null;
         try {
-            PipedInputStream stdout = new PipedInputStream();
-            PipedOutputStream stdoutIn = new PipedOutputStream(stdout);
+            PipedOutputStream out = new PipedOutputStream();
+            PipedInputStream stdout = new PipedInputStream(out);
             
             ProcessBuilder builder = new ProcessBuilder(srcExec.getAbsolutePath(), absoulteTarget.getAbsolutePath());
             
@@ -142,12 +140,29 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             builder.environment().put("LD_LIBRARY_PATH", libFolder);
             builder.environment().put("DYLD_LIBRARY_PATH", libFolder);
             
+            AbstractAstConverter xmlConverter = new XmlToSyntaxElementConverter(absoulteTarget, relativeTarget,
+                    headerHandling, this);
+            XmlToAstConverter converter = new XmlToAstConverter(stdout, xmlConverter);
+
             worker = new Thread(() -> {
                 boolean success;
                 try {
-                    success = Util.executeProcess(builder, "srcML", stdoutIn, stderr, 0);
+                    success = Util.executeProcess(builder, "srcML", out, stderr, 0);
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
+                } finally {
+                    // CHECKSTYLE:OFF // too much try nesting
+                    try {
+                        out.close();
+                    } catch (IOException e) {
+                        LOGGER.logException("Exception while closing piped stream for stdout", e);
+                    }
+                    try {
+                        stderr.close();
+                    } catch (IOException e) {
+                        LOGGER.logException("Exception while closing piped stream for stderr", e);
+                    }
+                    // CHECKSTYLE:ON
                 }
                 if (!success) {
                     LOGGER.logWarning("srcML exe did not execute succesfully");
@@ -155,13 +170,13 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             }, "SrcMLExtractor-Worker");
             worker.start();
             
-            SourceFile<ISyntaxElement> result = new SourceFile<>(relativeTarget);
-            result.addElement(parse(relativeTarget, stdout));
+            SourceFile<ISyntaxElement> resultFile = converter.parseToAst();
             
-            return result;
+            return resultFile;
             
-        } catch (IOException | UncheckedIOException | SAXException | FormatException e) {
+        } catch (IOException | UncheckedIOException | ParserConfigurationException | SAXException | FormatException e) {
             throw new CodeExtractorException(relativeTarget, e);
+            
         } finally {
             if (worker != null) {
                 try {
@@ -170,75 +185,12 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
                     // ignore
                 }
             }
-            
-            if (stderr.size() > 0) {
-                System.out.println("-------");
-                System.out.println("stderr:");
-                System.out.println(stderr.toString());
-                System.out.println("-------");
+            if (!stderr.toString().isEmpty()) {
+                LOGGER.logDebug(stderr.toString().split("\n"));
             }
         }
     }
-    
-    /**
-     * Parses the given XML stream to an AST.
-     * 
-     * @param relativeTarget The file that is currently parsed. Relative to source_tree. Used in error messages.
-     * @param xml The XML stream to parse.
-     * 
-     * @return The parsed AST.
-     * 
-     * @throws FormatException If converting the XML to an AST structure fails.
-     * @throws SAXException If parsing the XML fails.
-     * @throws IOException If reading the XML stream fails.
-     */
-    private @NonNull ISyntaxElement parse(@NonNull File relativeTarget, @NonNull InputStream xml)
-            throws FormatException, SAXException, IOException {
-        
-        Document doc = XmlParser.parse(xml);
-        Node root = notNull(doc.getDocumentElement());
-        
-        if (!root.getNodeName().equals("unit")) {
-            throw new FormatException("Expected <unit> but got <" + root.getNodeName() + ">");
-        }
-        
-        Node languageAttr = root.getAttributes().getNamedItem("language");
-        if (languageAttr == null) {
-            throw new FormatException("Language attribute not specified in <unit>");
-        }
-        if (!languageAttr.getTextContent().equals("C")) {
-            throw new FormatException("Unsupported language \"" + languageAttr.getTextContent() + "\"");
-        }
-        
-        if (DEBUG_LOGGING) {
-            System.out.println("==============");
-            System.out.println("   Parsed");
-            System.out.println("==============");
-            XmlUserData.debugPrintXml(root);
-        }
-        
-        new XmlPrepreocessor(relativeTarget, doc).preprocess(root);
 
-        if (DEBUG_LOGGING) {
-            System.out.println("==============");
-            System.out.println("   Pre-Processed");
-            System.out.println("==============");
-            XmlUserData.debugPrintXml(root);
-        }
-        
-        XmlToAstConverter converter = new XmlToAstConverter(relativeTarget);
-        net.ssehub.kernel_haven.code_model.ast.File file = converter.convertFile(root);
-        
-        if (DEBUG_LOGGING) {
-            System.out.println("==============");
-            System.out.println("   Result");
-            System.out.println("==============");
-            System.out.println(file);
-        }
-        
-        return file;
-    }
-    
     @Override
     protected @NonNull String getName() {
         return "SrcMLExtractor";

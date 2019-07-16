@@ -68,7 +68,6 @@ public class RobustnessTests extends AbstractSrcMLExtractorTest {
     public static Object[] data() throws IOException {
         List<Path> sourceFiles = Files.walk(TEST_FILES_PATH)
                 .filter(p ->p.getFileName().toString().endsWith(".c"))
-                .filter(p -> !p.getFileName().toString().startsWith("deactivated_"))
                 .collect(Collectors.toList());
         
         return sourceFiles.toArray();

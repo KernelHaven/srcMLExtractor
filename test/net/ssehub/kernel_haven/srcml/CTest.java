@@ -159,7 +159,7 @@ public class CTest extends AbstractSrcMLExtractorTest {
         CppBlock block = assertElement(CppBlock.class, "CONFIG_DEBUG", "CONFIG_DEBUG", funcBlock.getNestedElement(0));
         assertThat(block.getNestedElementCount(), is(1));
         assertThat(block.getLineStart(), is(4));
-        assertThat(block.getLineEnd(), is(5));
+        assertThat(block.getLineEnd(), is(6));
         
         SingleStatement printStmt = assertElement(SingleStatement.class, "CONFIG_DEBUG", "CONFIG_DEBUG",
                 block.getNestedElement(0));
@@ -189,8 +189,10 @@ public class CTest extends AbstractSrcMLExtractorTest {
     public void testComplexAst() throws IOException, FormatException {
         SourceFile<ISyntaxElement> ast = loadFile("Komplex2.c");
         
-        // load manually verified, cached version of the AST; this is known to be correct
         JsonCodeModelCache cache = new JsonCodeModelCache(new java.io.File("testdata/c"));
+//        cache.write(ast);
+        
+        // load manually verified, cached version of the AST; this is known to be correct
         SourceFile<ISyntaxElement> expected = cache.read(new java.io.File("Komplex2.c")).castTo(ISyntaxElement.class);
         
         assertThat(ast, is(expected));
