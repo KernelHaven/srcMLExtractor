@@ -154,8 +154,7 @@ public class XmlPrepreocessor {
     }
     
     /**
-     * Recurses through the complete XML tree and converts the nesting structure of C-preprocessor blocks. The elements
-     * contained in a CPP-block are nested inside that block.
+     * Recurses through the complete XML tree and converts the nesting structure of some XML nodes.
      * 
      * @param node The XML (root) node to convert the nesting structure for.
      * 
@@ -169,6 +168,8 @@ public class XmlPrepreocessor {
             }
             
             convertIfNesting(node, end);
+        } else if (isCase(node)) {
+            convertCaseNesting(node);
         }
         
         NodeList children = node.getChildNodes();
@@ -178,7 +179,25 @@ public class XmlPrepreocessor {
     }
     
     /**
-     * Converts the nesting structure for the given C-preprocessor block.
+     * Converts the nesting structure of case and default statements. The elements following a case label are moved
+     * into that case node.
+     * 
+     * @param caseNode The case or default node.
+     */
+    private void convertCaseNesting(@NonNull Node caseNode) {
+        Node parent = caseNode.getParentNode();
+        Node sibling = caseNode.getNextSibling();
+        while (sibling != null && !isCase(sibling)) {
+            parent.removeChild(sibling);
+            caseNode.appendChild(sibling);
+            
+            sibling = caseNode.getNextSibling();
+        }
+    }
+    
+    /**
+     * Converts the nesting structure for the given C-preprocessor block. The elements contained in a CPP-block are
+     * nested inside that block.
      * 
      * @param start The starting node of the block. Is one of: if, ifdef, ifndef, else, elif.
      * @param end The end node of the block. Is one of: else, elif, endif.
@@ -337,7 +356,7 @@ public class XmlPrepreocessor {
      * 
      * @return Whether this node starts a new block level.
      */
-    private boolean isStartingNode(@NonNull Node node) {
+    private static boolean isStartingNode(@NonNull Node node) {
         String name = node.getNodeName();
         return name.equals("cpp:if") || name.equals("cpp:ifdef") || name.equals("cpp:ifndef");
     }
@@ -349,7 +368,7 @@ public class XmlPrepreocessor {
      * 
      * @return Whether this node is a new block on the same level.
      */
-    private boolean isContinue(@NonNull Node node) {
+    private static boolean isContinue(@NonNull Node node) {
         String name = node.getNodeName();
         return name.equals("cpp:elif") || name.equals("cpp:else");
     }
@@ -361,9 +380,21 @@ public class XmlPrepreocessor {
      * 
      * @return Whether this node ends a level.
      */
-    private boolean isEnd(@NonNull Node node) {
+    private static boolean isEnd(@NonNull Node node) {
         String name = node.getNodeName();
         return name.equals("cpp:endif");
+    }
+    
+    /**
+     * Checks whether this is a case or default node.
+     * 
+     * @param node The XML node.
+     * 
+     * @return Whether this is a case or default node.
+     */
+    private static boolean isCase(@NonNull Node node) {
+        String name = node.getNodeName();
+        return name.equals("case") || name.equals("default");
     }
     
     /**

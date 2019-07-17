@@ -589,9 +589,27 @@ public class XmlToAstConverter {
             throw makeException(node, "Found <" + node.getNodeName() + "> without surounding <switch>");
         }
         
-        CaseStatement result = new CaseStatement(getPc(), convertChildrenToCode(node), type, parentSwitch);
+        int nestedIndex;
+        if (type == CaseStatement.CaseType.CASE) {
+            checkChildText(node, 0, "case");
+            checkChildName(node, 1, "expr");
+            checkChildText(node, 2, ":");
+            nestedIndex = 3;
+        } else {
+            checkChildText(node, 0, "default:");
+            nestedIndex = 1;
+        }
+        
+        CaseStatement result = new CaseStatement(getPc(), convertChildrenToCode(node, 0, nestedIndex),
+                type, parentSwitch);
         postCreation(result, node);
         parentSwitch.addCase(result);
+        
+        NodeList children = node.getChildNodes();
+        for (int i = nestedIndex; i < children.getLength(); i++) {
+            result.addNestedElement(convertSafe(notNull(children.item(i))));
+        }
+        
         return result;
     }
     
@@ -617,10 +635,13 @@ public class XmlToAstConverter {
         Node typeAttribute = node.getAttributes().getNamedItem("type");
         if (children.getLength() > 0 && (typeAttribute == null || !typeAttribute.getTextContent().equals("pseudo"))) {
             // first is "{", last is "}"
-            if (children.item(0).getTextContent().startsWith("{")) {
+            
+            Node first = children.item(0);
+            if (first.getNodeType() == Node.TEXT_NODE && first.getTextContent().startsWith("{")) {
                 start++;
             }
-            if (children.item(children.getLength() - 1).getTextContent().endsWith("}")) {
+            Node last = children.item(children.getLength() - 1);
+            if (last.getNodeType() == Node.TEXT_NODE && last.getTextContent().endsWith("}")) {
                 end--;
             }
         }
