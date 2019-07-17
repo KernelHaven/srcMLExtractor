@@ -643,17 +643,24 @@ public class XmlToAstConverter {
      * @throws FormatException If converting fails.
      */
     private @NonNull Function convertFunction(@NonNull Node node) throws FormatException {
-        checkChildName(node, 0, "type");
-        checkChildName(node, 1, "name");
-        checkChildName(node, 2, "parameter_list");
-        
+        int i = 0;
         NodeList children = node.getChildNodes();
-        String name = notNull(notNull(children.item(1)).getTextContent());
+        while (i < children.getLength() && children.item(i).getNodeName().equals("specifier")) {
+            i++;
+        }
+        
+        checkChildName(node, i++, "type");
+        int nameIndex = i;
+        checkChildName(node, i++, "name");
+        checkChildName(node, i++, "parameter_list");
+        
+        String name = notNull(notNull(children.item(nameIndex)).getTextContent());
         
         Function result = new Function(getPc(), name, convertChildrenToCode(node, 0, 3));
         postCreation(result, node);
         
-        for (int i = 3; i < children.getLength(); i++) {
+        // there now follow <decl_stmt> and <block> only
+        for (; i < children.getLength(); i++) {
             ISyntaxElement converted = convertSafe(notNull(children.item(i)));
             result.addNestedElement(converted);
         }
