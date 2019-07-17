@@ -1,7 +1,17 @@
+    switch(requestTypeId) {
+    case 1:
+        break;
 #ifdef A
-	while (1) {
+# ifdef B
+    case 2:
+        break;
+# endif
+    case 3:
+        break;
+    case 4:
+        break;
 #endif
-		;
-#ifdef A	
+    case 5:
+        break;
 	}
-#endif
+	

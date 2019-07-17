@@ -26,6 +26,7 @@ import static net.ssehub.kernel_haven.util.null_checks.NullHelpers.notNull;
 import java.io.File;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.function.Function;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -161,20 +162,48 @@ public class XmlPrepreocessor {
      * @throws FormatException If the nesting structure can not be converted (e.g. because it is malformed).
      */
     private void convertNesting(@NonNull Node node) throws FormatException {
-        if (isStartingNode(node) || isContinue(node)) {
-            Node end = (Node) node.getUserData(CPP_BLOCK_END);
-            if (end == null) {
-                throw makeException(node, "Didn't find and <cpp:endif> for <" + node.getNodeName() + ">");
-            }
-            
-            convertIfNesting(node, end);
-        } else if (isCase(node)) {
-            convertCaseNesting(node);
-        }
-        
+        // first convert the <case> nesting structure for all children
         NodeList children = node.getChildNodes();
         for (int i = 0; i < children.getLength(); i++) {
-            convertNesting(notNull(children.item(i)));
+            Node child = notNull(children.item(i));
+            if (isCase(child)) {
+                convertCaseNesting(child);
+            }
+        }
+        
+//        if (DEBUG_LOGGING) {
+//            Node tmp = node;
+//            while (!tmp.getNodeName().equals("unit") && tmp.getParentNode() != null) {
+//                tmp = notNull(tmp.getParentNode());
+//            }
+//            XmlUserData.debugPrintXml(notNull(tmp));
+//        }
+        
+        // then convert the <cpp:if*> nesting structure
+        for (int i = 0; i < children.getLength(); i++) {
+            Node child = notNull(children.item(i));
+            if (isStartingNode(child) || isContinue(child)) {
+                Node end = (Node) child.getUserData(CPP_BLOCK_END);
+                if (end == null) {
+                    throw makeException(child, "Didn't find and <cpp:endif> for <" + child.getNodeName() + ">");
+                }
+                
+                convertIfNesting(child, end);
+            }
+        }
+        
+//        if (DEBUG_LOGGING) {
+//            Node tmp = node;
+//            while (!tmp.getNodeName().equals("unit") && tmp.getParentNode() != null) {
+//                tmp = notNull(tmp.getParentNode());
+//            }
+//            XmlUserData.debugPrintXml(notNull(tmp));
+//        }
+        
+        // finally, recurse into all children
+        for (int i = 0; i < children.getLength(); i++) {
+            Node child = notNull(children.item(i));
+            convertNesting(child);
         }
     }
     
@@ -205,6 +234,8 @@ public class XmlPrepreocessor {
      * @throws FormatException If converting the nesting structure fails.
      */
     private void convertIfNesting(@NonNull Node start, @NonNull Node end) throws FormatException {
+        fixStartingIf(start);
+        
         Node parent = start.getParentNode();
         
         Node sibling;
@@ -256,13 +287,55 @@ public class XmlPrepreocessor {
         if (isEnd(end)) {
             end.getParentNode().removeChild(end);
         }
-        
-        if (DEBUG_LOGGING) {
-            Node tmp = notNull(start.getParentNode());
-            while (!tmp.getNodeName().equals("unit") && tmp.getParentNode() != null) {
-                tmp = notNull(tmp.getParentNode());
+    }
+    
+    /**
+     * Fixes a special case where a {@code <cpp:if*>} is the last child of a parent.
+     * <p>
+     * <b>Example:</b>
+     * <code>
+     * <pre>
+     * &lt;a>
+     *     &lt;b>&lt;/b>
+     *     &lt;cpp:ifdef>&lt;/cpp:ifdef>
+     *     &lt;cpp:ifdef>&lt;/cpp:ifdef>
+     * &lt;/a>
+     * </pre>
+     * </code>
+     * will be converted to:
+     * <code>
+     * <pre>
+     * &lt;a>
+     *     &lt;b>&lt;/b>
+     * &lt;/a>
+     * &lt;cpp:ifdef>&lt;/cpp:ifdef>
+     * &lt;cpp:ifdef>&lt;/cpp:ifdef>
+     * </pre>
+     * </code>
+     * 
+     * @param cppstart The starting C-preprocessor XML node.
+     */
+    private void fixStartingIf(@NonNull Node cppstart) {
+        Function<@NonNull Node, @NonNull Boolean> isLastNode = new Function<@NonNull Node, @NonNull Boolean>() {
+            
+            @Override
+            public @NonNull Boolean apply(@NonNull Node node) {
+                return (isStartingNode(node) || isContinue(node))
+                        && (node.getNextSibling() == null || apply(notNull(node.getNextSibling())));
             }
-            XmlUserData.debugPrintXml(notNull(tmp));
+        };
+        
+        // if the starting ifdef is the last element of a block, move it to the parent
+        while (isLastNode.apply(cppstart)) {
+            Node p = cppstart.getParentNode();
+            Node pp = p.getParentNode();
+            
+            Node child;
+            do {
+                child = p.getLastChild();
+                p.removeChild(child);
+                pp.insertBefore(child, p.getNextSibling());
+            } while (child != cppstart);
         }
     }
     
