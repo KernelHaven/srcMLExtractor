@@ -131,12 +131,13 @@ public class SrcMlConditionGrammar extends CStyleBooleanGrammar {
             return False.INSTANCE;
         }
         
-        if (!identifier.matches("defined\\([a-zA-Z0-9_]+\\)")) {
-            throw new ExpressionFormatException("Identifier \"" + identifier
-                    + "\" is not valid defined() expression");
+        if (identifier.matches("defined\\([a-zA-Z0-9_]+\\)")) {
+            identifier = identifier.substring("defined(".length(), identifier.length() - 1);
         }
-        
-        identifier = identifier.substring("defined(".length(), identifier.length() - 1);
+//        else {
+//            throw new ExpressionFormatException("Identifier \"" + identifier
+//                    + "\" is not valid defined() expression");
+//        }
         
         return super.makeIdentifierFormula(identifier);
     }
