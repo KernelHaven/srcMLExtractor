@@ -18,6 +18,7 @@ package net.ssehub.kernel_haven.srcml;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
@@ -28,16 +29,20 @@ import org.junit.Test;
 
 import net.ssehub.kernel_haven.code_model.JsonCodeModelCache;
 import net.ssehub.kernel_haven.code_model.SourceFile;
+import net.ssehub.kernel_haven.code_model.ast.BranchStatement;
 import net.ssehub.kernel_haven.code_model.ast.Code;
 import net.ssehub.kernel_haven.code_model.ast.CompoundStatement;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock;
+import net.ssehub.kernel_haven.code_model.ast.CppBlock.Type;
 import net.ssehub.kernel_haven.code_model.ast.CppStatement;
 import net.ssehub.kernel_haven.code_model.ast.File;
 import net.ssehub.kernel_haven.code_model.ast.Function;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
+import net.ssehub.kernel_haven.code_model.ast.ReferenceElement;
 import net.ssehub.kernel_haven.code_model.ast.SingleStatement;
 import net.ssehub.kernel_haven.code_model.ast.TypeDefinition;
 import net.ssehub.kernel_haven.util.FormatException;
+import net.ssehub.kernel_haven.util.logic.Variable;
 
 /**
  * Tests the translation of C-statements.
@@ -175,6 +180,53 @@ public class CTest extends AbstractSrcMLExtractorTest {
         assertThat(retStmt.getNestedElementCount(), is(0));
         assertThat(retStmt.getLineStart(), is(7));
         assertThat(retStmt.getLineEnd(), is(7));
+    }
+    
+    /**
+     * Tests a C-if where the header is surroundend by an ifdef, but not the body.
+     * 
+     * @throws IOException unwanted.
+     * @throws FormatException unwanted.
+     */
+    @Test
+    public void testIfWithIfdef() throws IOException, FormatException {
+        SourceFile<ISyntaxElement> ast = loadFile("IfWithIfdef.c");
+        assertThat(ast.getTopElementCount(), is(1));
+        
+        File file = assertElement(File.class, "1", "1", ast.getElement(0));
+        assertThat(file.getPath(), is(new java.io.File("c/IfWithIfdef.c")));
+        assertThat(file.getLineStart(), is(1));
+        assertThat(file.getLineEnd(), is(7));
+        assertThat(file.getNestedElementCount(), is(2));
+        
+        CppBlock ifdef = assertIf("A", "A", new Variable("A"), 1, Type.IFDEF, file.getNestedElement(0));
+        assertThat(ifdef.getLineStart(), is(1));
+        assertThat(ifdef.getLineEnd(), is(3));
+        assertThat(ifdef.getNestedElementCount(), is(1));
+        
+        CompoundStatement block = assertElement(CompoundStatement.class, "1", "1", file.getNestedElement(1));
+        assertThat(block.getLineStart(), is(4));
+        assertThat(block.getLineEnd(), is(6));
+        assertThat(block.getNestedElementCount(), is(1));
+        
+        SingleStatement stmt = assertElement(SingleStatement.class, "1", "1", block.getNestedElement(0));
+        assertThat(stmt.getLineStart(), is(5));
+        assertThat(stmt.getLineEnd(), is(5));
+        assertThat(stmt.getNestedElementCount(), is(0));
+        assertCode(";", stmt.getCode());
+        
+        BranchStatement ifStmt = assertElement(BranchStatement.class, "A", "A", ifdef.getNestedElement(0));
+        assertThat(ifStmt.getLineStart(), is(2));
+        assertThat(ifStmt.getLineEnd(), is(6));
+        assertThat(ifStmt.getNestedElementCount(), is(1));
+        assertCode("if ( abc == 1 )", ifStmt.getIfCondition());
+        
+        ReferenceElement ref = assertElement(ReferenceElement.class, "A", "A", ifStmt.getNestedElement(0));
+        assertThat(ref.getLineStart(), is(4));
+        assertThat(ref.getLineEnd(), is(6));
+        assertThat(ref.getNestedElementCount(), is(0));
+        
+        assertSame(block, ref.getReferenced());
     }
     
     /**
