@@ -197,7 +197,7 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             @NonNull InputStream xml) throws FormatException, SAXException, IOException {
         
         Document doc = XmlParser.parse(xml);
-        Node root = notNull(doc.getDocumentElement());
+        @NonNull Node root = notNull(doc.getDocumentElement());
         
         if (!root.getNodeName().equals("unit")) {
             throw new FormatException("Expected <unit> but got <" + root.getNodeName() + ">");
