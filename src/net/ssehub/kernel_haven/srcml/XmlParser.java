@@ -115,18 +115,52 @@ public class XmlParser {
         @Override
         public void characters(char[] ch, int start, int length) {
             String str = new String(ch, start, length);
-            str = str.trim().replaceAll("\\s+", " ");
+            str = str.trim();
             if (!str.isEmpty()) {
-                Node textNode = doc.createTextNode(str);
+                Node textNode = doc.createTextNode(str.replaceAll("\\s+", " "));
                 
-                textNode.setUserData(XmlUserData.LINE_START, getLineNumber(), null);
-                textNode.setUserData(XmlUserData.LINE_END, getLineNumber(), null);
+                /*
+                 * Calculate the start and end line number:
+                 * - getLineNumber() is at the end of the text buffer
+                 * - for the start line, we need to subtract how many newlines appeared before that (ignoring the
+                 *   trimmed-off whitespace at the start of the buffer)
+                 * - for the end line, we need to subtract how many newlines appeared between end of text node and
+                 *   the end of the buffer (trimmed-off whitespace) 
+                 */
                 
-                if (elements.isEmpty()) {
-                    doc.appendChild(textNode);
-                } else {
-                    notNull(elements.peek()).appendChild(textNode);
+                // count number of newlines starting with the text content (skip the whitespace trimmed at the start)
+                int numNewlines = 0;
+                boolean foundFirstNonWhitespace = false;
+                for (int i = start; i < start + length; i++) {
+                    if (!Character.isWhitespace(ch[i])) {
+                        foundFirstNonWhitespace = true;
+                    }
+                    
+                    if (foundFirstNonWhitespace && ch[i] == '\n') {
+                        numNewlines++;
+                    }
                 }
+                
+                // count the number of newlines after the text content
+                int numNewLinesEnd = 0;
+                for (int i = start + length - 1; i >= start; i--) {
+                    if (!Character.isWhitespace(ch[i])) {
+                        break;
+                    }
+                    
+                    if (ch[i] == '\n') {
+                        numNewLinesEnd++;
+                    }
+                }
+                
+                int lineNumber = getLineNumber();
+                int lineStart = lineNumber - numNewlines;
+                int lineEnd = lineNumber - numNewLinesEnd;
+                
+                textNode.setUserData(XmlUserData.LINE_START, lineStart, null);
+                textNode.setUserData(XmlUserData.LINE_END, lineEnd, null);
+                
+                notNull(elements.peek()).appendChild(textNode);
             }
         }
         
@@ -158,7 +192,7 @@ public class XmlParser {
             throw new SAXException("Can't create document or parser", e);
         }
         
-        parser.parse(in, new LineNumberHandler(doc));        
+        parser.parse(in, new LineNumberHandler(doc));
         
         return doc;
     }

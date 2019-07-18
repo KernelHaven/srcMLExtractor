@@ -188,7 +188,7 @@
 								"id": 19,
 								"sourceFile": "c/Komplex2.c",
 								"lineStart": 11,
-								"lineEnd": 12,
+								"lineEnd": 11,
 								"condition": "1",
 								"presenceCondition": "1",
 								"code": "void function ("
@@ -212,7 +212,7 @@
 										"id": 21,
 										"sourceFile": "c/Komplex2.c",
 										"lineStart": 13,
-										"lineEnd": 14,
+										"lineEnd": 13,
 										"condition": "A",
 										"presenceCondition": "A",
 										"code": "int a ,"
