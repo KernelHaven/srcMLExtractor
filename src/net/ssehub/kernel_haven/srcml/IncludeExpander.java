@@ -175,8 +175,12 @@ public class IncludeExpander implements ISyntaxElementVisitor {
                         parent.replaceNestedElement(cppStatement, header.getElement(0));
                         
                     } catch (CodeExtractorException e) {
+                        Throwable exc = e;
+                        if (e.getCause() != null) {
+                            exc = e.getCause();
+                        }
                         ErrorElement error = new ErrorElement(cppStatement.getPresenceCondition(),
-                                "Can't parse header " + file + ": " + e.getMessage());
+                                "Can't parse header " + file + ": " + exc.getMessage());
                         error.setSourceFile(cppStatement.getSourceFile());
                         error.setLineStart(cppStatement.getLineStart());
                         error.setLineEnd(cppStatement.getLineEnd());

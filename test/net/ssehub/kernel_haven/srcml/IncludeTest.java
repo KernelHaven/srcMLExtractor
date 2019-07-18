@@ -28,6 +28,7 @@ import net.ssehub.kernel_haven.code_model.ast.CompoundStatement;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock;
 import net.ssehub.kernel_haven.code_model.ast.CppStatement;
 import net.ssehub.kernel_haven.code_model.ast.CppStatement.Type;
+import net.ssehub.kernel_haven.code_model.ast.ErrorElement;
 import net.ssehub.kernel_haven.code_model.ast.File;
 import net.ssehub.kernel_haven.code_model.ast.Function;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
@@ -78,7 +79,7 @@ public class IncludeTest extends AbstractSrcMLExtractorTest {
         assertCode("int a ;", stmt1.getCode());
         assertCode("int b ;", stmt2.getCode());
         
-        // TODO: should this be headers/file1.h instead?
+        // TODO: should this be headers/simple.h instead?
         assertThat(stmt1.getSourceFile(), is(new java.io.File("testdata/headers/simple.h")));
         assertThat(stmt1.getLineStart(), is(4));
         
@@ -123,6 +124,26 @@ public class IncludeTest extends AbstractSrcMLExtractorTest {
         
         assertCode("\"missing_header.h\"", incl1.getExpression());
         assertCode("< other_missing_header.h >", incl2.getExpression());
+    }
+
+    /**
+     * Tests that including an unparseable header is handled correctly.
+     */
+    @Test
+    public void testUnparseableHeader() {
+        SourceFile<ISyntaxElement> ast = loadFile("unparseable_base.c", HeaderHandling.INCLUDE);
+        List<ISyntaxElement> elements = getElements(ast);
+        
+        SingleStatement stmt1 = assertElement(SingleStatement.class, "1", "1", elements.get(0));
+        ErrorElement error = assertElement(ErrorElement.class, "1", "1", elements.get(1));
+        SingleStatement stmt2 = assertElement(SingleStatement.class, "1", "1", elements.get(2));
+        
+        assertCode(";", stmt1.getCode());
+        assertCode(";", stmt2.getCode());
+        
+        assertThat(error.getErrorText(), is("Can't parse header testdata\\headers\\unparseable_included.java: "
+                + "Unsupported language \"Java\""));
+        assertThat(error.getNestedElementCount(), is(0));
     }
     
     @Override
