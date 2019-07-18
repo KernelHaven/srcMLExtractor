@@ -141,8 +141,8 @@ public class IncludeTest extends AbstractSrcMLExtractorTest {
         assertCode(";", stmt1.getCode());
         assertCode(";", stmt2.getCode());
         
-        assertThat(error.getErrorText(), is("Can't parse header testdata\\headers\\unparseable_included.java: "
-                + "Unsupported language \"Java\""));
+        assertThat(error.getErrorText().replace('\\', '/'),
+                is("Can't parse header testdata/headers/unparseable_included.java: Unsupported language \"Java\""));
         assertThat(error.getNestedElementCount(), is(0));
     }
     
