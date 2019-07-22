@@ -1,0 +1,8 @@
+<unit language="C">
+	<cpp:ifdef>#<cpp:directive>ifdef</cpp:directive><name>A</name></cpp:ifdef>
+	<block>
+		<empty_stmt>S1</empty_stmt>
+		<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
+		<empty_stmt>S2</empty_stmt>
+	</block>
+</unit>

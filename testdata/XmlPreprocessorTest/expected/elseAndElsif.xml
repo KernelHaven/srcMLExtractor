@@ -1,0 +1,9 @@
+<unit language="C">
+	<cpp:if>#<cpp:directive>if</cpp:directive><expr>A</expr>
+		<empty_stmt>;</empty_stmt></cpp:if>
+	<cpp:elif>#<cpp:directive>elif</cpp:directive><expr>B</expr>
+		<empty_stmt>;</empty_stmt></cpp:elif>
+	<cpp:else>#<cpp:directive>else</cpp:directive>
+		<empty_stmt>;</empty_stmt>
+	</cpp:else>
+</unit>

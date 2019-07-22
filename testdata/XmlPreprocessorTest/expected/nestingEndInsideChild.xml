@@ -1,0 +1,10 @@
+<unit lineStart="0" lineEnd="7" language="C">
+	<cpp:ifdef lineStart="1" lineEnd="4">#<cpp:directive>ifdef</cpp:directive><name>A</name>
+		<block>
+			<empty_stmt>S1</empty_stmt>
+			
+			<kh:reference></kh:reference>
+		</block>
+	</cpp:ifdef>
+	<empty_stmt lineStart="5" lineEnd="5">S2</empty_stmt>
+</unit>

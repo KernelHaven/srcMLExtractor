@@ -185,7 +185,7 @@ public class XmlPrepreocessor {
             if (isStartingNode(child) || isContinue(child)) {
                 Node end = (Node) child.getUserData(CPP_BLOCK_END);
                 if (end == null) {
-                    throw makeException(child, "Didn't find and <cpp:endif> for <" + child.getNodeName() + ">");
+                    throw makeException(child, "Didn't find an <cpp:endif> for <" + child.getNodeName() + ">");
                 }
                 
                 convertIfNesting(child, end);
