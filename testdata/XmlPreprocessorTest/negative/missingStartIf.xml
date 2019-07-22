@@ -1,0 +1,4 @@
+<unit language="C">
+	<empty_stmt>;</empty_stmt>
+	<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
+</unit>

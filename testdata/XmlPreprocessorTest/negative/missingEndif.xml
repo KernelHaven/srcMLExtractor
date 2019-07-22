@@ -1,0 +1,4 @@
+<unit language="C">
+	<cpp:ifdef>#<cpp:directive>ifdef</cpp:directive><name>A</name></cpp:ifdef>
+	<empty_stmt>;</empty_stmt>
+</unit>

@@ -1,0 +1,5 @@
+<unit language="C">
+	<cpp:else>#<cpp:directive>else</cpp:directive></cpp:else>
+	<empty_stmt>;</empty_stmt>
+	<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
+</unit>

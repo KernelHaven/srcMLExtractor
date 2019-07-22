@@ -36,6 +36,7 @@ import org.junit.runners.Suite.SuiteClasses;
     RobustnessTests.class,
     XmlParserTest.class,
     XmlPreprocessorTest.class,
+    XmlPreprocessorNegativeTest.class,
     })
 public class AllTests {
     public static final File TESTDATA = new File("testdata");
