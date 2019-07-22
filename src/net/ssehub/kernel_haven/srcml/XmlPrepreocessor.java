@@ -220,6 +220,9 @@ class XmlPrepreocessor {
             parent.removeChild(sibling);
             caseNode.appendChild(sibling);
             
+            // update end line number for case
+            caseNode.setUserData(LINE_END, sibling.getUserData(LINE_END), null);
+            
             sibling = caseNode.getNextSibling();
         }
     }

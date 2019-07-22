@@ -1,0 +1,15 @@
+<unit language="C">
+	<switch>
+		<block>
+			<case>case 1:
+				<empty_stmt>S1</empty_stmt>
+				<break>break;</break></case>
+			<case>case 2:</case>
+			<case>case 3:
+				<empty_stmt>S2</empty_stmt>
+				<break>break;</break></case>
+			<default>default:
+				<empty_stmt>S3</empty_stmt></default>
+		</block>
+	</switch>	
+</unit>
