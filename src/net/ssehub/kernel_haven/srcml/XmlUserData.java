@@ -31,7 +31,7 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
  *
  * @author Adam
  */
-public class XmlUserData {
+class XmlUserData {
 
     public static final @NonNull String LINE_START = "net.ssehub.kernel_haven:line_start";
     

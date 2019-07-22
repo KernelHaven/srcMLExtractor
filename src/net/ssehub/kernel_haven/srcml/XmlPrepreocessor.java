@@ -44,7 +44,7 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
  *
  * @author Adam
  */
-public class XmlPrepreocessor {
+class XmlPrepreocessor {
     
     private static final boolean DEBUG_LOGGING = SrcMLExtractor.DEBUG_LOGGING;
     

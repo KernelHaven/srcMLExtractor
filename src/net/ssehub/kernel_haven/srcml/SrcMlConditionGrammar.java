@@ -38,7 +38,7 @@ import net.ssehub.kernel_haven.util.logic.parser.VariableCache;
  * 
  * @author Adam Krafczyk
  */
-public class SrcMlConditionGrammar extends CStyleBooleanGrammar {
+class SrcMlConditionGrammar extends CStyleBooleanGrammar {
     
     // CHECKSTYLE:OFF
     // see CStyleBooleanGrammar for explanation why we disable checkstyle

@@ -46,7 +46,7 @@ import net.ssehub.kernel_haven.util.null_checks.Nullable;
  * 
  * @author Adam
  */
-public class FunctionConditionExpander implements ISyntaxElementVisitor {
+class FunctionConditionExpander implements ISyntaxElementVisitor {
     
     private static final Logger LOGGER = Logger.get();
 

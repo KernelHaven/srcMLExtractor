@@ -54,7 +54,7 @@ import net.ssehub.kernel_haven.util.null_checks.Nullable;
  * 
  * @author Adam
  */
-public class IncludeExpander implements ISyntaxElementVisitor {
+class IncludeExpander implements ISyntaxElementVisitor {
     
     private static final Logger LOGGER = Logger.get();
     

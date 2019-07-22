@@ -49,7 +49,7 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
  *
  * @author Adam
  */
-public class XmlParser {
+class XmlParser {
     
     /**
      * A SAX handler that stores line numbers of {@link Node}s and omits whitespace-only text nodes.

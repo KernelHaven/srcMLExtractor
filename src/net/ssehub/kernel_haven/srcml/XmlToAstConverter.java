@@ -73,7 +73,7 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
  *
  * @author Adam
  */
-public class XmlToAstConverter {
+class XmlToAstConverter {
     
     private java.io.@NonNull File baseFile;
     
