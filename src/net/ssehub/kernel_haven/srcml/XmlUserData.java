@@ -16,6 +16,8 @@
  */
 package net.ssehub.kernel_haven.srcml;
 
+import static net.ssehub.kernel_haven.util.null_checks.NullHelpers.notNull;
+
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -57,7 +59,9 @@ class XmlUserData {
      * @param node The node to print.
      */
     public static void debugPrintXml(@NonNull Node node) {
-        debugPrintXmlImpl(node, "");
+        if (SrcMLExtractor.DEBUG_LOGGING) {
+            debugPrintXmlImpl(node, "");
+        }
     }
     
     /**
@@ -66,38 +70,39 @@ class XmlUserData {
      * @param element The element to print.
      * @param indentation The current indentation.
      */
-    private static void debugPrintXmlImpl(Node element, String indentation) {
-        if (element.getNodeType() == Node.TEXT_NODE) {
-            
-            if (!element.getTextContent().trim().isEmpty()) {
-                System.out.println(indentation + element.getTextContent().trim());
+    private static void debugPrintXmlImpl(@NonNull Node element, @NonNull String indentation) {
+        if (SrcMLExtractor.DEBUG_LOGGING) {
+            if (element.getNodeType() == Node.TEXT_NODE) {
+                
+                if (!element.getTextContent().trim().isEmpty()) {
+                    System.out.println(indentation + element.getTextContent().trim());
+                }
+                
+            } else {
+                System.out.print(indentation + "<" + element.getNodeName());
+                
+                NamedNodeMap attributes = element.getAttributes();
+                for (int i = 0; i < attributes.getLength(); i++) {
+                    Node attribute = attributes.item(i);
+                    System.out.print(" " + attribute.getNodeName() + "=\"" + attribute.getTextContent() + "\"");
+                }
+                
+                printUserData(element, LINE_START, "lineStart");
+                printUserData(element, LINE_END, "lineEnd");
+                printUserData(element, NODE_REFERENCE, "nodeReference");
+                printUserData(element, PREVIOUS_CPP_BLOCK, "previousCppBlock");
+                printUserData(element, CPP_BLOCK_END, "cppBlockEnd");
+                printUserData(element, CONVERTED, "converted");
+                System.out.println(">");
+                
+                NodeList children = element.getChildNodes();
+                for (int i = 0; i < children.getLength(); i++) {
+                    debugPrintXmlImpl(notNull(children.item(i)), indentation + "\t");
+                }
+                
+                System.out.println(indentation + "</" + element.getNodeName() + ">");
             }
-            
-        } else {
-            System.out.print(indentation + "<" + element.getNodeName());
-            
-            NamedNodeMap attributes = element.getAttributes();
-            for (int i = 0; i < attributes.getLength(); i++) {
-                Node attribute = attributes.item(i);
-                System.out.print(" " + attribute.getNodeName() + "=\"" + attribute.getTextContent() + "\"");
-            }
-            
-            printUserData(element, LINE_START, "lineStart");
-            printUserData(element, LINE_END, "lineEnd");
-            printUserData(element, NODE_REFERENCE, "nodeReference");
-            printUserData(element, PREVIOUS_CPP_BLOCK, "previousCppBlock");
-            printUserData(element, CPP_BLOCK_END, "cppBlockEnd");
-            printUserData(element, CONVERTED, "converted");
-            System.out.println(">");
-            
-            NodeList children = element.getChildNodes();
-            for (int i = 0; i < children.getLength(); i++) {
-                debugPrintXmlImpl(children.item(i), indentation + "\t");
-            }
-            
-            System.out.println(indentation + "</" + element.getNodeName() + ">");
         }
-        
     }
     
     /**
@@ -108,24 +113,26 @@ class XmlUserData {
      * @param name The name to print for the userdata.
      */
     private static void printUserData(@NonNull Node node, @NonNull String userData, @NonNull String name) {
-        Object data = node.getUserData(userData);
-        if (data != null) {
-            System.out.print(" ud:" + name + "=\"");
-            
-            if (data instanceof Node) {
-                Node n = (Node) data;
-                System.out.print("node: " + n.getNodeName());
-                Integer line = (Integer) n.getUserData(LINE_START);
-                if (line != null) {
-                    System.out.print(" line " + line);
+        if (SrcMLExtractor.DEBUG_LOGGING) {
+            Object data = node.getUserData(userData);
+            if (data != null) {
+                System.out.print(" ud:" + name + "=\"");
+                
+                if (data instanceof Node) {
+                    Node n = (Node) data;
+                    System.out.print("node: " + n.getNodeName());
+                    Integer line = (Integer) n.getUserData(LINE_START);
+                    if (line != null) {
+                        System.out.print(" line " + line);
+                    }
+                } else if (data instanceof ISyntaxElement) {
+                    System.out.print(data.getClass().getSimpleName()); // TODO
+                } else {
+                    System.out.print(data.toString());
                 }
-            } else if (data instanceof ISyntaxElement) {
-                System.out.print(data.getClass().getSimpleName()); // TODO
-            } else {
-                System.out.print(data.toString());
+                
+                System.out.print("\"");
             }
-            
-            System.out.print("\"");
         }
     }
     
