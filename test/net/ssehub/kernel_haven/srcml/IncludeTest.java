@@ -24,6 +24,8 @@ import java.util.List;
 import org.junit.Test;
 
 import net.ssehub.kernel_haven.code_model.SourceFile;
+import net.ssehub.kernel_haven.code_model.ast.BranchStatement;
+import net.ssehub.kernel_haven.code_model.ast.CaseStatement;
 import net.ssehub.kernel_haven.code_model.ast.CompoundStatement;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock;
 import net.ssehub.kernel_haven.code_model.ast.CppStatement;
@@ -32,7 +34,9 @@ import net.ssehub.kernel_haven.code_model.ast.ErrorElement;
 import net.ssehub.kernel_haven.code_model.ast.File;
 import net.ssehub.kernel_haven.code_model.ast.Function;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
+import net.ssehub.kernel_haven.code_model.ast.LoopStatement;
 import net.ssehub.kernel_haven.code_model.ast.SingleStatement;
+import net.ssehub.kernel_haven.code_model.ast.SwitchStatement;
 import net.ssehub.kernel_haven.util.logic.Variable;
 
 /**
@@ -144,6 +148,30 @@ public class IncludeTest extends AbstractSrcMLExtractorTest {
         assertThat(error.getErrorText().replace('\\', '/'),
                 is("Can't parse header testdata/headers/unparseable_included.java: Unsupported language \"Java\""));
         assertThat(error.getNestedElementCount(), is(0));
+    }
+    
+    /**
+     * Tests that an include directive that is very deeply nested in other elements. This basically tests all the
+     * visit*() methods in {@link IncludeExpander}.
+     */
+    @Test
+    public void testDeeplyNested() {
+        SourceFile<ISyntaxElement> ast = loadFile("deeply_nested.c", HeaderHandling.INCLUDE);
+        List<ISyntaxElement> elements = getElements(ast);
+        
+        Function func = assertElement(Function.class, "1", "1", elements.get(0));
+        BranchStatement ifStmt
+                = assertElement(BranchStatement.class, "1", "1", func.getNestedElement(0).getNestedElement(0));
+        LoopStatement loop
+                = assertElement(LoopStatement.class, "1", "1", ifStmt.getNestedElement(0).getNestedElement(0));
+        SwitchStatement switchStmt
+                = assertElement(SwitchStatement.class, "1", "1", loop.getNestedElement(0).getNestedElement(0));
+        CaseStatement caseStmt
+                = assertElement(CaseStatement.class, "1", "1", switchStmt.getNestedElement(0).getNestedElement(0));
+        
+        File included = assertElement(File.class, "1", "1", caseStmt.getNestedElement(0));
+        SingleStatement stmt = assertElement(SingleStatement.class, "1", "1", included.getNestedElement(0));
+        assertCode("int a ;", stmt.getCode());
     }
     
     @Override
