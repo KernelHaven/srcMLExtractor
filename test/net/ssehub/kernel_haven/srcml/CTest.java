@@ -257,7 +257,6 @@ public class CTest extends AbstractSrcMLExtractorTest {
         assertThat(ast.getTopElementCount(), is(1));
         
         File file = assertElement(File.class, "1", "1", ast.getElement(0));
-        System.out.println(file);
         assertThat(file.getPath(), is(new java.io.File("c/ErrorElement.c")));
         assertThat(file.getLineStart(), is(1));
         assertThat(file.getLineEnd(), is(7));
