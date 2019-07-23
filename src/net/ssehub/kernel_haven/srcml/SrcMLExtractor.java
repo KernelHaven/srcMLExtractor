@@ -44,6 +44,7 @@ import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.Util;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
+import net.ssehub.kernel_haven.util.null_checks.Nullable;
 
 /**
  * An extractor which uses <a href="https://www.srcml.org/">srcML</a> to create an AST, still containing variability
@@ -53,16 +54,19 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
  * <ul>
  *   <li>C-AST</li>
  *   <li>Contains preprocessor directives (variation points / presence conditions)</li>
- *   <li>Won't include headers or expand macros</li>
+ *   <li>Optionally includes headers</li>
+ *   <li>Won't expand macros</li>
  * </ul>
  * This extractor supports the following platforms:
  * <ul>
  *   <li>Windows 64 Bit</li>
  *   <li>Linux 64 Bit</li>
  *   <li>macOS: El Capitan (not tested)</li>
+ *   <li>Any where srcml is installed and available as "srcml" on the PATH</li>
  * </ul>
+ * 
+ * @author Adam
  * @author El-Sharkawy
- *
  */
 public class SrcMLExtractor extends AbstractCodeModelExtractor {
     
@@ -81,6 +85,12 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             + " (#include \"file.h\") relative to the source file being parsed are supported.");
     // TODO AK: update "currently only supports" when applicable
     
+    /**
+     * <b>Do not use this variable directly, use {@link #hasSrcmlInstalled()} instead.</b>
+     * Caches the result of {@link #hasSrcmlInstalled()}.
+     */
+    private static @Nullable Boolean hasSrcmlInstalled;
+    
     private @NonNull HeaderHandling headerHandling = HeaderHandling.IGNORE; // will be overriden in init()
     
     private @NonNull File sourceTree = new File("will be initialized"); // will be overriden in init()
@@ -93,8 +103,10 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
         config.registerSetting(HEADER_HANDLING_SETTING);
         headerHandling = config.getValue(HEADER_HANDLING_SETTING);
         
-        Preparation preparator = new Preparation(config);
-        srcExec = preparator.prepareExec();
+        if (!hasSrcmlInstalled()) {
+            Preparation preparator = new Preparation(config);
+            srcExec = preparator.prepareExec();
+        }
     }
     
     @Override
@@ -129,17 +141,21 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             PipedInputStream stdout = new PipedInputStream();
             PipedOutputStream stdoutIn = new PipedOutputStream(stdout);
             
-            ProcessBuilder builder = new ProcessBuilder(srcExec.getAbsolutePath(), absoluteTarget.getAbsolutePath());
-            
-//            builder.directory(srcExec.getParentFile());
-            /*
-             * LD_LIBRARY_PATH = ../lib needed on Linux/Mac
-             * DYLD_LIBRARY_PATH = ../lib needed on Mac
-             * Both settings do no harm on Windows.
-             */
-            String libFolder = new File(srcExec.getParentFile().getParentFile(), "lib").getAbsolutePath();
-            builder.environment().put("LD_LIBRARY_PATH", libFolder);
-            builder.environment().put("DYLD_LIBRARY_PATH", libFolder);
+            ProcessBuilder builder;
+            if (hasSrcmlInstalled()) {
+                builder = new ProcessBuilder("srcml", absoluteTarget.getAbsolutePath());
+                
+            } else {
+                builder = new ProcessBuilder(srcExec.getAbsolutePath(), absoluteTarget.getAbsolutePath());
+                /*
+                 * LD_LIBRARY_PATH = ../lib needed on Linux & Mac
+                 * DYLD_LIBRARY_PATH = ../lib needed on Mac
+                 * Both settings do no harm on Windows.
+                 */
+                String libFolder = new File(srcExec.getParentFile().getParentFile(), "lib").getAbsolutePath();
+                builder.environment().put("LD_LIBRARY_PATH", libFolder);
+                builder.environment().put("DYLD_LIBRARY_PATH", libFolder);
+            }
             
             worker = new Thread(() -> {
                 boolean success;
@@ -171,10 +187,7 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             }
             
             if (stderr.size() > 0) {
-                System.out.println("-------");
-                System.out.println("stderr:");
-                System.out.println(stderr.toString());
-                System.out.println("-------");
+                LOGGER.logDebug("srcML stderr:", stderr.toString());
             }
         }
     }
@@ -256,6 +269,31 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
         }
         
         return file;
+    }
+    
+    /**
+     * Checks whether the srcml executable is installed on the current system.
+     * 
+     * @return Whether the srcml executable is available on the system PATH.
+     */
+    private static synchronized boolean hasSrcmlInstalled() {
+        boolean result;
+        if (hasSrcmlInstalled != null) {
+            result = hasSrcmlInstalled;
+        } else {
+            int ret = -1;
+            try {
+                ProcessBuilder pb = new ProcessBuilder("srcml", "--version");
+                Process p = pb.start();
+                ret = p.waitFor();
+            } catch (IOException | InterruptedException e) {
+                // ignore
+            }
+            
+            result = (ret == 0);
+            hasSrcmlInstalled = result;
+        }
+        return result;
     }
     
     @Override
