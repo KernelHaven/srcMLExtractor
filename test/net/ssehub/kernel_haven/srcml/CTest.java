@@ -35,6 +35,7 @@ import net.ssehub.kernel_haven.code_model.ast.CompoundStatement;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock.Type;
 import net.ssehub.kernel_haven.code_model.ast.CppStatement;
+import net.ssehub.kernel_haven.code_model.ast.ErrorElement;
 import net.ssehub.kernel_haven.code_model.ast.File;
 import net.ssehub.kernel_haven.code_model.ast.Function;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
@@ -184,12 +185,9 @@ public class CTest extends AbstractSrcMLExtractorTest {
     
     /**
      * Tests a C-if where the header is surroundend by an ifdef, but not the body.
-     * 
-     * @throws IOException unwanted.
-     * @throws FormatException unwanted.
      */
     @Test
-    public void testIfWithIfdef() throws IOException, FormatException {
+    public void testIfWithIfdef() {
         SourceFile<ISyntaxElement> ast = loadFile("IfWithIfdef.c");
         assertThat(ast.getTopElementCount(), is(1));
         
@@ -248,6 +246,51 @@ public class CTest extends AbstractSrcMLExtractorTest {
         SourceFile<ISyntaxElement> expected = cache.read(new java.io.File("Komplex2.c")).castTo(ISyntaxElement.class);
         
         assertThat(ast, is(expected));
+    }
+    
+    /**
+     * Tests that {@link ISyntaxElement#containsErrorElement()} is correclty set.
+     */
+    @Test
+    public void testContainsErrorElement() {
+        SourceFile<ISyntaxElement> ast = loadFile("ErrorElement.c");
+        assertThat(ast.getTopElementCount(), is(1));
+        
+        File file = assertElement(File.class, "1", "1", ast.getElement(0));
+        System.out.println(file);
+        assertThat(file.getPath(), is(new java.io.File("c/ErrorElement.c")));
+        assertThat(file.getLineStart(), is(1));
+        assertThat(file.getLineEnd(), is(7));
+        assertThat(file.containsErrorElement(), is(true));
+        assertThat(file.getNestedElementCount(), is(3));
+        
+        SingleStatement stmt1 = assertElement(SingleStatement.class, "1", "1", file.getNestedElement(0));
+        assertThat(stmt1.getLineStart(), is(1));
+        assertThat(stmt1.getLineEnd(), is(1));
+        assertThat(stmt1.containsErrorElement(), is(false));
+        
+        CompoundStatement block = assertElement(CompoundStatement.class, "1", "1", file.getNestedElement(1));
+        assertThat(block.getLineStart(), is(2));
+        assertThat(block.getLineEnd(), is(5));
+        assertThat(block.containsErrorElement(), is(true));
+        assertThat(block.getNestedElementCount(), is(2));
+        
+        SingleStatement stmt3 = assertElement(SingleStatement.class, "1", "1", file.getNestedElement(2));
+        assertThat(stmt3.getLineStart(), is(6));
+        assertThat(stmt3.getLineEnd(), is(6));
+        assertThat(stmt3.containsErrorElement(), is(false));
+        
+        
+        ErrorElement error = assertElement(ErrorElement.class, "1", "1", block.getNestedElement(0));
+        assertThat(error.getLineStart(), is(3));
+        assertThat(error.getLineEnd(), is(3));
+        assertThat(error.containsErrorElement(), is(true));
+        
+        SingleStatement stmt2 = assertElement(SingleStatement.class, "1", "1", block.getNestedElement(1));
+        assertThat(stmt2.getLineStart(), is(4));
+        assertThat(stmt2.getLineEnd(), is(4));
+        assertThat(stmt2.containsErrorElement(), is(false));
+        
     }
     
     @Override

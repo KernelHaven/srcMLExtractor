@@ -77,14 +77,36 @@ class XmlToAstConverter {
     
     private java.io.@NonNull File baseFile;
     
+    /**
+     * The current stack of C-preprocessor conditions. Always contains a {@link True} at the bottom of the stack.
+     */
     private @NonNull Deque<@NonNull Formula> conditions;
     
     private @NonNull Parser<@NonNull Formula> cppConditionParser;
     
+    /**
+     * The current stack of elements that are being transformed. This is used to set
+     * {@link ISyntaxElement#setContainsErrorElement(boolean)} so it should contain all parents that need to have this
+     * flag set when an {@link ErrorElement} is encountered.
+     */
+    private @NonNull Deque<@NonNull ISyntaxElement> elementStack;
+    
+    /**
+     * The currently enclosing {@link SwitchStatement}s. This is used to map the {@link CaseStatement} to their
+     * corresponding switch.
+     */
     private @NonNull Deque<@NonNull SwitchStatement> switchStack;
     
+    /**
+     * The currently enclosing {@link BranchStatement} (only starting if). This is used to map the else and elseif
+     * {@link BranchStatement} to their starting if.
+     */
     private @NonNull Deque<@NonNull BranchStatement> ifStack;
     
+    /**
+     * Contains all {@link ReferenceElement}s where the referred-to element was not yet converted. The keys are the
+     * referred to XMl nodes, the value contains all {@link ReferenceElement} that reference this node.
+     */
     private @NonNull Map<@NonNull Node, @NonNull List<@NonNull ReferenceElement>> referencesToResolve;
     
     /**
@@ -99,6 +121,7 @@ class XmlToAstConverter {
         
         this.cppConditionParser = new Parser<>(new SrcMlConditionGrammar(new VariableCache()));
         
+        this.elementStack = new LinkedList<>();
         this.switchStack = new LinkedList<>();
         this.ifStack = new LinkedList<>();
         this.referencesToResolve = new HashMap<>();
@@ -114,12 +137,14 @@ class XmlToAstConverter {
     public @NonNull File convertFile(@NonNull Node node) {
         File result = new File(getPc(), baseFile);
         postCreation(result, node);
-
+        
+        elementStack.push(result);
         NodeList children = node.getChildNodes();
         for (int i = 0; i < children.getLength(); i++) {
             Node child = notNull(children.item(i));
             result.addNestedElement(convertSafe(child));
         }
+        elementStack.pop();
         
         resolveReferencesToResolve();
         
@@ -147,6 +172,7 @@ class XmlToAstConverter {
                     postCreation(error, node);
                     error.setCondition(reference.getCondition());
                     reference.setReferenced(error);
+                    // TODO: markErrorElement() doesn't work, since elementsStack is now empty
                 }
             }
         }
@@ -168,10 +194,15 @@ class XmlToAstConverter {
             result = new ErrorElement(getPc(), notNull(e.getMessage()));
             postCreation(result, node);
             
+            elementStack.push(result);
+            markErrorElement();
+            
             NodeList children = node.getChildNodes();
             for (int i = 0; i < children.getLength(); i++) {
                 result.addNestedElement(convertSafe(notNull(children.item(i))));
             }
+            
+            elementStack.pop();
         }
         
         return result;
@@ -318,16 +349,16 @@ class XmlToAstConverter {
             throw makeException(node, "Invalid CPP statement type: " + typeString);
         }
         
-        ICode expression;
-        if (type == Type.EMPTY) {
-            expression = new Code(getPc(), "");
-            postCreation(expression, node);
-        } else {
+        ICode expression = null;
+        if (type != Type.EMPTY) {
             expression = convertChildrenToCode(node, 2, node.getChildNodes().getLength());
         }
         
         CppStatement result = new CppStatement(getPc(), type, expression);
         postCreation(result, node);
+        if (expression != null && expression.containsErrorElement()) {
+            result.setContainsErrorElement(true);
+        }
         
         return result;
     }
@@ -468,15 +499,20 @@ class XmlToAstConverter {
 
         // don't convert content of #if 0
         if (formula != False.INSTANCE) {
+            elementStack.push(result);
+            
             NodeList children = node.getChildNodes();
             if (convertToCode) {
                 result.addNestedElement(convertChildrenToCode(node, nestedStartIndex, children.getLength()));
+                
             } else {
                 for (int i = nestedStartIndex; i < children.getLength(); i++) {
                     Node child = notNull(children.item(i));
                     result.addNestedElement(convertSafe(child));
                 }
             }
+            
+            elementStack.pop();
         }
         
         if (formula != null) {
@@ -497,6 +533,9 @@ class XmlToAstConverter {
     private @NonNull Comment convertComment(@NonNull Node node) throws FormatException {
         Comment result = new Comment(getPc(), convertChildrenToCode(node));
         postCreation(result, node);
+        if (result.getComment().containsErrorElement()) {
+            result.setContainsErrorElement(true);
+        }
         return result;
     }
     
@@ -543,6 +582,9 @@ class XmlToAstConverter {
         
         SingleStatement result = new SingleStatement(getPc(), code, type);
         postCreation(result, node);
+        if (code.containsErrorElement()) {
+            result.setContainsErrorElement(true);
+        }
         
         return result;
     }
@@ -559,6 +601,9 @@ class XmlToAstConverter {
     private @NonNull Label convertLabel(@NonNull Node node) throws FormatException {
         Label result = new Label(getPc(), convertChildrenToCode(node));
         postCreation(result, node);
+        if (result.getCode().containsErrorElement()) {
+            result.setContainsErrorElement(true);
+        }
         return result;
     }
     
@@ -604,11 +649,16 @@ class XmlToAstConverter {
                 type, parentSwitch);
         postCreation(result, node);
         parentSwitch.addCase(result);
+        if (notNull(result.getCaseCondition()).containsErrorElement()) {
+            result.setContainsErrorElement(true);
+        }
         
+        elementStack.push(result);
         NodeList children = node.getChildNodes();
         for (int i = nestedIndex; i < children.getLength(); i++) {
             result.addNestedElement(convertSafe(notNull(children.item(i))));
         }
+        elementStack.pop();
         
         return result;
     }
@@ -646,10 +696,12 @@ class XmlToAstConverter {
             }
         }
         
+        elementStack.push(result);
         for (int i = start; i < end; i++) {
             Node child = notNull(children.item(i));
             result.addNestedElement(convertSafe(child));
         }
+        elementStack.pop();
         
         return result;
     }
@@ -679,12 +731,17 @@ class XmlToAstConverter {
         
         Function result = new Function(getPc(), name, convertChildrenToCode(node, 0, 3));
         postCreation(result, node);
+        if (result.getHeader().containsErrorElement()) {
+            result.setContainsErrorElement(true);
+        }
         
+        elementStack.push(result);
         // there now follow <decl_stmt> and <block> only
         for (; i < children.getLength(); i++) {
             ISyntaxElement converted = convertSafe(notNull(children.item(i)));
             result.addNestedElement(converted);
         }
+        elementStack.pop();
         
         return result;
     }
@@ -717,10 +774,15 @@ class XmlToAstConverter {
         ICode condition = convertChildrenToCode(node, "block");
         LoopStatement result = new LoopStatement(getPc(), condition, type);
         postCreation(result, node);
+        if (condition.containsErrorElement()) {
+            result.setContainsErrorElement(true);
+        }
         
+        elementStack.push(result);
         for (Node block : getChildren(node, "block")) {
             result.addNestedElement(convertSafe(block));
         }
+        elementStack.pop();
         
         return result;
     }
@@ -741,9 +803,13 @@ class XmlToAstConverter {
         BranchStatement result = new BranchStatement(getPc(), BranchStatement.Type.IF,
                 convertChildrenToCode(node, 0, 2));
         postCreation(result, node);
+        if (notNull(result.getIfCondition()).containsErrorElement()) {
+            result.setContainsErrorElement(true);
+        }
         
         result.addSibling(result);
         
+        elementStack.push(result);
         ifStack.push(result);
         
         NodeList children = node.getChildNodes();
@@ -761,6 +827,7 @@ class XmlToAstConverter {
         }
         
         ifStack.pop();
+        elementStack.pop();
 
         for (int i = 1; i < result.getSiblingCount(); i++) {
             BranchStatement sibling = result.getSibling(i);
@@ -800,9 +867,13 @@ class XmlToAstConverter {
         BranchStatement result = new BranchStatement(getPc(), BranchStatement.Type.ELSE_IF,
                 convertChildrenToCode(ifChild, 0, 2));
         postCreation(result, node);
+        if (notNull(result.getIfCondition()).containsErrorElement()) {
+            result.setContainsErrorElement(true);
+        }
         
         notNull(ifStack.peek()).addSibling(result);
 
+        elementStack.push(result);
         NodeList ifChildChildren = ifChild.getChildNodes();
         for (int i = 2; i < ifChildChildren.getLength(); i++) {
             Node child = notNull(ifChildChildren.item(i));
@@ -816,6 +887,7 @@ class XmlToAstConverter {
                 result.addNestedElement(convertSafe(child));
             }
         }
+        elementStack.pop();
         
         return result;
     }
@@ -840,10 +912,12 @@ class XmlToAstConverter {
         
         notNull(ifStack.peek()).addSibling(result);
         
+        elementStack.push(result);
         NodeList children = node.getChildNodes();
         for (int i = 1; i < children.getLength(); i++) {
             result.addNestedElement(convertSafe(notNull(children.item(i))));
         }
+        elementStack.pop();
         
         return result;
     }
@@ -860,17 +934,22 @@ class XmlToAstConverter {
     private @NonNull SwitchStatement convertSwitch(@NonNull Node node) throws FormatException {
         SwitchStatement result = new SwitchStatement(getPc(), convertChildrenToCode(node, "block"));
         postCreation(result, node);
+        if (result.getHeader().containsErrorElement()) {
+            result.setContainsErrorElement(true);
+        }
         
         List<@NonNull Node> blocks = getChildren(node, "block");
         if (blocks.isEmpty()) {
             throw makeException(node, "Expected at least one <block> in <switch>");
         }
         
+        elementStack.push(result);
         switchStack.push(result);
         for (Node block : blocks) {
             result.addNestedElement(convertSafe(block));
         }
         switchStack.pop();
+        elementStack.pop();
         
         return result;
     }
@@ -903,11 +982,11 @@ class XmlToAstConverter {
             throw makeException(node, "Can't determine typedef type of <" + node.getNodeName() + ">");
         }
         
-        List<@NonNull ISyntaxElement> nestedBlocks = new LinkedList<>();
+        List<@NonNull Node> nestedBlockNodes = new LinkedList<>();
         String ignoreChild = null;
         if (type != TypeDefType.ENUM) {
             for (Node block : getChildren(node, "block")) {
-                nestedBlocks.add(convertSafe(block));
+                nestedBlockNodes.add(block);
             }
             ignoreChild = "block";
         }
@@ -921,10 +1000,16 @@ class XmlToAstConverter {
         
         TypeDefinition result = new TypeDefinition(getPc(), code, type);
         postCreation(result, node);
-        
-        for (ISyntaxElement nestedBlock : nestedBlocks) {
-            result.addNestedElement(nestedBlock);
+        if (code.containsErrorElement()) {
+            result.setContainsErrorElement(true);
         }
+        
+        elementStack.push(result);
+        for (Node nestedBlockNode : nestedBlockNodes) {
+            result.addNestedElement(convertSafe(nestedBlockNode));
+        }
+        elementStack.pop();
+        
         
         return result;
     }
@@ -1070,8 +1155,12 @@ class XmlToAstConverter {
                 } catch (FormatException e) {
                     convertedIf = new ErrorElement(getPc(), notNull(e.getMessage()));
                     postCreation(convertedIf, node);
+                    elementStack.push(convertedIf);
+                    markErrorElement();
                     
                     convertedIf.addNestedElement(convertChildrenToCode(node));
+                    
+                    elementStack.pop();
                 }
                 list.add(convertedIf);
                 
@@ -1133,6 +1222,7 @@ class XmlToAstConverter {
                     newCode.setCondition(first.getCondition());
                     newCode.setLineStart(first.getLineStart());
                     newCode.setLineEnd(second.getLineEnd());
+                    newCode.setContainsErrorElement(first.containsErrorElement() || second.containsErrorElement());
                     
                     list.remove(i);
                     list.set(i, newCode);
@@ -1146,9 +1236,12 @@ class XmlToAstConverter {
                 result.setCondition(conditions.peek());
                 result.setLineStart(notNull(list.get(0)).getLineStart());
                 result.setLineEnd(notNull(list.get(list.size() - 1)).getLineEnd());
+                boolean containsErrorElement = false;
                 for (ICode element : list) {
                     result.addNestedElement(element);
+                    containsErrorElement |= element.containsErrorElement();
                 }
+                result.setContainsErrorElement(containsErrorElement);
                 
             } else {
                 result = notNull(list.get(0));
@@ -1171,6 +1264,16 @@ class XmlToAstConverter {
         element.setLineEnd((int) node.getUserData(LINE_END));
         
         node.setUserData(CONVERTED, element, null);
+    }
+    
+    /**
+     * Triggered when an {@link ErrorElement} is created. This marks all elements in {@link #elementStack} as
+     * {@link ISyntaxElement#containsErrorElement()}.
+     */
+    private void markErrorElement() {
+        for (ISyntaxElement element : elementStack) {
+            element.setContainsErrorElement(true);
+        }
     }
     
     /**
