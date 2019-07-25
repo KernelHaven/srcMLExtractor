@@ -23,6 +23,7 @@ In addition to KernelHaven, this plugin has the following dependencies:
 	* Windows (Vista, 7, 8, 10) 64 Bit
 	* Linux x86 64 Bit; requires the following libraries (packages for Ubuntu 16.04): `libxml2, libxslt1.1, libarchive13, libssl1.0.0, libcurl3`
 	* macOS: El Capitan (not tested)
+	* Any platform, where srcML is installed (i.e. the binary `srcml` is available on the `PATH`)
 
 ## License
 
