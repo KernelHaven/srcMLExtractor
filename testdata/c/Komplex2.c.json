@@ -426,7 +426,7 @@
 														"lineEnd": 27,
 														"condition": "1",
 														"presenceCondition": "1",
-														"code": "while ( y > 0 )"
+														"code": "( y > 0 )"
 													},
 													"nested": [
 														{
@@ -504,7 +504,7 @@
 																"lineEnd": 31,
 																"condition": "1",
 																"presenceCondition": "1",
-																"code": "for ( int a ; a < y ; a ++ )"
+																"code": "( int a ; a < y ; a ++ )"
 															},
 															"nested": [
 																{

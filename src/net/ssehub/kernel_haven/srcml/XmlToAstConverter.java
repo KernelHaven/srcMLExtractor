@@ -756,22 +756,47 @@ class XmlToAstConverter {
      * @throws FormatException If conversion fails.
      */
     private @NonNull LoopStatement convertLoop(@NonNull Node node) throws FormatException {
+        int nestedStartIndex;
+        int nestedEndIndex;
+        int conditionIndex;
+        NodeList children = node.getChildNodes();
+        
         LoopType type;
         switch (node.getNodeName()) {
         case "for":
+            checkChildText(node, 0, "for");
+            checkChildName(node, 1, "control");
+            nestedStartIndex = 2;
+            nestedEndIndex = children.getLength();
+            conditionIndex = 1;
+            
             type = LoopType.FOR;
             break;
         case "while":
+            checkChildText(node, 0, "while");
+            checkChildName(node, 1, "condition");
+            nestedStartIndex = 2;
+            nestedEndIndex = children.getLength();
+            conditionIndex = 1;
+            
             type = LoopType.WHILE;
             break;
         case "do":
+            checkChildText(node, 0, "do");
+            checkChildText(node, children.getLength() - 3, "while");
+            checkChildName(node, children.getLength() - 2, "condition");
+            checkChildText(node, children.getLength() - 1, ";");
+            nestedStartIndex = 1;
+            nestedEndIndex = children.getLength() - 3;
+            conditionIndex = children.getLength() - 2;
+            
             type = LoopType.DO_WHILE;
             break;
         default:
             throw makeException(node, "Can't determine loop type of <" + node.getNodeName() + ">");
         }
         
-        ICode condition = convertChildrenToCode(node, "block");
+        ICode condition = convertChildrenToCode(node, conditionIndex, conditionIndex + 1);
         LoopStatement result = new LoopStatement(getPc(), condition, type);
         postCreation(result, node);
         if (condition.containsErrorElement()) {
@@ -779,8 +804,8 @@ class XmlToAstConverter {
         }
         
         elementStack.push(result);
-        for (Node block : getChildren(node, "block")) {
-            result.addNestedElement(convertSafe(block));
+        for (int i = nestedStartIndex; i < nestedEndIndex; i++) {
+            result.addNestedElement(convertSafe(notNull(children.item(i))));
         }
         elementStack.pop();
         
