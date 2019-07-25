@@ -957,21 +957,21 @@ class XmlToAstConverter {
      * @throws FormatException If conversion fails.
      */
     private @NonNull SwitchStatement convertSwitch(@NonNull Node node) throws FormatException {
-        SwitchStatement result = new SwitchStatement(getPc(), convertChildrenToCode(node, "block"));
+        checkChildText(node, 0, "switch");
+        checkChildName(node, 1, "condition");
+        
+        SwitchStatement result = new SwitchStatement(getPc(), convertChildrenToCode(node, 0, 2));
         postCreation(result, node);
         if (result.getHeader().containsErrorElement()) {
             result.setContainsErrorElement(true);
         }
         
-        List<@NonNull Node> blocks = getChildren(node, "block");
-        if (blocks.isEmpty()) {
-            throw makeException(node, "Expected at least one <block> in <switch>");
-        }
-        
         elementStack.push(result);
         switchStack.push(result);
-        for (Node block : blocks) {
-            result.addNestedElement(convertSafe(block));
+        
+        NodeList children = node.getChildNodes();
+        for (int i = 2; i < children.getLength(); i++) {
+            result.addNestedElement(convertSafe(notNull(children.item(i))));
         }
         switchStack.pop();
         elementStack.pop();
