@@ -1,16 +1,9 @@
 TODO
 ====
 - XmlToAstConverter / XmlPreprocessor
-    - Handle the following code:
-            #ifdef A
-                int
-            #else
-                float
-            #endif
-                a;
-        -> this causes the <decl_stmt> to end too early
     - convertToCode()
         - Handle <kh:reference> nodes
+        - Set CONVERTED user-data
     - Review child detection with srcML documentation
         - don't search nested by name anymore (purge getChildren())?
     - <cpp:if*> parsing (C preprocessor)
