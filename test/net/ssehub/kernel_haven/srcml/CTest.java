@@ -16,6 +16,7 @@
  */
 package net.ssehub.kernel_haven.srcml;
 
+import static net.ssehub.kernel_haven.util.logic.FormulaBuilder.not;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
@@ -31,6 +32,7 @@ import net.ssehub.kernel_haven.code_model.JsonCodeModelCache;
 import net.ssehub.kernel_haven.code_model.SourceFile;
 import net.ssehub.kernel_haven.code_model.ast.BranchStatement;
 import net.ssehub.kernel_haven.code_model.ast.Code;
+import net.ssehub.kernel_haven.code_model.ast.CodeList;
 import net.ssehub.kernel_haven.code_model.ast.CompoundStatement;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock.Type;
@@ -289,7 +291,45 @@ public class CTest extends AbstractSrcMLExtractorTest {
         assertThat(stmt2.getLineStart(), is(4));
         assertThat(stmt2.getLineEnd(), is(4));
         assertThat(stmt2.containsErrorElement(), is(false));
+    }
+    
+    /**
+     * Tests parsing a file where the ifdef is the first element of a {@link SingleStatement}.
+     */
+    @Test
+    public void testDeclStartingWithIfdef() {
+        SourceFile<ISyntaxElement> ast = loadFile("DeclStartingWithIfdef.c");
+        assertThat(ast.getTopElementCount(), is(1));
         
+        File file = assertElement(File.class, "1", "1", ast.getElement(0));
+        assertThat(file.getPath(), is(new java.io.File("c/DeclStartingWithIfdef.c")));
+        assertThat(file.getLineStart(), is(1));
+        assertThat(file.getLineEnd(), is(7));
+        assertThat(file.containsErrorElement(), is(false));
+        assertThat(file.getNestedElementCount(), is(1));
+        
+        SingleStatement stmt = assertElement(SingleStatement.class, "1", "1", file.getNestedElement(0));
+        assertThat(stmt.getLineStart(), is(2));
+        assertThat(stmt.getLineEnd(), is(6));
+        assertThat(stmt.getNestedElementCount(), is(0));
+        
+        CodeList code = (CodeList) stmt.getCode();
+        assertThat(code.getNestedElementCount(), is(3));
+
+        CppBlock ifdef = assertIf("A", "A", new Variable("A"), 1, Type.IFDEF, code.getNestedElement(0));
+        CppBlock elsedef = assertIf("!A", "!A", not("A"), 1, Type.ELSE, code.getNestedElement(1));
+        assertCode("a ;", code.getNestedElement(2));
+        
+        assertCode("int", ifdef.getNestedElement(0));
+        assertCode("float", elsedef.getNestedElement(0));
+        
+        assertThat(ifdef.getNestedElementCount(), is(1));
+        assertThat(elsedef.getNestedElementCount(), is(1));
+        
+        assertThat(ifdef.getLineStart(), is(1));
+        assertThat(ifdef.getLineEnd(), is(2));
+        assertThat(elsedef.getLineStart(), is(3));
+        assertThat(elsedef.getLineEnd(), is(5));
     }
     
     @Override

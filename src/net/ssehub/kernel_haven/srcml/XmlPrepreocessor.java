@@ -24,14 +24,18 @@ import static net.ssehub.kernel_haven.srcml.XmlUserData.PREVIOUS_CPP_BLOCK;
 import static net.ssehub.kernel_haven.util.null_checks.NullHelpers.notNull;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 import java.util.function.Function;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
 import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
@@ -47,6 +51,30 @@ import net.ssehub.kernel_haven.util.null_checks.NonNull;
 class XmlPrepreocessor {
     
     private static final boolean DEBUG_LOGGING = SrcMLExtractor.DEBUG_LOGGING;
+    
+    /**
+     * Contains all node names that will be converted to {@link ISyntaxElement}s without nested elements.
+     * This is used to determine when to move {@code <cpp:if>} elements into their next sibling.
+     */
+    private static final @NonNull Set<@NonNull String> NODES_WITHOUT_NESTING;
+    
+    static {
+        NODES_WITHOUT_NESTING = new HashSet<>(Arrays.asList(
+            "expr_stmt",
+            "continue",
+            "break",
+            "goto",
+            "return",
+            "empty_stmt",
+            "function_decl",
+            "struct_decl",
+            "union_decl",
+            "decl_stmt",
+            "macro",
+            "comment",
+            "label"
+        ));
+    }
     
     private @NonNull File baseFile;
     
@@ -237,7 +265,8 @@ class XmlPrepreocessor {
      * @throws FormatException If converting the nesting structure fails.
      */
     private void convertIfNesting(@NonNull Node start, @NonNull Node end) throws FormatException {
-        fixStartingIf(start);
+        fixStartingIfAtEnd(start);
+        fixStartingIfBefore(start, end);
         
         Node parent = start.getParentNode();
         
@@ -318,7 +347,7 @@ class XmlPrepreocessor {
      * 
      * @param cppstart The starting C-preprocessor XML node.
      */
-    private void fixStartingIf(@NonNull Node cppstart) {
+    private void fixStartingIfAtEnd(@NonNull Node cppstart) {
         Function<@NonNull Node, @NonNull Boolean> isLastNode = new Function<@NonNull Node, @NonNull Boolean>() {
             
             @Override
@@ -339,6 +368,48 @@ class XmlPrepreocessor {
                 p.removeChild(child);
                 pp.insertBefore(child, p.getNextSibling());
             } while (child != cppstart);
+        }
+    }
+    
+    /**
+     * Fixes a special case where a {@code <cpp:if*>} is directly in front of a single statement, and the
+     * corresponding {@code <cpp:endif>} is in that single statement.
+     * <p>
+     * <b>Example:</b>
+     * <code>
+     * <pre>
+     * &lt;cpp:ifdef>&lt;/cpp:ifdef>
+     * &lt;expr_stmt>
+     *     &lt;b>&lt;/b>
+     *     &lt;cpp:endif>&lt;/cpp:endif>
+     * &lt;/expr_stmt>
+     * </pre>
+     * </code>
+     * will be converted to:
+     * <code>
+     * <pre>
+     * &lt;expr_stmt>
+     *     &lt;cpp:ifdef>&lt;/cpp:ifdef>
+     *     &lt;b>&lt;/b>
+     *     &lt;cpp:endif>&lt;/cpp:endif>
+     * &lt;/expr_stmt>
+     * </pre>
+     * </code>
+     * 
+     * @param cppStart The starting C-preprocessor node.
+     * @param cppEnd The ending C-preprocessor node.
+     */
+    private void fixStartingIfBefore(@NonNull Node cppStart, @NonNull Node cppEnd) {
+        Node sibling = cppStart.getNextSibling();
+        if (NODES_WITHOUT_NESTING.contains(sibling.getNodeName()) && containsEndNode(sibling, cppEnd)) {
+            do {
+                cppStart.getParentNode().removeChild(cppStart);
+                sibling.insertBefore(cppStart, sibling.getFirstChild());
+                
+                // repeat this until we moved in deep enough; we don't need to check NODES_WITHOUT_NESTING anymore,
+                // since we know we are already inside one
+                sibling = cppStart.getNextSibling();
+            } while (sibling != null && containsEndNode(sibling, cppEnd));
         }
     }
     
