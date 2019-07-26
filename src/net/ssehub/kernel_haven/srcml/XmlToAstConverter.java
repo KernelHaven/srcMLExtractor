@@ -694,6 +694,15 @@ class XmlToAstConverter {
             if (last.getNodeType() == Node.TEXT_NODE && last.getTextContent().endsWith("}")) {
                 end--;
             }
+            
+            // check special case: last is a reference to a "}" text node
+            if (last.getNodeName().equals("kh:reference")) {
+                Node referred = (Node) last.getUserData(NODE_REFERENCE);
+                if (referred != null && referred.getNodeType() == Node.TEXT_NODE
+                        && referred.getTextContent().equals("}")) {
+                    end--;
+                }
+            }
         }
         
         elementStack.push(result);
