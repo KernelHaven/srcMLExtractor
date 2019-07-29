@@ -18,13 +18,9 @@ package net.ssehub.kernel_haven.srcml;
 
 import static net.ssehub.kernel_haven.util.null_checks.NullHelpers.notNull;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.io.UncheckedIOException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -119,28 +115,24 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
         
         return parseFile(absoulteTarget, target);
     }
-
+    
     /**
-     * Parses the given source file.
-     * 
-     * @param absoluteTarget The absolute path to the file to parse.
-     * @param relativeTarget The path to the file to parse, relative to the source tree. This is used in exceptions
-     *      and as the path in the result {@link SourceFile}.
-     *      
-     * @return The parsed {@link SourceFile}.
-     * 
-     * @throws CodeExtractorException If parsing the file fails.
+     * Holds the information associated with a srcml process.
      */
-    public @NonNull SourceFile<ISyntaxElement> parseFile(@NonNull File absoluteTarget, @NonNull File relativeTarget)
-            throws CodeExtractorException {
+    private class SrcMlProcess {
         
-        ByteArrayOutputStream stderr = new ByteArrayOutputStream();
+        private @NonNull Process process;
         
-        Thread worker = null;
-        try {
-            PipedInputStream stdout = new PipedInputStream();
-            PipedOutputStream stdoutIn = new PipedOutputStream(stdout);
-            
+        private @NonNull String stderr = "";
+
+        /**
+         * Creates and starts a srcml process.
+         * 
+         * @param absoluteTarget The file to run the process on.
+         * 
+         * @throws IOException If starting the process fails.
+         */
+        public SrcMlProcess(@NonNull File absoluteTarget) throws IOException {
             ProcessBuilder builder;
             if (hasSrcmlInstalled()) {
                 builder = new ProcessBuilder("srcml", absoluteTarget.getAbsolutePath());
@@ -156,40 +148,124 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
                 builder.environment().put("LD_LIBRARY_PATH", libFolder);
                 builder.environment().put("DYLD_LIBRARY_PATH", libFolder);
             }
+
+            this.process = notNull(builder.start());
             
-            worker = new Thread(() -> {
-                boolean success;
+            Thread errorReader = new Thread(() -> {
                 try {
-                    success = Util.executeProcess(builder, "srcML", stdoutIn, stderr, 0);
+                    this.stderr = Util.readStream(notNull(this.process.getErrorStream()));
                 } catch (IOException e) {
-                    throw new UncheckedIOException(e);
                 }
-                if (!success) {
-                    LOGGER.logWarning("srcML exe did not execute succesfully");
-                }
-            }, "SrcMLExtractor-Worker");
-            worker.start();
-            
-            SourceFile<ISyntaxElement> result = new SourceFile<>(relativeTarget);
-            result.addElement(parse(absoluteTarget, relativeTarget, stdout));
-            
-            return result;
-            
-        } catch (IOException | UncheckedIOException | SAXException | FormatException e) {
-            throw new CodeExtractorException(relativeTarget, e);
-        } finally {
-            if (worker != null) {
-                try {
-                    worker.join();
-                } catch (InterruptedException e) {
-                    // ignore
-                }
-            }
-            
-            if (stderr.size() > 0) {
-                LOGGER.logDebug("srcML stderr:", stderr.toString());
-            }
+            }, "SrcMLStderrReader");
+            errorReader.setDaemon(true);
+            errorReader.start();
         }
+        
+        /**
+         * Returns the standard output stream of this process.
+         * 
+         * @return The standard output stream of this process.
+         */
+        public @NonNull InputStream getStdout() {
+            return notNull(this.process.getInputStream());
+        }
+        
+        /**
+         * After {@link #waitFor()} is called, this returns the error output of this process.
+         * 
+         * @return The error output of this process.
+         */
+        public @NonNull String getStderr() {
+            return stderr;
+        }
+        
+        /**
+         * Waits until this process is finished and returns the exit code. If this process is already finished, only
+         * the exit code is returned.
+         * 
+         * @param timeout The maximum time to wait for the process to finish, in milliseconds. If this is elapsed,
+         *      the process is killed and <code>null</code> is returned.
+         * 
+         * @return The exit code of this process or <code>null</code> if the process was killed due to a timeout.
+         */
+        public @Nullable Integer waitFor(long timeout) {
+            return Util.waitForProcess(this.process, timeout);
+        }
+        
+    }
+
+    /**
+     * Parses the given source file.
+     * 
+     * @param absoluteTarget The absolute path to the file to parse.
+     * @param relativeTarget The path to the file to parse, relative to the source tree. This is used in exceptions
+     *      and as the path in the result {@link SourceFile}.
+     *      
+     * @return The parsed {@link SourceFile}.
+     * 
+     * @throws CodeExtractorException If parsing the file fails.
+     */
+    public @NonNull SourceFile<ISyntaxElement> parseFile(@NonNull File absoluteTarget, @NonNull File relativeTarget)
+            throws CodeExtractorException {
+
+        SourceFile<ISyntaxElement> result = null;
+        int iteration = 1;
+        
+        /*
+         * this is set to true if either
+         * a) we have a successful parsing result
+         * b) the srcML process exited normally 
+         */
+        boolean success = false;
+        
+        do {
+            if (iteration > 1) {
+                LOGGER.logInfo("Trying again");
+            }
+            
+            SrcMlProcess process = null;
+            
+            try {
+                process = new SrcMlProcess(absoluteTarget);
+                
+                result = new SourceFile<>(relativeTarget);
+                result.addElement(parse(absoluteTarget, relativeTarget, process.getStdout()));
+                // if we have a successfully parsed result, we don't need to try again if the srcML exe hangs
+                success = true;
+                
+            } catch (IOException | SAXException | FormatException e) {
+                throw new CodeExtractorException(relativeTarget, e);
+                
+            } finally {
+                if (process != null) {
+                    try {
+                        // close stdout in the case that an exception aborted our parsing early
+                        process.getStdout().close();
+                    } catch (IOException e) {
+                        // ignore
+                    }
+                    // wait only a bit for the srcml exe to stop, since parsing is already finished
+                    Integer exitCode = process.waitFor(100);
+                    
+                    if (exitCode != null) {
+                        if (exitCode != 0) {
+                            LOGGER.logWarning("srcML exe did not execute succesfully: " + exitCode);
+                        } else {
+                            // if the srcML exe didn't hang, we don't need to try again
+                            success = true;
+                        }
+                    } else {
+                        LOGGER.logWarning("srcML was killed due to the kill-timeout being reached");
+                    }
+                    if (process.getStderr().length() > 0) {
+                        LOGGER.logDebug("srcML stderr:", process.getStderr());
+                    }
+                }
+            }
+            
+        } while (!success && (++iteration) < 3);
+        
+        return result;
     }
     
     /**
