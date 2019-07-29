@@ -1,0 +1,12 @@
+<unit language="C">
+	<block>
+		<block>
+			<cpp:ifdef lineStart="3" lineEnd="10">#<cpp:directive>ifdef</cpp:directive><name>A</name>
+				<empty_stmt>;</empty_stmt>
+				<cpp:ifdef lineStart="5" lineEnd="9">#<cpp:directive>ifdef</cpp:directive><name>B</name>
+					<empty_stmt>;</empty_stmt></cpp:ifdef></cpp:ifdef>
+		</block>
+	</block>
+
+
+</unit>

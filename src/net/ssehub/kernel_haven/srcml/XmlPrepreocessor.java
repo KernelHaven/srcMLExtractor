@@ -268,7 +268,7 @@ class XmlPrepreocessor {
         fixStartingIfAtEnd(start);
         fixStartingIfBefore(start, end);
         
-        Node parent = start.getParentNode();
+        Node parent = notNull(start.getParentNode());
         
         Node sibling;
         do {
@@ -286,15 +286,7 @@ class XmlPrepreocessor {
         if (sibling == null) {
             // we did not find the <cpp:endif> at this or any nested level
             // check if it follows immediately after any parent (or parent parent) closing tag
-            boolean found = false;
-            Node p = start.getParentNode();
-            while (p != null) {
-                Node pSibling = p.getNextSibling();
-                if (pSibling == end) {
-                    found = true;
-                }
-                p = p.getParentNode();
-            }
+            boolean found = fixEndifNesting(parent, end);
             
             // if we found the <cpp:endif>, it is treated as if it was the last element in the current nesting
             // if not, then we throw an exception :-(
@@ -411,6 +403,73 @@ class XmlPrepreocessor {
                 sibling = cppStart.getNextSibling();
             } while (sibling != null && containsEndNode(sibling, cppEnd));
         }
+    }
+    
+    /**
+     * Fixes a special case where the {@code <cpp:endif>} has a lower nesting depth than its corresponding
+     * {@code <cpp:if*>}.
+     * 
+     * <p>
+     * <b>Example:</b>
+     * <code>
+     * <pre>
+     * &lt;a>
+     *     &lt;cpp:ifdef>&lt;/cpp:ifdef>
+     *     &lt;b>&lt;/b>
+     *     &lt;cpp:ifdef>&lt;/cpp:ifdef>
+     * &lt;/a>
+     * &lt;cpp:endif>&lt;/cpp:endif>
+     * &lt;cpp:endif>&lt;/cpp:endif>
+     * </pre>
+     * </code>
+     * will be converted to:
+     * <code>
+     * <pre>
+     * &lt;a>
+     *     &lt;cpp:ifdef>&lt;/cpp:ifdef>
+     *     &lt;b>&lt;/b>
+     *     &lt;cpp:ifdef>&lt;/cpp:ifdef>
+     *     &lt;cpp:endif>&lt;/cpp:endif>
+     *     &lt;cpp:endif>&lt;/cpp:endif>
+     * &lt;/a>
+     * </pre>
+     * </code>
+     * 
+     * @param parent The parent node of the {@code <cpp:if*>} that does not contain the end node.
+     * @param end The {@code <cpp:endif>} node.
+     * 
+     * @return <code>true</code> if this special case was detected and fixed.
+     */
+    private boolean fixEndifNesting(@NonNull Node parent, @NonNull Node end) {
+        boolean found = false;
+        Node p = parent;
+        while (!found && p != null) {
+            Node pSibling = p.getNextSibling();
+            
+            while (!found && pSibling != null && (isContinue(pSibling) || isEnd(pSibling))) {
+                if (pSibling == end) {
+                    found = true;
+                    
+                    // move all <cpp:endif>s between p and end
+                    pSibling = p.getNextSibling();
+                    while (pSibling != end) {
+                        if (DEBUG_LOGGING) {
+                            System.out.println("Moving <" + pSibling.getNodeName()
+                                + "> into <" + parent.getNodeName() + ">");
+                        }
+                        pSibling.getParentNode().removeChild(pSibling);
+                        parent.appendChild(pSibling);
+                        
+                        pSibling = p.getNextSibling();
+                    }
+                }
+                
+                pSibling = pSibling.getNextSibling();
+            }
+            
+            p = p.getParentNode();
+        }
+        return found;
     }
     
     /**

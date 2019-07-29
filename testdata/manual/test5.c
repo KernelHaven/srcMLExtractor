@@ -1,9 +1,8 @@
-void func() {
-    #ifdef EXP
-        if (cond1) {
-    #else
-        if (cond2) {
-    #endif
-        ;
-    }
-}
+		if (a)
+#ifdef A
+			;
+#else
+		return;
+#endif
+		else
+			return ;

@@ -17,6 +17,7 @@
 package net.ssehub.kernel_haven.srcml;
 
 import static net.ssehub.kernel_haven.util.logic.FormulaBuilder.not;
+import static net.ssehub.kernel_haven.util.null_checks.NullHelpers.notNull;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
@@ -330,6 +331,48 @@ public class CTest extends AbstractSrcMLExtractorTest {
         assertThat(ifdef.getLineEnd(), is(2));
         assertThat(elsedef.getLineStart(), is(3));
         assertThat(elsedef.getLineEnd(), is(5));
+    }
+    
+    /**
+     * Tests a C-if where the condition contains an ifdef.
+     */
+    @Test
+    public void testIfConditionWithIfdef() {
+        SourceFile<ISyntaxElement> ast = loadFile("IfConditionWithIfdef.c");
+        assertThat(ast.getTopElementCount(), is(1));
+        
+        File file = assertElement(File.class, "1", "1", ast.getElement(0));
+        assertThat(file.getPath(), is(new java.io.File("c/IfConditionWithIfdef.c")));
+        assertThat(file.getLineStart(), is(1));
+        assertThat(file.getLineEnd(), is(8));
+        assertThat(file.getNestedElementCount(), is(1));
+        
+        BranchStatement ifStmt = assertElement(BranchStatement.class, "1", "1", file.getNestedElement(0));
+        assertThat(ifStmt.getLineStart(), is(1));
+        assertThat(ifStmt.getLineEnd(), is(7));
+        assertThat(ifStmt.getNestedElementCount(), is(1));
+        
+        CodeList outerList = (CodeList) notNull(ifStmt.getIfCondition());
+        assertThat(outerList.getNestedElementCount(), is(3));
+        assertCode("if ( a", outerList.getNestedElement(0));
+        assertCode(")", outerList.getNestedElement(2));
+
+        CppBlock ifdef = assertIf("A", "A", new Variable("A"), 1, Type.IFDEF, outerList.getNestedElement(1));
+        assertThat(ifdef.getLineStart(), is(2));
+        assertThat(ifdef.getLineEnd(), is(4));
+        assertThat(ifdef.getNestedElementCount(), is(1));
+        assertCode("== 0", ifdef.getNestedElement(0));
+        
+        CompoundStatement block = assertElement(CompoundStatement.class, "1", "1", ifStmt.getNestedElement(0));
+        assertThat(block.getLineStart(), is(5));
+        assertThat(block.getLineEnd(), is(7));
+        assertThat(block.getNestedElementCount(), is(1));
+        
+        SingleStatement stmt = assertElement(SingleStatement.class, "1", "1", block.getNestedElement(0));
+        assertThat(stmt.getLineStart(), is(6));
+        assertThat(stmt.getLineEnd(), is(6));
+        assertThat(stmt.getNestedElementCount(), is(0));
+        assertCode(";", stmt.getCode());
     }
     
     @Override
