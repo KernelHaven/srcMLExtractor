@@ -108,7 +108,7 @@ public class ParsingStatistics extends AbstractAnalysis implements ISyntaxElemen
      */
     private static @NonNull String asPercent(int full, int part) {
         double ratio = (double) part / full;
-        return notNull(String.format("%.2f%%", ratio));
+        return notNull(String.format("%.2f%%", ratio * 100));
     }
     
     @Override
