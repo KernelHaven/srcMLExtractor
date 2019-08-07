@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -1244,23 +1245,45 @@ class XmlToAstConverter {
         } else {
             // If a Code follows a Code, join them together
             for (int i = 0; i < list.size() - 1; i++) {
-                if (list.get(i) instanceof Code && list.get(i + 1) instanceof Code) {
+                if (list.get(i) instanceof Code && !notNull(list.get(i)).containsErrorElement()) {
+                    // Check which elements belong together
                     Code first = (Code) list.get(i);
-                    Code second = (Code) list.get(i + 1);
+                    int endIndex = i;
+                    Code last = first;
                     
-                    if (!first.getPresenceCondition().equals(second.getPresenceCondition())) {
-                        continue;
+                    for (int j = i + 1; j < list.size(); j++) {
+                        if (list.get(j) instanceof Code) {
+                            Code second = (Code) list.get(j);
+                            if (first.getPresenceCondition().equals(second.getPresenceCondition())
+                                && !second.containsErrorElement()) {
+                                
+                                endIndex = j;
+                                last = second;
+                            } else {
+                                break;
+                            }
+                        } else {
+                            break;
+                        }
                     }
-                    Code newCode = new Code(first.getPresenceCondition(), first.getText() + " " + second.getText());
-                    newCode.setSourceFile(baseFile);
-                    newCode.setCondition(first.getCondition());
-                    newCode.setLineStart(first.getLineStart());
-                    newCode.setLineEnd(second.getLineEnd());
-                    newCode.setContainsErrorElement(first.containsErrorElement() || second.containsErrorElement());
-                    
-                    list.remove(i);
-                    list.set(i, newCode);
-                    i--;
+                    if (i != endIndex) {
+                        // Merge elements together
+                        StringJoiner sj = new StringJoiner(" ");
+                        while (endIndex >= i) {
+                            Code code = (Code) list.get(i);
+                            sj.add(code.getText());
+                            list.remove(i);
+                            endIndex--;
+                        }
+                        Code newCode = new Code(first.getPresenceCondition(), notNull(sj.toString()));
+                        newCode.setSourceFile(baseFile);
+                        newCode.setCondition(first.getCondition());
+                        newCode.setLineStart(first.getLineStart());
+                        newCode.setLineEnd(last.getLineEnd());
+                        newCode.setContainsErrorElement(false);
+                        
+                        list.add(i, newCode);
+                    }
                 }
             }
             
