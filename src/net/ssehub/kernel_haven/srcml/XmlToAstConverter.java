@@ -1202,26 +1202,40 @@ class XmlToAstConverter {
             } else {
                 ICode nested = convertChildrenToCode(node, 0, node.getChildNodes().getLength());
 
-                if (str.length() > 0) {
-                    Code untilThisPart = new Code(getPc(), notNull(str.toString()));
-                    untilThisPart.setSourceFile(baseFile);
-                    untilThisPart.setCondition(conditions.peek());
-                    untilThisPart.setLineStart(strLineStart);
-                    untilThisPart.setLineEnd(strLineEnd);
-                    str = new StringBuilder();
-                    strLineStart = -1;
-                    strLineEnd = -1;
-                    list.add(untilThisPart);
-                }
-                
-                if (nested instanceof CodeList) {
-                    CodeList nestedList = (CodeList) nested;
-                    for (ISyntaxElement inner : nestedList) {
-                        list.add((ICode) inner);
+                if (nested instanceof Code) {
+                    // just append code content to str
+                    if (str.length() > 0) {
+                        str.append(' ');
+                    } else {
+                        strLineStart = nested.getLineStart();
                     }
+                    strLineEnd = nested.getLineEnd();
+                    str.append(((Code) nested).getText());
                     
                 } else {
-                    list.add(nested);
+                    // finish up everything until now
+                    if (str.length() > 0) {
+                        Code untilThisPart = new Code(getPc(), notNull(str.toString()));
+                        untilThisPart.setSourceFile(baseFile);
+                        untilThisPart.setCondition(conditions.peek());
+                        untilThisPart.setLineStart(strLineStart);
+                        untilThisPart.setLineEnd(strLineEnd);
+                        str = new StringBuilder();
+                        strLineStart = -1;
+                        strLineEnd = -1;
+                        list.add(untilThisPart);
+                    }
+                    
+                    // append new part
+                    if (nested instanceof CodeList) {
+                        CodeList nestedList = (CodeList) nested;
+                        for (ISyntaxElement inner : nestedList) {
+                            list.add((ICode) inner);
+                        }
+                        
+                    } else {
+                        list.add(nested);
+                    }
                 }
             }
         }
@@ -1244,6 +1258,7 @@ class XmlToAstConverter {
             
         } else {
             // If a Code follows a Code, join them together
+            // this is a fallback; in most cases, the code above should not produce a Code followed by a Code
             for (int i = 0; i < list.size() - 1; i++) {
                 if (list.get(i) instanceof Code) {
                     // Check which elements belong together
