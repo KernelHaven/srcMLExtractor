@@ -1245,26 +1245,21 @@ class XmlToAstConverter {
         } else {
             // If a Code follows a Code, join them together
             for (int i = 0; i < list.size() - 1; i++) {
-                if (list.get(i) instanceof Code && !notNull(list.get(i)).containsErrorElement()) {
+                if (list.get(i) instanceof Code) {
                     // Check which elements belong together
                     Code first = (Code) list.get(i);
                     int endIndex = i;
                     Code last = first;
+                    boolean containsErrorElement = first.containsErrorElement();
                     
                     for (int j = i + 1; j < list.size(); j++) {
-                        if (list.get(j) instanceof Code) {
-                            Code second = (Code) list.get(j);
-                            if (first.getPresenceCondition().equals(second.getPresenceCondition())
-                                && !second.containsErrorElement()) {
-                                
-                                endIndex = j;
-                                last = second;
-                            } else {
-                                break;
-                            }
-                        } else {
+                        if (!(list.get(j) instanceof Code)
+                                || !first.getPresenceCondition().equals(notNull(list.get(j)).getPresenceCondition())) {
                             break;
                         }
+                        endIndex = j;
+                        last = (Code) list.get(j);
+                        containsErrorElement |= last.containsErrorElement();
                     }
                     if (i != endIndex) {
                         // Merge elements together
@@ -1280,7 +1275,7 @@ class XmlToAstConverter {
                         newCode.setCondition(first.getCondition());
                         newCode.setLineStart(first.getLineStart());
                         newCode.setLineEnd(last.getLineEnd());
-                        newCode.setContainsErrorElement(false);
+                        newCode.setContainsErrorElement(containsErrorElement);
                         
                         list.add(i, newCode);
                     }
