@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -80,7 +81,22 @@ class XmlPrepreocessor {
     
     private @NonNull Document doc;
     
-    private @NonNull Deque<@NonNull Node> cppIfs;
+    /**
+     * Used in {@link #matchCppIfs(Node)}.
+     */
+    private @NonNull Deque<@NonNull Node> cppIfStack;
+
+    /**
+     * A list of all C-preprocessor block nodes. Populated by {@link #findRelevantNodes(Node)}, used by
+     * {@link #convertNesting()}.
+     */
+    private @NonNull List<@NonNull Node> cppBlockNodes;
+    
+    /**
+     * A list of all {@code <case>} and {@code <default>} nodes. Populated by {@link #findRelevantNodes(Node)}, used by
+     * {@link #convertNesting()}.
+     */
+    private @NonNull List<@NonNull Node> caseNodes;
     
     /**
      * Helper variable for {@link #moveNodesAfterEndif(Node, Node, Node, boolean)}. Reset by
@@ -97,7 +113,10 @@ class XmlPrepreocessor {
     public XmlPrepreocessor(@NonNull File baseFile, @NonNull Document doc) {
         this.baseFile = baseFile;
         this.doc = doc;
-        cppIfs = new LinkedList<>();
+        this.cppIfStack = new LinkedList<>();
+        
+        this.cppBlockNodes = new LinkedList<>();
+        this.caseNodes = new LinkedList<>();
     }
 
     /**
@@ -120,8 +139,9 @@ class XmlPrepreocessor {
             System.out.println();
         }
         
-        convertNesting(node);
-
+        findRelevantNodes(node);
+        convertNesting();
+        
         if (DEBUG_LOGGING) {
             System.out.println();
             System.out.println();
@@ -130,7 +150,7 @@ class XmlPrepreocessor {
     
     /**
      * Recurses through the complete XMl structure and matches all if, ifdef, ifndef, else, elif, and endif nodes.
-     * Uses {@link #cppIfs}. After this,
+     * Uses {@link #cppIfStack}. After this,
      * {@link XmlUserData#CPP_BLOCK_END} is set for all if, ifdef, ifndef, else, and elif nodes; and
      * {@link XmlUserData#PREVIOUS_CPP_BLOCK} is set for all else and elif nodes.
      * 
@@ -140,14 +160,14 @@ class XmlPrepreocessor {
      */
     private void matchCppIfs(@NonNull Node node) throws FormatException {
         if (isStartingNode(node)) {
-            cppIfs.push(node);
+            cppIfStack.push(node);
             
         } else if (isContinue(node)) {
-            if (cppIfs.isEmpty()) {
+            if (cppIfStack.isEmpty()) {
                 throw makeException(node, "Found <" + node.getNodeName() + "> without starting <cpp:if>");
             }
             
-            Node start = notNull(cppIfs.pop());
+            Node start = notNull(cppIfStack.pop());
             start.setUserData(CPP_BLOCK_END, node, null);
             start.setUserData(LINE_END, (int) node.getUserData(LINE_START) - 1, null);
             node.setUserData(PREVIOUS_CPP_BLOCK, start, null);
@@ -158,14 +178,14 @@ class XmlPrepreocessor {
                             + " kh:lineStart=" + node.getUserData(LINE_START) + ">");
             }
             
-            cppIfs.push(node);
+            cppIfStack.push(node);
             
         } else if (isEnd(node)) {
-            if (cppIfs.isEmpty()) {
+            if (cppIfStack.isEmpty()) {
                 throw makeException(node, "Found <cpp:endif> without starting <cpp:if>");
             }
             
-            Node start = notNull(cppIfs.pop());
+            Node start = notNull(cppIfStack.pop());
             start.setUserData(CPP_BLOCK_END, node, null);
             start.setUserData(LINE_END, node.getUserData(LINE_START), null);
             
@@ -183,44 +203,53 @@ class XmlPrepreocessor {
     }
     
     /**
-     * Recurses through the complete XML tree and converts the nesting structure of some XML nodes.
+     * Populates {@link #cppBlockNodes} and {@link #caseNodes}. Recurses through all child nodes of the given nodes
+     * and searches for the relevant nodes.
      * 
-     * @param node The XML (root) node to convert the nesting structure for.
+     * @param node The parent node to search in.
+     */
+    private void findRelevantNodes(@NonNull Node node) {
+        // order is important here: first search all child nodes, then recruse into them
+        
+        // search all child nodes for the node names we expect
+        Node child = node.getFirstChild();
+        while (child != null) {
+            if (isCase(child)) {
+                caseNodes.add(child);
+                
+            } else if (isStartingNode(child) || isContinue(child)) {
+                cppBlockNodes.add(child);
+            }
+            
+            child = child.getNextSibling();
+        }
+        
+        // then recurse into all child nodes
+        child = node.getFirstChild();
+        while (child != null) {
+            findRelevantNodes(child);
+            
+            child = child.getNextSibling();
+        }
+    }
+    
+    /**
+     * Goes through the nodes found by {@link #findRelevantNodes(Node)} and converts the nesting structure for them.
      * 
      * @throws FormatException If the nesting structure can not be converted (e.g. because it is malformed).
      */
-    private void convertNesting(@NonNull Node node) throws FormatException {
-        NodeList children = node.getChildNodes();
-
-        // first convert the <case> nesting structure for all children
-        for (int i = 0; i < children.getLength(); i++) {
-            Node child = notNull(children.item(i));
-            if (isCase(child)) {
-                convertCaseNesting(child);
-            }
-            
+    private void convertNesting() throws FormatException {
+        for (Node caseNode : caseNodes) {
+            convertCaseNesting(caseNode);
         }
         
-        // then convert the <cpp:if*> nesting structure
-        for (int i = 0; i < children.getLength(); i++) {
-            Node child = notNull(children.item(i));
-            if (isStartingNode(child) || isContinue(child)) {
-                Node end = (Node) child.getUserData(CPP_BLOCK_END);
-                if (end == null) {
-                    throw makeException(child, "Didn't find an <cpp:endif> for <" + child.getNodeName() + ">");
-                }
-              
-                convertIfNesting(child, end);
+        for (Node cppNode : cppBlockNodes) {
+            Node end = (Node) cppNode.getUserData(CPP_BLOCK_END);
+            if (end == null) {
+                throw makeException(cppNode, "Didn't find an <cpp:endif> for <" + cppNode.getNodeName() + ">");
             }
-        }
-        
-        // finally, recurse into all children
-        // using getFirstChild() and child.getNextSibling() is faster than iterating over children
-        // we can do this here since no immediate child nodes will be modified in convertNesting()
-        Node child = node.getFirstChild();
-        while (child != null) {
-            convertNesting(child);
-            child = child.getNextSibling();
+          
+            convertIfNesting(cppNode, end);
         }
     }
     

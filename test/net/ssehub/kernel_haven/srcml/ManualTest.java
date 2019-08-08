@@ -22,6 +22,8 @@ import net.ssehub.kernel_haven.code_model.SourceFile;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
 import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.Logger.Level;
+import net.ssehub.kernel_haven.util.PerformanceProbe;
+import net.ssehub.kernel_haven.util.Util;
 
 /**
  * Helper class for manual testing of the extractor.
@@ -36,14 +38,22 @@ public class ManualTest extends AbstractSrcMLExtractorTest {
     @Test
     public void test() {
         Logger.get().setLevel(Level.DEBUG);
+        PerformanceProbe.setEnabled(true);
         
+        long t0 = System.currentTimeMillis();
 //        SourceFile<ISyntaxElement> ast = loadFile("FunctionsAndCPP.c");
 //        SourceFile ast = loadFile("NestedCppIfs.c");
         SourceFile<ISyntaxElement> ast = loadFile("test5.c");
 //        SourceFile<ISyntaxElement> ast = loadFile("FunctionWithIfdefHeader.c");
 //        SourceFile<ISyntaxElement> ast = loadFile("test2.c", HeaderHandling.EXPAND_FUNCTION_CONDITION);
 //        SourceFile ast = loadFile("../real/Linux4.15/pci_stub.c");
+        
+        long t1 = System.currentTimeMillis();
+        
         System.out.println(ast.getElement(0));
+        
+        System.out.println("Duration: " + Util.formatDurationMs(t1 - t0));
+        PerformanceProbe.printResult();
     }
     
     @Override
