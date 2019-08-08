@@ -67,7 +67,9 @@ public class RobustnessTests extends AbstractSrcMLExtractorTest {
     @Parameters(name = "{0}")
     public static Object[] data() throws IOException {
         List<Path> sourceFiles = Files.walk(TEST_FILES_PATH)
-                .filter(p ->p.getFileName().toString().endsWith(".c"))
+                .filter(p ->
+                    p.getFileName().toString().endsWith(".c")
+                    || p.getFileName().toString().endsWith(".h"))
                 .collect(Collectors.toList());
         
         return sourceFiles.toArray();
