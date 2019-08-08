@@ -190,22 +190,16 @@ class XmlPrepreocessor {
      * @throws FormatException If the nesting structure can not be converted (e.g. because it is malformed).
      */
     private void convertNesting(@NonNull Node node) throws FormatException {
-        // first convert the <case> nesting structure for all children
         NodeList children = node.getChildNodes();
+
+        // first convert the <case> nesting structure for all children
         for (int i = 0; i < children.getLength(); i++) {
             Node child = notNull(children.item(i));
             if (isCase(child)) {
                 convertCaseNesting(child);
             }
+            
         }
-        
-//        if (DEBUG_LOGGING) {
-//            Node tmp = node;
-//            while (!tmp.getNodeName().equals("unit") && tmp.getParentNode() != null) {
-//                tmp = notNull(tmp.getParentNode());
-//            }
-//            XmlUserData.debugPrintXml(notNull(tmp));
-//        }
         
         // then convert the <cpp:if*> nesting structure
         for (int i = 0; i < children.getLength(); i++) {
@@ -215,23 +209,18 @@ class XmlPrepreocessor {
                 if (end == null) {
                     throw makeException(child, "Didn't find an <cpp:endif> for <" + child.getNodeName() + ">");
                 }
-                
+              
                 convertIfNesting(child, end);
             }
         }
         
-//        if (DEBUG_LOGGING) {
-//            Node tmp = node;
-//            while (!tmp.getNodeName().equals("unit") && tmp.getParentNode() != null) {
-//                tmp = notNull(tmp.getParentNode());
-//            }
-//            XmlUserData.debugPrintXml(notNull(tmp));
-//        }
-        
         // finally, recurse into all children
-        for (int i = 0; i < children.getLength(); i++) {
-            Node child = notNull(children.item(i));
+        // using getFirstChild() and child.getNextSibling() is faster than iterating over children
+        // we can do this here since no immediate child nodes will be modified in convertNesting()
+        Node child = node.getFirstChild();
+        while (child != null) {
             convertNesting(child);
+            child = child.getNextSibling();
         }
     }
     
@@ -242,10 +231,8 @@ class XmlPrepreocessor {
      * @param caseNode The case or default node.
      */
     private void convertCaseNesting(@NonNull Node caseNode) {
-        Node parent = caseNode.getParentNode();
         Node sibling = caseNode.getNextSibling();
         while (sibling != null && !isCase(sibling)) {
-            parent.removeChild(sibling);
             caseNode.appendChild(sibling);
             
             // update end line number for case
@@ -278,7 +265,6 @@ class XmlPrepreocessor {
                 if (DEBUG_LOGGING) {
                     System.out.println("Moving <" + sibling.getNodeName() + "> into <" + start.getNodeName() + ">");
                 }
-                parent.removeChild(sibling);
                 start.appendChild(sibling);
             }
         } while (sibling != null && !containsEndNode(sibling, end));
@@ -357,7 +343,6 @@ class XmlPrepreocessor {
             Node child;
             do {
                 child = p.getLastChild();
-                p.removeChild(child);
                 pp.insertBefore(child, p.getNextSibling());
             } while (child != cppstart);
         }
@@ -395,7 +380,6 @@ class XmlPrepreocessor {
         Node sibling = cppStart.getNextSibling();
         if (NODES_WITHOUT_NESTING.contains(sibling.getNodeName()) && containsEndNode(sibling, cppEnd)) {
             do {
-                cppStart.getParentNode().removeChild(cppStart);
                 sibling.insertBefore(cppStart, sibling.getFirstChild());
                 
                 // repeat this until we moved in deep enough; we don't need to check NODES_WITHOUT_NESTING anymore,
@@ -457,7 +441,6 @@ class XmlPrepreocessor {
                             System.out.println("Moving <" + pSibling.getNodeName()
                                 + "> into <" + parent.getNodeName() + ">");
                         }
-                        pSibling.getParentNode().removeChild(pSibling);
                         parent.appendChild(pSibling);
                         
                         pSibling = p.getNextSibling();
@@ -525,7 +508,6 @@ class XmlPrepreocessor {
                 // move this child to after the ifdef
                 if (isStartingNode(child) || isContinue(child) || isEnd(child)) {
                     // do not leave a reference for <cpp:if*> elements
-                    containingEndif.removeChild(child);
                     i--;
                     
                 } else {
