@@ -433,6 +433,7 @@ class XmlToAstConverter {
             nestedStartIndex = 2;
         }
         
+        Formula ownFormula = formula;
         CppBlock previousBlock = null;
         if (type == CppBlock.Type.ELSE || type == CppBlock.Type.ELSEIF) {
             Node previousNode = (Node) node.getUserData(PREVIOUS_CPP_BLOCK);
@@ -473,6 +474,7 @@ class XmlToAstConverter {
             }
             
             if (type == CppBlock.Type.ELSE) {
+                ownFormula = null;
                 formula = allPreviousNegated;
             } else if (type == CppBlock.Type.ELSEIF) {
                 formula = new Conjunction(allPreviousNegated, notNull(formula));
@@ -483,7 +485,7 @@ class XmlToAstConverter {
             conditions.push(formula);
         }
         
-        CppBlock result = new CppBlock(getPc(), formula, type);
+        CppBlock result = new CppBlock(getPc(), formula, ownFormula, type);
         postCreation(result, node);
         
         if (type == CppBlock.Type.ELSE || type == CppBlock.Type.ELSEIF) {
