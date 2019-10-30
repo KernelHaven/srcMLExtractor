@@ -19,6 +19,7 @@ To use this extractor, set `code.extractor.class` to `net.ssehub.kernel_haven.sr
 ## Dependencies
 
 In addition to KernelHaven, this plugin has the following dependencies:
+* [CodeBlockExtractor](https://github.com/KernelHaven/CodeBlockExtractor)
 * Only runs on these platforms:
 	* Windows (Vista, 7, 8, 10) 64 Bit
 	* Linux x86 64 Bit; requires the following libraries (packages for Ubuntu 16.04): `libxml2, libxslt1.1, libarchive13, libssl1.0.0, libcurl3`

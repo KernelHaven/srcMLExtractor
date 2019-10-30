@@ -28,6 +28,8 @@ import java.util.List;
 
 import org.junit.Test;
 
+import net.ssehub.kernel_haven.block_extractor.CppConditionParser;
+import net.ssehub.kernel_haven.block_extractor.InvalidConditionHandling;
 import net.ssehub.kernel_haven.code_model.SourceFile;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock.Type;
@@ -434,16 +436,18 @@ public class CppTest extends AbstractSrcMLExtractorTest {
      */
     @Test
     public void testMissingDefined() {
-        SourceFile<ISyntaxElement> ast = loadFile("MissingDefined.c");
+        SourceFile<ISyntaxElement> ast = loadFile("MissingDefined.c", HeaderHandling.IGNORE,
+                InvalidConditionHandling.ERROR_VARIABLE);
         List<ISyntaxElement> elements = getElements(ast);
         
         assertEquals("Got unexpected number of elements", 3, elements.size());
 
         assertElement(SingleStatement.class, "1", "1", elements.get(0));
-        CppBlock ifElem = assertIf("A", "A", new Variable("A"), 1, Type.IF, elements.get(1));
+        String var = CppConditionParser.ERROR_VARIBLE.getName();
+        CppBlock ifElem = assertIf(var, var, new Variable(var), 1, Type.IF, elements.get(1));
         assertElement(SingleStatement.class, "1", "1", elements.get(2));
         
-        assertElement(SingleStatement.class, "A", "A", ifElem.getNestedElement(0));
+        assertElement(SingleStatement.class, var, var, ifElem.getNestedElement(0));
         
         assertThat(ifElem.getSiblingCount(), is(1));
         assertThat(ifElem.getSibling(0), sameInstance(ifElem));
@@ -468,8 +472,9 @@ public class CppTest extends AbstractSrcMLExtractorTest {
     }
     
     @Override
-    protected SourceFile<ISyntaxElement> loadFile(String file) {
-        return super.loadFile("cpp/" + file);
+    protected SourceFile<ISyntaxElement> loadFile(String file, HeaderHandling headerHandling,
+            InvalidConditionHandling invalidConditionHandling) {
+        return super.loadFile("cpp/" + file, headerHandling, invalidConditionHandling);
     }
     
 }

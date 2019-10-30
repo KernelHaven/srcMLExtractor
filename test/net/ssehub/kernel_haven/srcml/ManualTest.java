@@ -18,6 +18,7 @@ package net.ssehub.kernel_haven.srcml;
 
 import org.junit.Test;
 
+import net.ssehub.kernel_haven.block_extractor.InvalidConditionHandling;
 import net.ssehub.kernel_haven.code_model.SourceFile;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
 import net.ssehub.kernel_haven.util.Logger;
@@ -57,8 +58,9 @@ public class ManualTest extends AbstractSrcMLExtractorTest {
     }
     
     @Override
-    protected SourceFile<ISyntaxElement> loadFile(String file, HeaderHandling headerHandling) {
-        return super.loadFile("manual/" + file, headerHandling);
+    protected SourceFile<ISyntaxElement> loadFile(String file, HeaderHandling headerHandling,
+            InvalidConditionHandling invalidConditionHandling) {
+        return super.loadFile("manual/" + file, headerHandling, invalidConditionHandling);
     }
     
 }

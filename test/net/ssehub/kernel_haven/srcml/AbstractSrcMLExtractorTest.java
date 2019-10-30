@@ -32,6 +32,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 
 import net.ssehub.kernel_haven.SetUpException;
+import net.ssehub.kernel_haven.block_extractor.InvalidConditionHandling;
 import net.ssehub.kernel_haven.code_model.SourceFile;
 import net.ssehub.kernel_haven.code_model.ast.Code;
 import net.ssehub.kernel_haven.code_model.ast.CppBlock;
@@ -99,7 +100,7 @@ public class AbstractSrcMLExtractorTest {
      * @return The parsed code model, ready for testing the result.
      */
     protected SourceFile<ISyntaxElement> loadFile(String file) {
-        return loadFile(file, HeaderHandling.IGNORE);
+        return loadFile(file, HeaderHandling.IGNORE, InvalidConditionHandling.EXCEPTION);
     }
     
     /**
@@ -107,10 +108,12 @@ public class AbstractSrcMLExtractorTest {
      *  
      * @param file The source file to parse.
      * @param headerHandling The header handling that should be used.
+     * @param invalidConditionHandling How to handle unparseable conditions.
      * 
      * @return The parsed code model, ready for testing the result.
      */
-    protected SourceFile<ISyntaxElement> loadFile(String file, HeaderHandling headerHandling) {
+    protected SourceFile<ISyntaxElement> loadFile(String file, HeaderHandling headerHandling,
+            InvalidConditionHandling invalidConditionHandling) {
         File srcFile = new File(AllTests.TESTDATA, file);
         Assert.assertTrue("Specified test file does not exist: " + srcFile, srcFile.isFile());
         
@@ -121,6 +124,7 @@ public class AbstractSrcMLExtractorTest {
             props.setProperty("source_tree", "testdata/");
             props.setProperty("code.extractor.files", file);
             props.setProperty("code.extractor.header_handling", headerHandling.name());
+            props.setProperty("code.extractor.invalid_condition", invalidConditionHandling.name());
             
             TestConfiguration config = new TestConfiguration(props);
             

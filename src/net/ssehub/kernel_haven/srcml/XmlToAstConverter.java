@@ -35,6 +35,8 @@ import java.util.StringJoiner;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import net.ssehub.kernel_haven.block_extractor.CppConditionParser;
+import net.ssehub.kernel_haven.block_extractor.InvalidConditionHandling;
 import net.ssehub.kernel_haven.code_model.ast.BranchStatement;
 import net.ssehub.kernel_haven.code_model.ast.CaseStatement;
 import net.ssehub.kernel_haven.code_model.ast.CaseStatement.CaseType;
@@ -65,8 +67,6 @@ import net.ssehub.kernel_haven.util.logic.Formula;
 import net.ssehub.kernel_haven.util.logic.Negation;
 import net.ssehub.kernel_haven.util.logic.True;
 import net.ssehub.kernel_haven.util.logic.parser.ExpressionFormatException;
-import net.ssehub.kernel_haven.util.logic.parser.Parser;
-import net.ssehub.kernel_haven.util.logic.parser.VariableCache;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
@@ -78,12 +78,12 @@ class XmlToAstConverter {
     
     private java.io.@NonNull File baseFile;
     
+    private @NonNull CppConditionParser cppConditionParser;
+    
     /**
      * The current stack of C-preprocessor conditions. Always contains a {@link True} at the bottom of the stack.
      */
     private @NonNull Deque<@NonNull Formula> conditions;
-    
-    private @NonNull Parser<@NonNull Formula> cppConditionParser;
     
     /**
      * The current stack of elements that are being transformed. This is used to set
@@ -114,13 +114,18 @@ class XmlToAstConverter {
      * Creates an XML output converter for the given base source file that is being parsed.
      * 
      * @param baseFile The source file that is parsed.
+     * @param handleLinuxMacros Whether to handle preprocessor macros found in the Linux Kernel (i.e.
+     *      IS_ENABLED, IS_BUILTIN, IS_MODULE).
+     * @param fuzzyParsing Whether to do fuzzy parsing for non-boolean integer comparisons.
+     * @param invalidConditionHandling How to handle unparseable conditions.
      */
-    public XmlToAstConverter(java.io.@NonNull File baseFile) {
+    public XmlToAstConverter(java.io.@NonNull File baseFile, boolean handleLinuxMacros, boolean fuzzyParsing,
+            @NonNull InvalidConditionHandling invalidConditionHandling) {
         this.baseFile = baseFile;
         this.conditions = new LinkedList<>();
         this.conditions.push(True.INSTANCE);
         
-        this.cppConditionParser = new Parser<>(new SrcMlConditionGrammar(new VariableCache()));
+        this.cppConditionParser = new CppConditionParser(handleLinuxMacros, fuzzyParsing, invalidConditionHandling);
         
         this.elementStack = new LinkedList<>();
         this.switchStack = new LinkedList<>();

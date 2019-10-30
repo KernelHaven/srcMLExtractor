@@ -27,6 +27,8 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import net.ssehub.kernel_haven.SetUpException;
+import net.ssehub.kernel_haven.block_extractor.CodeBlockExtractor;
+import net.ssehub.kernel_haven.block_extractor.InvalidConditionHandling;
 import net.ssehub.kernel_haven.code_model.AbstractCodeModelExtractor;
 import net.ssehub.kernel_haven.code_model.SourceFile;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
@@ -87,17 +89,32 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
      */
     private static @Nullable Boolean hasSrcmlInstalled;
     
-    private @NonNull HeaderHandling headerHandling = HeaderHandling.IGNORE; // will be overriden in init()
+    private @NonNull HeaderHandling headerHandling = HeaderHandling.IGNORE; // will be overridden in init()
     
-    private @NonNull File sourceTree = new File("will be initialized"); // will be overriden in init()
+    private @NonNull File sourceTree = new File("will be initialized"); // will be overridden in init()
+    
+    private boolean handleLinuxMacro = false; // will be overridden in init()
+    
+    private boolean fuzzyParsing = false; // will be overridden in init()
+    
+    // will be overridden in init()
+    private @NonNull InvalidConditionHandling invalidConditionHandling = InvalidConditionHandling.EXCEPTION;
     
     private File srcExec;
 
     @Override
     protected void init(@NonNull Configuration config) throws SetUpException {
-        sourceTree = config.getValue(DefaultSettings.SOURCE_TREE);
+        this.sourceTree = config.getValue(DefaultSettings.SOURCE_TREE);
+        this.fuzzyParsing = config.getValue(DefaultSettings.FUZZY_PARSING);
+        
         config.registerSetting(HEADER_HANDLING_SETTING);
-        headerHandling = config.getValue(HEADER_HANDLING_SETTING);
+        this.headerHandling = config.getValue(HEADER_HANDLING_SETTING);
+        
+        // TODO: these settings are CodeBlockExtractor-specific; the user may not know that they apply here
+        config.registerSetting(CodeBlockExtractor.HANDLE_LINUX_MACROS);
+        this.handleLinuxMacro = config.getValue(CodeBlockExtractor.HANDLE_LINUX_MACROS);
+        config.registerSetting(CodeBlockExtractor.INVALID_CONDITION_SETTING);
+        this.invalidConditionHandling = config.getValue(CodeBlockExtractor.INVALID_CONDITION_SETTING);
         
         if (!hasSrcmlInstalled()) {
             Preparation preparator = new Preparation(config);
@@ -316,7 +333,8 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             XmlUserData.debugPrintXml(root);
         }
         
-        XmlToAstConverter converter = new XmlToAstConverter(relativeTarget);
+        XmlToAstConverter converter = new XmlToAstConverter(relativeTarget, this.handleLinuxMacro, this.fuzzyParsing,
+                this.invalidConditionHandling);
         net.ssehub.kernel_haven.code_model.ast.File file = converter.convertFile(root);
         
         if (DEBUG_LOGGING) {

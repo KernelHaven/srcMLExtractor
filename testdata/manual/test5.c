@@ -1,8 +1,3 @@
-		if (a)
-#ifdef A
-			;
-#else
-		return;
+#if IS_MODULE(A)
+
 #endif
-		else
-			return ;

@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import net.ssehub.kernel_haven.block_extractor.InvalidConditionHandling;
 import net.ssehub.kernel_haven.code_model.SourceFile;
 import net.ssehub.kernel_haven.code_model.ast.BranchStatement;
 import net.ssehub.kernel_haven.code_model.ast.CaseStatement;
@@ -174,9 +175,16 @@ public class IncludeTest extends AbstractSrcMLExtractorTest {
         assertCode("int a ;", stmt.getCode());
     }
     
-    @Override
-    protected SourceFile<ISyntaxElement> loadFile(String file, HeaderHandling headerHandling) {
-        return super.loadFile("headers/" + file, headerHandling);
+    /**
+     * Helper method which runs the {@link SrcMLExtractor} on the specified source file.
+     *  
+     * @param file The source file to parse.
+     * @param headerHandling The header handling that should be used.
+     * 
+     * @return The parsed code model, ready for testing the result.
+     */
+    private SourceFile<ISyntaxElement> loadFile(String file, HeaderHandling headerHandling) {
+        return super.loadFile("headers/" + file, headerHandling, InvalidConditionHandling.EXCEPTION);
     }
     
 }
