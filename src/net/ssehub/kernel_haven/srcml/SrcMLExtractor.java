@@ -303,21 +303,25 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
     private @NonNull ISyntaxElement parse(@NonNull File absoluteTarget, @NonNull File relativeTarget,
             @NonNull InputStream xml) throws FormatException, SAXException, IOException {
         PerformanceProbe p = new PerformanceProbe("SrcMLExtractor parse()");
+        PerformanceProbe p1 = new PerformanceProbe("SrcMLExtractor 1) XML parsing");
         
         Document doc = XmlParser.parse(xml);
         @NonNull Node root = notNull(doc.getDocumentElement());
         
         if (!root.getNodeName().equals("unit")) {
+            p1.close();
             p.close();
             throw new FormatException("Expected <unit> but got <" + root.getNodeName() + ">");
         }
         
         Node languageAttr = root.getAttributes().getNamedItem("language");
         if (languageAttr == null) {
+            p1.close();
             p.close();
             throw new FormatException("Language attribute not specified in <unit>");
         }
         if (!languageAttr.getTextContent().equals("C")) {
+            p1.close();
             p.close();
             throw new FormatException("Unsupported language \"" + languageAttr.getTextContent() + "\"");
         }
@@ -329,6 +333,9 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             XmlUserData.debugPrintXml(root);
         }
         
+        p1.close();
+        p1 = new PerformanceProbe("SrcMLExtractor 2) Preprocessing");
+        
         new XmlPrepreocessor(relativeTarget, doc).preprocess(root);
 
         if (DEBUG_LOGGING) {
@@ -337,6 +344,9 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             System.out.println("==============");
             XmlUserData.debugPrintXml(root);
         }
+        
+        p1.close();
+        p1 = new PerformanceProbe("SrcMLExtractor 3) Conversion");
         
         XmlToAstConverter converter = new XmlToAstConverter(relativeTarget, this.handleLinuxMacro, this.fuzzyParsing,
                 this.invalidConditionHandling);
@@ -348,6 +358,9 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             System.out.println("==============");
             System.out.println(file);
         }
+        
+        p1.close();
+        p1 = new PerformanceProbe("SrcMLExtractor 4) Header Handling");
         
         switch (headerHandling) {
         case IGNORE:
@@ -364,10 +377,12 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             break;
         
         default:
+            p1.close();
             p.close();
             throw new FormatException("Header handling " + headerHandling + " not implemented");
         }
         
+        p1.close();
         p.close();
         return file;
     }
