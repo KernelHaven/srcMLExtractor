@@ -40,6 +40,7 @@ import net.ssehub.kernel_haven.util.CodeExtractorException;
 import net.ssehub.kernel_haven.util.ExtractorException;
 import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.Logger;
+import net.ssehub.kernel_haven.util.PerformanceProbe;
 import net.ssehub.kernel_haven.util.Util;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 import net.ssehub.kernel_haven.util.null_checks.Nullable;
@@ -301,19 +302,23 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
      */
     private @NonNull ISyntaxElement parse(@NonNull File absoluteTarget, @NonNull File relativeTarget,
             @NonNull InputStream xml) throws FormatException, SAXException, IOException {
+        PerformanceProbe p = new PerformanceProbe("SrcMLExtractor parse()");
         
         Document doc = XmlParser.parse(xml);
         @NonNull Node root = notNull(doc.getDocumentElement());
         
         if (!root.getNodeName().equals("unit")) {
+            p.close();
             throw new FormatException("Expected <unit> but got <" + root.getNodeName() + ">");
         }
         
         Node languageAttr = root.getAttributes().getNamedItem("language");
         if (languageAttr == null) {
+            p.close();
             throw new FormatException("Language attribute not specified in <unit>");
         }
         if (!languageAttr.getTextContent().equals("C")) {
+            p.close();
             throw new FormatException("Unsupported language \"" + languageAttr.getTextContent() + "\"");
         }
         
@@ -359,9 +364,11 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             break;
         
         default:
+            p.close();
             throw new FormatException("Header handling " + headerHandling + " not implemented");
         }
         
+        p.close();
         return file;
     }
     
