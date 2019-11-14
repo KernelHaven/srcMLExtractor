@@ -82,7 +82,7 @@ public class ParsingStatistics extends AbstractAnalysis implements ISyntaxElemen
         @Override
         public Boolean visitNegation(@NonNull Negation formula) {
             if (allOK) {
-                formula.accept(this);
+                formula.getFormula().accept(this);
             }
             return allOK;
         }
@@ -180,6 +180,7 @@ public class ParsingStatistics extends AbstractAnalysis implements ISyntaxElemen
      */
     public ParsingStatistics(@NonNull Configuration config) {
         super(config);
+        checker = new FormulaChecker();
         InvalidConditionHandling conditionHandling = config.getValue(CppParsingSettings.INVALID_CONDITION_SETTING);
         if (conditionHandling == InvalidConditionHandling.ERROR_VARIABLE) {
             checkFormulas = true;
@@ -188,7 +189,6 @@ public class ParsingStatistics extends AbstractAnalysis implements ISyntaxElemen
 
     @Override
     public void run() {
-        checker = new FormulaChecker();
         try {
             cmProvider.start();
         } catch (SetUpException e) {
