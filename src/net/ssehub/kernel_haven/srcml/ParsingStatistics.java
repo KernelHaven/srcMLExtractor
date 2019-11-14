@@ -235,7 +235,7 @@ public class ParsingStatistics extends AbstractAnalysis implements ISyntaxElemen
                 " - Number of succesfully parsed CPP conditions: " + numCppConditionsWithoutErrors
                     + " (" + asPercent(numCppConditions, numCppConditionsWithoutErrors) + ")",
                 " - Number of unsuccesfully parsed CPP conditions: " + numCppConditionsErrors
-                    + " (" + asPercent(numCppConditionsErrors, numCppConditionsWithoutErrors) + ")",
+                    + " (" + asPercent(numCppConditions, numCppConditionsErrors) + ")",
             };
             LOGGER.logInfo(cppLines);
         }
