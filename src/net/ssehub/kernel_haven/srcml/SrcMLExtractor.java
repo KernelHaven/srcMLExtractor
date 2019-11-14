@@ -27,8 +27,6 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import net.ssehub.kernel_haven.SetUpException;
-import net.ssehub.kernel_haven.block_extractor.CodeBlockExtractor;
-import net.ssehub.kernel_haven.block_extractor.InvalidConditionHandling;
 import net.ssehub.kernel_haven.code_model.AbstractCodeModelExtractor;
 import net.ssehub.kernel_haven.code_model.SourceFile;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
@@ -36,6 +34,8 @@ import net.ssehub.kernel_haven.config.Configuration;
 import net.ssehub.kernel_haven.config.DefaultSettings;
 import net.ssehub.kernel_haven.config.EnumSetting;
 import net.ssehub.kernel_haven.config.Setting;
+import net.ssehub.kernel_haven.cpp_utils.CppParsingSettings;
+import net.ssehub.kernel_haven.cpp_utils.InvalidConditionHandling;
 import net.ssehub.kernel_haven.util.CodeExtractorException;
 import net.ssehub.kernel_haven.util.ExtractorException;
 import net.ssehub.kernel_haven.util.FormatException;
@@ -84,6 +84,15 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             + " (#include \"file.h\") relative to the source file being parsed are supported.");
     // TODO AK: update "currently only supports" when applicable
     
+    private static final @NonNull Setting<@NonNull ExpressionHandling> EXPRESSIVENESS_SETTING = new EnumSetting<>(
+        "code.extractor.cpp_expressiveness", ExpressionHandling.class, true, ExpressionHandling.BOOLEAN,
+        "How should CPP expressions be handled and parsed to which kind of expressiveness:\n - "
+            + ExpressionHandling.BOOLEAN + ": Parses only pure Boolean expressions.\n - "
+            + ExpressionHandling.FUZZY + ": Enables fuzzy parsing, which will parse comparisons etc. to auxiliary "
+                + "variables.\n - "
+            + ExpressionHandling.NON_BOOLEAN + ": Parses expressions to non-Boolean formulas. Metrics may benefit from "
+                + "this approach, logical analyses like DeadCode analysis won't work with this AST anymore.");
+    
     /**
      * <b>Do not use this variable directly, use {@link #hasSrcmlInstalled()} instead.</b>
      * Caches the result of {@link #hasSrcmlInstalled()}.
@@ -96,7 +105,7 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
     
     private boolean handleLinuxMacro = false; // will be overridden in init()
     
-    private boolean fuzzyParsing = false; // will be overridden in init()
+    private ExpressionHandling cppExpressiveness = ExpressionHandling.BOOLEAN; // will be overridden in init()
     
     // will be overridden in init()
     private @NonNull InvalidConditionHandling invalidConditionHandling = InvalidConditionHandling.EXCEPTION;
@@ -106,16 +115,18 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
     @Override
     protected void init(@NonNull Configuration config) throws SetUpException {
         this.sourceTree = config.getValue(DefaultSettings.SOURCE_TREE);
-        this.fuzzyParsing = config.getValue(DefaultSettings.FUZZY_PARSING);
+        
+        config.registerSetting(EXPRESSIVENESS_SETTING);
+        this.cppExpressiveness = config.getValue(EXPRESSIVENESS_SETTING);
         
         config.registerSetting(HEADER_HANDLING_SETTING);
         this.headerHandling = config.getValue(HEADER_HANDLING_SETTING);
         
         // TODO: these settings are CodeBlockExtractor-specific; the user may not know that they apply here
-        config.registerSetting(CodeBlockExtractor.HANDLE_LINUX_MACROS);
-        this.handleLinuxMacro = config.getValue(CodeBlockExtractor.HANDLE_LINUX_MACROS);
-        config.registerSetting(CodeBlockExtractor.INVALID_CONDITION_SETTING);
-        this.invalidConditionHandling = config.getValue(CodeBlockExtractor.INVALID_CONDITION_SETTING);
+        config.registerSetting(CppParsingSettings.HANDLE_LINUX_MACROS);
+        this.handleLinuxMacro = config.getValue(CppParsingSettings.HANDLE_LINUX_MACROS);
+        config.registerSetting(CppParsingSettings.INVALID_CONDITION_SETTING);
+        this.invalidConditionHandling = config.getValue(CppParsingSettings.INVALID_CONDITION_SETTING);
         
         if (!hasSrcmlInstalled()) {
             Preparation preparator = new Preparation(config);
@@ -336,7 +347,7 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
         p1.close();
         p1 = new PerformanceProbe("SrcMLExtractor 3) Conversion");
         
-        XmlToAstConverter converter = new XmlToAstConverter(relativeTarget, this.handleLinuxMacro, this.fuzzyParsing,
+        XmlToAstConverter converter = new XmlToAstConverter(relativeTarget, this.handleLinuxMacro, cppExpressiveness,
                 this.invalidConditionHandling);
         net.ssehub.kernel_haven.code_model.ast.File file = converter.convertFile(root);   
         debugFileOutput(file);

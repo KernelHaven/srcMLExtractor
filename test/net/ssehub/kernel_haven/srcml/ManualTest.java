@@ -18,9 +18,9 @@ package net.ssehub.kernel_haven.srcml;
 
 import org.junit.Test;
 
-import net.ssehub.kernel_haven.block_extractor.InvalidConditionHandling;
 import net.ssehub.kernel_haven.code_model.SourceFile;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
+import net.ssehub.kernel_haven.cpp_utils.InvalidConditionHandling;
 import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.Logger.Level;
 import net.ssehub.kernel_haven.util.PerformanceProbe;

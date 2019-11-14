@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import net.ssehub.kernel_haven.block_extractor.InvalidConditionHandling;
 import net.ssehub.kernel_haven.code_model.SourceFile;
 import net.ssehub.kernel_haven.code_model.ast.BranchStatement;
 import net.ssehub.kernel_haven.code_model.ast.CaseStatement;
@@ -38,6 +37,7 @@ import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
 import net.ssehub.kernel_haven.code_model.ast.LoopStatement;
 import net.ssehub.kernel_haven.code_model.ast.SingleStatement;
 import net.ssehub.kernel_haven.code_model.ast.SwitchStatement;
+import net.ssehub.kernel_haven.cpp_utils.InvalidConditionHandling;
 import net.ssehub.kernel_haven.util.logic.Variable;
 
 /**

@@ -35,8 +35,6 @@ import java.util.StringJoiner;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import net.ssehub.kernel_haven.block_extractor.CppConditionParser;
-import net.ssehub.kernel_haven.block_extractor.InvalidConditionHandling;
 import net.ssehub.kernel_haven.code_model.ast.BranchStatement;
 import net.ssehub.kernel_haven.code_model.ast.CaseStatement;
 import net.ssehub.kernel_haven.code_model.ast.CaseStatement.CaseType;
@@ -60,6 +58,9 @@ import net.ssehub.kernel_haven.code_model.ast.SingleStatement;
 import net.ssehub.kernel_haven.code_model.ast.SwitchStatement;
 import net.ssehub.kernel_haven.code_model.ast.TypeDefinition;
 import net.ssehub.kernel_haven.code_model.ast.TypeDefinition.TypeDefType;
+import net.ssehub.kernel_haven.cpp_utils.CppConditionParser;
+import net.ssehub.kernel_haven.cpp_utils.InvalidConditionHandling;
+import net.ssehub.kernel_haven.cpp_utils.non_boolean.CppNonBooleanConditionParser;
 import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.logic.Conjunction;
 import net.ssehub.kernel_haven.util.logic.False;
@@ -116,16 +117,24 @@ class XmlToAstConverter {
      * @param baseFile The source file that is parsed.
      * @param handleLinuxMacros Whether to handle preprocessor macros found in the Linux Kernel (i.e.
      *      IS_ENABLED, IS_BUILTIN, IS_MODULE).
-     * @param fuzzyParsing Whether to do fuzzy parsing for non-boolean integer comparisons.
+     * @param cppExpressiveness Specifies expressiveness of AST and how to handle non-Boolean conditions.
      * @param invalidConditionHandling How to handle unparseable conditions.
      */
-    public XmlToAstConverter(java.io.@NonNull File baseFile, boolean handleLinuxMacros, boolean fuzzyParsing,
-            @NonNull InvalidConditionHandling invalidConditionHandling) {
+    public XmlToAstConverter(java.io.@NonNull File baseFile, boolean handleLinuxMacros,
+        ExpressionHandling cppExpressiveness, @NonNull InvalidConditionHandling invalidConditionHandling) {
+        
         this.baseFile = baseFile;
         this.conditions = new LinkedList<>();
         this.conditions.push(True.INSTANCE);
         
-        this.cppConditionParser = new CppConditionParser(handleLinuxMacros, fuzzyParsing, invalidConditionHandling);
+        if (cppExpressiveness == ExpressionHandling.NON_BOOLEAN) {
+            net.ssehub.kernel_haven.cpp_utils.InvalidConditionHandling conditionHandling = 
+                net.ssehub.kernel_haven.cpp_utils.InvalidConditionHandling.valueOf(invalidConditionHandling.name());
+            this.cppConditionParser = new CppNonBooleanConditionParser(handleLinuxMacros, conditionHandling);
+        } else {
+            this.cppConditionParser = new CppConditionParser(handleLinuxMacros,
+                cppExpressiveness == ExpressionHandling.FUZZY, invalidConditionHandling);
+        }
         
         this.elementStack = new LinkedList<>();
         this.switchStack = new LinkedList<>();
