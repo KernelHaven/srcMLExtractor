@@ -21,19 +21,120 @@ import static net.ssehub.kernel_haven.util.null_checks.NullHelpers.notNull;
 import net.ssehub.kernel_haven.SetUpException;
 import net.ssehub.kernel_haven.analysis.AbstractAnalysis;
 import net.ssehub.kernel_haven.code_model.SourceFile;
+import net.ssehub.kernel_haven.code_model.ast.CppBlock;
 import net.ssehub.kernel_haven.code_model.ast.ErrorElement;
 import net.ssehub.kernel_haven.code_model.ast.Function;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElementVisitor;
 import net.ssehub.kernel_haven.config.Configuration;
+import net.ssehub.kernel_haven.cpp_utils.CppParsingSettings;
+import net.ssehub.kernel_haven.cpp_utils.InvalidConditionHandling;
+import net.ssehub.kernel_haven.cpp_utils.non_boolean.INonBooleanFormulaVisitor;
+import net.ssehub.kernel_haven.cpp_utils.non_boolean.Literal;
+import net.ssehub.kernel_haven.cpp_utils.non_boolean.Macro;
+import net.ssehub.kernel_haven.cpp_utils.non_boolean.NonBooleanOperator;
+import net.ssehub.kernel_haven.util.logic.Conjunction;
+import net.ssehub.kernel_haven.util.logic.Disjunction;
+import net.ssehub.kernel_haven.util.logic.False;
+import net.ssehub.kernel_haven.util.logic.Formula;
+import net.ssehub.kernel_haven.util.logic.Negation;
+import net.ssehub.kernel_haven.util.logic.True;
+import net.ssehub.kernel_haven.util.logic.Variable;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
 /**
  * An analysis that collects statistics about files and functions parseable by this srcML extractor.
  *
  * @author Adam
+ * @author El-Sharkawy
  */
 public class ParsingStatistics extends AbstractAnalysis implements ISyntaxElementVisitor {
+    
+    /**
+     * Checks whether a formula contains PARSING_ERROR.
+     * This will only work if {@link CppParsingSettings#INVALID_CONDITION_SETTING} was configured this way. 
+     * 
+     *
+     * @author El-Sharkawy
+     */
+    private static class FormulaChecker implements INonBooleanFormulaVisitor<Boolean> {
+
+        private boolean allOK = true;
+        
+        @Override
+        public Boolean visitFalse(@NonNull False falseConstant) {
+            return allOK;
+        }
+
+        @Override
+        public Boolean visitTrue(@NonNull True trueConstant) {
+            return allOK;
+        }
+
+        @Override
+        public Boolean visitVariable(@NonNull Variable variable) {
+            if ("PARSING_ERROR".equals(variable.getName())) {
+                allOK = false;
+            }
+            return allOK;
+        }
+
+        @Override
+        public Boolean visitNegation(@NonNull Negation formula) {
+            if (allOK) {
+                formula.accept(this);
+            }
+            return allOK;
+        }
+
+        @Override
+        public Boolean visitDisjunction(@NonNull Disjunction formula) {
+            if (allOK) {
+                formula.getLeft().accept(this);
+            }
+            if (allOK) {
+                formula.getRight().accept(this);
+            }
+            return allOK;
+        }
+
+        @Override
+        public Boolean visitConjunction(@NonNull Conjunction formula) {
+            if (allOK) {
+                formula.getLeft().accept(this);
+            }
+            if (allOK) {
+                formula.getRight().accept(this);
+            }
+            return allOK;
+        }
+
+        @Override
+        public Boolean visitNonBooleanOperator(NonBooleanOperator operator) {
+            if (allOK) {
+                operator.getLeft().accept(this);
+            }
+            if (allOK) {
+                operator.getRight().accept(this);
+            }
+            return allOK;
+        }
+
+        @Override
+        public Boolean visitLiteral(Literal literal) {
+            return allOK;
+        }
+
+        @Override
+        public Boolean visitMacro(Macro macro) {
+            Formula argument = macro.getArgument();
+            if (allOK && null != argument) {
+                argument.accept(this);
+            }
+            return allOK;
+        }
+        
+    }
 
     private int numExceptions;
     
@@ -45,21 +146,49 @@ public class ParsingStatistics extends AbstractAnalysis implements ISyntaxElemen
     
     private int numFunctionsWithErrorElement;
     
+    /**
+     * All blocks, including if, elif, else.
+     */
+    private int numCppBlocks;
+    
+    /**
+     * All blocks except for else.
+     */
+    private int numCppConditions;
+    
+    /**
+     * All blocks except for else that do not contain error elements.
+     */
+    private int numCppConditionsWithoutErrors;
+    /**
+     * All blocks except for else that contain error elements.
+     */
+    private int numCppConditionsErrors;
+    
     private boolean currentFunctionContainsErrorElement;
     
     private boolean currentFileContainsErrorElement;
     
+    private @NonNull FormulaChecker checker;
+    
+    private boolean checkFormulas = false;;
+    
     /**
      * Creates this analysis.
      * 
-     * @param config The pipelien configuration.
+     * @param config The pipeline configuration.
      */
     public ParsingStatistics(@NonNull Configuration config) {
         super(config);
+        InvalidConditionHandling conditionHandling = config.getValue(CppParsingSettings.INVALID_CONDITION_SETTING);
+        if (conditionHandling == InvalidConditionHandling.ERROR_VARIABLE) {
+            checkFormulas = true;
+        }
     }
 
     @Override
     public void run() {
+        checker = new FormulaChecker();
         try {
             cmProvider.start();
         } catch (SetUpException e) {
@@ -84,7 +213,7 @@ public class ParsingStatistics extends AbstractAnalysis implements ISyntaxElemen
             numExceptions++;
         }
         
-        // print statistics
+        // Print File-based Statistics
         String[] lines = {
             "srcML extractor parsing statistics:",
             " - Number of parsed files: " + numFiles,
@@ -96,6 +225,20 @@ public class ParsingStatistics extends AbstractAnalysis implements ISyntaxElemen
                     + " (" + asPercent(numFunctions, numFunctionsWithErrorElement) + ")"
         };
         LOGGER.logInfo(lines);
+        
+        // Print Cpp Statistics
+        if (checkFormulas) {
+            String[] cppLines = {
+                "CPP parsing statistics:",
+                " - Number of parsed CPP blocks (including #else): " + numCppBlocks,
+                " - Number of parsed CPP conditions (excluding #else): " + numCppConditions,
+                " - Number of succesfully parsed CPP conditions: " + numCppConditionsWithoutErrors
+                    + " (" + asPercent(numCppConditions, numCppConditionsWithoutErrors) + ")",
+                " - Number of unsuccesfully parsed CPP conditions: " + numCppConditionsErrors
+                    + " (" + asPercent(numCppConditionsErrors, numExceptions) + ")",
+            };
+            LOGGER.logInfo(cppLines);
+        }
     }
     
     /**
@@ -131,4 +274,26 @@ public class ParsingStatistics extends AbstractAnalysis implements ISyntaxElemen
         currentFunctionContainsErrorElement = true;
     }
 
+    @Override
+    public void visitCppBlock(@NonNull CppBlock block) {
+        ISyntaxElementVisitor.super.visitCppBlock(block);
+        
+        // CPP Stats
+        numCppBlocks++;
+        if (block.getType() != CppBlock.Type.ELSE) {
+            numCppConditions++;
+            
+            if (checkFormulas) {
+                Formula condition = block.getCondition();
+                if (null != condition) {
+                    checker.allOK = true;
+                    if (condition.accept(checker)) {
+                        numCppConditionsWithoutErrors++;
+                    } else {
+                        numCppConditionsErrors++;                    
+                    }
+                }
+            }
+        }
+    }
 }
