@@ -324,40 +324,22 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
             p1.close();
             p.close();
             throw new FormatException("Unsupported language \"" + languageAttr.getTextContent() + "\"");
-        }
-        
-        if (DEBUG_LOGGING) {
-            System.out.println("==============");
-            System.out.println("   Parsed");
-            System.out.println("==============");
-            XmlUserData.debugPrintXml(root);
-        }
+        }    
+        debugXmlOutput("Parsed", root);
         
         p1.close();
         p1 = new PerformanceProbe("SrcMLExtractor 2) Preprocessing");
         
         new XmlPrepreocessor(relativeTarget, doc).preprocess(root);
-
-        if (DEBUG_LOGGING) {
-            System.out.println("==============");
-            System.out.println("   Pre-Processed");
-            System.out.println("==============");
-            XmlUserData.debugPrintXml(root);
-        }
+        debugXmlOutput("Pre-Processed", root);
         
         p1.close();
         p1 = new PerformanceProbe("SrcMLExtractor 3) Conversion");
         
         XmlToAstConverter converter = new XmlToAstConverter(relativeTarget, this.handleLinuxMacro, this.fuzzyParsing,
                 this.invalidConditionHandling);
-        net.ssehub.kernel_haven.code_model.ast.File file = converter.convertFile(root);
-        
-        if (DEBUG_LOGGING) {
-            System.out.println("==============");
-            System.out.println("   Result");
-            System.out.println("==============");
-            System.out.println(file);
-        }
+        net.ssehub.kernel_haven.code_model.ast.File file = converter.convertFile(root);   
+        debugFileOutput(file);
         
         p1.close();
         p1 = new PerformanceProbe("SrcMLExtractor 4) Header Handling");
@@ -385,6 +367,34 @@ public class SrcMLExtractor extends AbstractCodeModelExtractor {
         p1.close();
         p.close();
         return file;
+    }
+
+    /**
+     * Prints the parsed {@link net.ssehub.kernel_haven.code_model.ast.File}, if {@link #DEBUG_LOGGING}.
+     * @param file The parsed file to print
+     */
+    private void debugFileOutput(net.ssehub.kernel_haven.code_model.ast.File file) {
+        if (DEBUG_LOGGING) {
+            System.out.println("==============");
+            System.out.println("   Result");
+            System.out.println("==============");
+            System.out.println(file);
+        }
+    }
+
+    /**
+     * Prints the parsed XML document, if {@link #DEBUG_LOGGING}.
+     * @param type The processing type for printing the log message, e.g., parsed, pre-processed, ...
+     * @param root The root of the XML to print.
+     */
+    private void debugXmlOutput(String type, @NonNull Node root) {
+        if (DEBUG_LOGGING) {
+            System.out.println("==============");
+            System.out.print("   ");
+            System.out.println(type);
+            System.out.println("==============");
+            XmlUserData.debugPrintXml(root);
+        }
     }
     
     /**
