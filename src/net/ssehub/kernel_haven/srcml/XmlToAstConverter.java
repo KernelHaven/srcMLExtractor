@@ -128,9 +128,7 @@ class XmlToAstConverter {
         this.conditions.push(True.INSTANCE);
         
         if (cppExpressiveness == ExpressionHandling.NON_BOOLEAN) {
-            net.ssehub.kernel_haven.cpp_utils.InvalidConditionHandling conditionHandling = 
-                net.ssehub.kernel_haven.cpp_utils.InvalidConditionHandling.valueOf(invalidConditionHandling.name());
-            this.cppConditionParser = new CppNonBooleanConditionParser(handleLinuxMacros, conditionHandling);
+            this.cppConditionParser = new CppNonBooleanConditionParser(handleLinuxMacros, invalidConditionHandling);
         } else {
             this.cppConditionParser = new CppConditionParser(handleLinuxMacros,
                 cppExpressiveness == ExpressionHandling.FUZZY, invalidConditionHandling);
